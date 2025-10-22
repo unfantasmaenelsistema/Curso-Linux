@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>31 Seguridad</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>Herramientas Esenciales de Seguridad</strong></p>
+<p><strong>1. Firewall (Cortafuegos): UFW (Uncomplicated
+Firewall)</strong></p>
+<p><strong>UFW</strong> es la interfaz predeterminada y fácil de usar
+para configurar el firewall <strong>Netfilter</strong> de Linux. Viene
+preinstalado en Ubuntu, pero a menudo está deshabilitado por defecto. Es
+esencial para restringir el tráfico de red entrante y saliente.</p>
+<ul>
+<li><p><strong>¿Por qué usarlo?</strong> Bloquea las conexiones no
+deseadas a tu sistema, lo que es vital tanto para escritorios como para
+servidores.</p></li>
+<li><p><strong>Comandos Sencillos:</strong></p>
+<ul>
+<li><p>sudo ufw enable: Habilita el firewall.</p></li>
+<li><p>sudo ufw default deny incoming: Establece la política
+predeterminada para denegar todas las conexiones entrantes (esto es
+clave).</p></li>
+<li><p>sudo ufw allow ssh: Permite el acceso SSH (si lo
+necesitas).</p></li>
+<li><p>sudo ufw status verbose: Muestra el estado y las reglas
+configuradas.</p></li>
+</ul></li>
+</ul>
+<p><strong>2. Detección de Rootkits y Malware: rkhunter o
+Chkrootkit</strong></p>
+<p>Estas herramientas escanean tu sistema en busca de
+<strong>rootkits</strong> (programas maliciosos diseñados para ocultar
+la actividad de un atacante) y otro <strong>malware</strong>.</p>
+<ul>
+<li><p><strong>rkhunter (Rootkit Hunter):</strong> Es muy popular por su
+base de datos de firmas conocida de rootkits.</p>
+<ul>
+<li><p><strong>Instalación:</strong> sudo apt install rkhunter</p></li>
+<li><p><strong>Uso:</strong> sudo rkhunter –check</p></li>
+</ul></li>
+<li><p><strong>Chkrootkit:</strong> Otra alternativa más ligera.</p>
+<ul>
+<li><p><strong>Instalación:</strong> sudo apt install
+chkrootkit</p></li>
+<li><p><strong>Uso:</strong> sudo chkrootkit</p></li>
+</ul></li>
+</ul>
+<p><strong>3. Escaneo de Antivirus (Opcional, Principalmente para
+Archivos Compartidos): ClamAV</strong></p>
+<p>Aunque los sistemas Linux son menos propensos a los virus de Windows,
+<strong>ClamAV</strong> es útil si tu máquina interactúa con archivos de
+otros sistemas operativos (como un servidor de correo o archivos
+compartidos) y quieres escanearlos.</p>
+<ul>
+<li><p><strong>Instalación:</strong> sudo apt install clamav
+clamav-daemon</p></li>
+<li><p><strong>Actualizar la base de datos de virus:</strong> sudo
+freshclam</p></li>
+<li><p><strong>Escanear un directorio, por ejemplo, el directorio
+personal:</strong> clamscan -r /home/tu_usuario</p></li>
+</ul>
+<p><strong>4. Monitoreo de Integridad de Archivos: AIDE (Advanced
+Intrusion Detection Environment)</strong></p>
+<p><strong>AIDE</strong> crea una base de datos de "instantánea" de la
+estructura, permisos y contenido de archivos importantes del sistema. Si
+alguno de estos archivos cambia (lo que podría indicar una intrusión),
+AIDE te avisará en las comprobaciones futuras.</p>
+<ul>
+<li><p><strong>Instalación:</strong> sudo apt install aide</p></li>
+<li><p><strong>Inicializar la base de datos por primera vez (¡haz esto
+inmediatamente después de la instalación!):</strong></p>
+<ol type="1">
+<li><p>sudo aide --init</p></li>
+<li><p>sudo mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db (para
+activar la base de datos)</p></li>
+</ol></li>
+<li><p><strong>Verificación (para ejecutar regularmente):</strong> sudo
+aide --check</p></li>
+</ul>
+<p><strong>Buenas Prácticas de Seguridad Adicionales</strong></p>
+<p>Además de las herramientas, estas configuraciones simples son
+cruciales:</p>
+<ul>
+<li><p><strong>Mantén tu Sistema Actualizado:</strong> Esta es la medida
+de seguridad más básica y efectiva. Siempre aplica las últimas
+actualizaciones de seguridad.</p>
+<ul>
+<li><p>sudo apt update</p></li>
+<li><p>sudo apt upgrade</p></li>
+</ul></li>
+<li><p><strong>Deshabilita Servicios Innecesarios:</strong> Cuantos
+menos servicios estén corriendo y escuchando conexiones, menor será la
+superficie de ataque. Revisa qué servicios tienes habilitados.</p></li>
+<li><p><strong>Configura una Contraseña Robusta:</strong> Usa una
+contraseña fuerte y, si es posible, habilita la <strong>autenticación de
+dos factores (2FA)</strong> si accedes a tu sistema a través de
+SSH.</p></li>
+</ul>
+<p>El proceso de <strong>fortalecer un sistema Linux</strong> (o
+<em>hardening</em>) se puede automatizar y guiar a través de múltiples
+proyectos de código abierto disponibles en GitHub. Estos proyectos
+suelen ser <em>scripts</em> o guías que aplican de forma sistemática las
+mejores prácticas de seguridad, a menudo siguiendo estándares como los
+de <strong>CIS (Center for Internet Security)</strong> o <strong>DISA
+STIG</strong>.</p>
+<p><strong>Herramientas y Scripts de Hardening</strong></p>
+<p>Estos proyectos ofrecen <em>scripts</em> o herramientas para
+automatizar la configuración de seguridad.</p>
+<p><strong>1. Lynis</strong></p>
+<p>Aunque no es un proyecto de <em>scripting</em> de <em>hardening</em>
+directo, <strong>Lynis</strong> es una herramienta de auditoría de
+seguridad y <em>hardening</em> muy popular en Linux. Escanea a fondo tu
+sistema en busca de debilidades y ofrece sugerencias detalladas sobre
+cómo corregirlas.</p>
+<ul>
+<li><p><strong>¿Qué hace?</strong> Escanea el sistema operativo,
+configuración del kernel, paquetes instalados, información de red,
+firewall, etc., y te da una "puntuación" de seguridad con
+recomendaciones.</p></li>
+<li><p><strong>Proyecto GitHub:</strong> Puedes encontrar el repositorio
+oficial y la documentación en GitHub. Su valor está en la <strong>guía
+de las mejoras</strong> que debes aplicar.</p></li>
+</ul>
+<p><strong>2. The Practical Linux Hardening Guide</strong></p>
+<p>Este repositorio no es una herramienta ejecutable, sino una
+<strong>guía muy completa y práctica</strong> sobre cómo proteger
+manualmente (o con scripts) un sistema GNU/Linux de producción. Es
+excelente para entender las bases del <em>hardening</em>.</p>
+<ul>
+<li><p><strong>¿Qué contiene?</strong> Instrucciones detalladas sobre la
+configuración del kernel (sysctl), el sistema de archivos, el firewall,
+SSH, servicios, cifrado, y más.</p></li>
+<li><p><strong>Proyecto GitHub:</strong>
+trimstray/the-practical-linux-hardening-guide</p></li>
+</ul>
+<p><strong>3. Scripts de Hardening Específicos (Ejemplo para
+Ubuntu)</strong></p>
+<p>Existen múltiples repositorios que ofrecen scripts Bash
+semi-automatizados para aplicar la seguridad en distribuciones como
+Ubuntu o Debian, a menudo enfocándose en cumplir con estándares.</p>
+<ul>
+<li><p><strong>Ejemplo:</strong> Proyectos como
+<strong>Z-A-P-P-I-T/Ubuntu-Security-Hardening-Script</strong> o
+<strong>captainzero93/security_harden_linux</strong> suelen incluir
+módulos para:</p>
+<ul>
+<li><p>Configurar <strong>UFW</strong> (firewall).</p></li>
+<li><p>Instalar y configurar <strong>Fail2Ban</strong> (prevención de
+intrusiones).</p></li>
+<li><p>Fortalecer la configuración de <strong>SSH</strong>.</p></li>
+<li><p>Aplicar políticas de <strong>contraseñas
+robustas</strong>.</p></li>
+<li><p>Instalar herramientas de detección como
+<strong>rkhunter</strong>.</p></li>
+</ul></li>
+</ul>
+<p><strong>Automatización y Gestión de Configuración
+(Ansible/SaltStack)</strong></p>
+<p>Para entornos más grandes o si quieres una gestión de configuración
+repetible, los proyectos basados en herramientas de automatización son
+clave.</p>
+<p><strong>4. Roles de Ansible para Hardening</strong></p>
+<p><strong>Ansible</strong> es una herramienta de automatización muy
+utilizada. En GitHub encontrarás <strong>"roles"</strong> de Ansible
+diseñados para aplicar configuraciones de <em>hardening</em>.</p>
+<ul>
+<li><p><strong>Ejemplo:</strong> El proyecto
+<strong>ansible-lockdown</strong> ofrece roles que te permiten aplicar
+configuraciones de seguridad basadas en las guías <strong>CIS</strong> o
+<strong>DISA STIG</strong> para distintas versiones de Linux (incluyendo
+Ubuntu). Esto garantiza que tu configuración cumple con un estándar
+reconocido de la industria.</p></li>
+</ul>
+<p><strong>Detección de Intrusiones y Auditoría</strong></p>
+<p><strong>5. Configuración de AIDE (Advanced Intrusion Detection
+Environment)</strong></p>
+<p>Muchos repositorios de <em>hardening</em> incluyen pasos o scripts
+para configurar <strong>AIDE</strong>, una herramienta que verifica la
+integridad de los archivos del sistema.</p>
+<ul>
+<li><p><strong>¿Qué hace?</strong> Crea una "instantánea" de archivos
+críticos y luego verifica periódicamente si han sido modificados por un
+atacante o <em>rootkit</em>, ayudando en la detección
+post-intrusión.</p></li>
+</ul>
+<p><strong>6. Auditoría con OpenSCAP/SCAP Workbench</strong></p>
+<p>El proyecto <strong>OpenSCAP</strong> proporciona una implementación
+de las guías de seguridad <strong>SCAP (Security Content Automation
+Protocol)</strong>. Permite escanear y aplicar perfiles de
+<em>hardening</em> que cumplen con rigurosos estándares gubernamentales
+o industriales.</p>
+<ul>
+<li><p><strong>¿Qué contiene?</strong> Herramientas para auditar tu
+sistema contra políticas de seguridad (como las reglas CIS o STIG) y
+generar informes de cumplimiento.</p></li>
+</ul>
+<p><strong>Advertencia Importante</strong></p>
+<p>Antes de ejecutar cualquier <em>script</em> de <em>hardening</em> de
+GitHub (o de cualquier otra fuente):</p>
+<ol type="1">
+<li><p><strong>Revisa el Código:</strong> Asegúrate de entender
+exactamente qué comandos ejecuta el <em>script</em>. Un <em>script</em>
+de <em>hardening</em> mal configurado puede <strong>romper tu
+sistema</strong> o bloquear tu acceso.</p></li>
+<li><p><strong>Haz Copias de Seguridad:</strong>
+<strong>Siempre</strong> haz una copia de seguridad o prueba el script
+en un entorno de desarrollo/prueba antes de aplicarlo a un sistema de
+producción.</p></li>
+<li><p><strong>Elige Proyectos Activos:</strong> Prioriza repositorios
+que tengan actividad de <em>commits</em> reciente y un buen número de
+estrellas/forks, ya que es más probable que estén mantenidos y sean
+compatibles con las versiones actuales de Linux (como Ubuntu
+24.04).</p></li>
+</ol>
+<script src="nav.js"></script>
+</body>
+</html>

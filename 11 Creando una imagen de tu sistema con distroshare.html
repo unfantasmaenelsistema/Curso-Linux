@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>11 Creando una imagen de tu sistema con distroshare</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>Crear una imagen de tu sistema con distroshare</strong></p>
+<p>Cada vez que instalamos una distro de Linux en nuestro sistema, todo
+comienza desde el principio. Debemos configurar su servidor de
+actualización, instalar software, colocar cada icono en el lugar
+correcto; en definitiva, dejarlo a nuestro gusto.</p>
+<p>Todos estos procesos son realmente molestos, pero no evitables al
+mismo tiempo, ¿verdad? ¿Te imaginas que tuviéramos toda nuestra
+personalización tan pronto como instalamos el sistema?</p>
+<p>Pues esto es posible con Distroshare, un script que te ayuda a crea
+tu propia imagen de Ubuntu.</p>
+<p>Echemos un vistazo a este kit de herramientas mágicas para ayudarnos:
+<a
+href="https://github.com/Distroshare/distroshare-ubuntu-imager">Distroshare
+Ubuntu Imager</a>.</p>
+<p>La herramienta es especialmente útil cuando ejecutamos el proceso de
+instalación para varios equipos. Luego, no tendremos que ejecutar el
+mismo proceso de actualización de la distribución, instalando el
+software necesario y otros para ejecutar todas las máquinas.</p>
+<p>Para disfrutar de esta increíble instalación, debes preparar tu
+sistema con el software necesario. Al principio, tienes que instalar Git
+si no lo tienes ya instalado.</p>
+<p>Esto es primordial ya que tomará la herramienta de la web.</p>
+<p><strong>sudo apt install git</strong></p>
+<p>Es sorprendente que la herramienta, a pesar de ser muy poderosa, sea
+muy simple. Es solo un script que se ejecutará con el shell Bash y
+realizará todas las tareas necesarias en tu sistema para crear el
+archivo ISO en vivo (también instalable).</p>
+<blockquote>
+<p><strong>git clone</strong> <a
+href="https://github.com/Distroshare/distroshare-ubuntu-imager.git">https://github.com/Distroshare/distroshare-ubuntu-imager.git</a></p>
+<p><img
+src=".\\media\\11 Creando una imagen de tu sistema con distroshare/media/image1.jpg"
+style="width:5.92708in;height:1.71875in" /></p>
+</blockquote>
+<p>Entramos a la carpeta de los archivos descargados:</p>
+<blockquote>
+<p><strong>cd distroshare-ubuntu-imager</strong></p>
+<p><img
+src=".\\media\\11 Creando una imagen de tu sistema con distroshare/media/image2.jpg"
+style="width:5.92708in;height:2.16667in" /></p>
+</blockquote>
+<p>Le damos permiso de archivo para ejecutar el script:</p>
+<blockquote>
+<p><strong>sudo chmod +x distroshare-ubuntu-imager.sh</strong></p>
+<p><img
+src=".\\media\\11 Creando una imagen de tu sistema con distroshare/media/image3.jpg"
+style="width:5.94792in;height:2.51042in" /></p>
+</blockquote>
+<p>Ahora es el momento de comprender un poco cómo funciona la
+herramienta.</p>
+<p>Distroshare Ubuntu Imager toma nota de la información de todos los
+programas instalados en el sistema y los convierte en un script
+utilizable.</p>
+<p>Dicho esto, debes asegurarte de que todas tus aplicaciones
+importantes y otras aplicaciones necesarias estén instaladas en tu
+sistema. Debes tenerlo todo como lo quieres tener.</p>
+<p>¡No te olvides de hacer todas las personalizaciones! La herramienta
+es lo suficientemente grande como para capturar todos esos cambios y
+ponerlos en el archivo ISO.</p>
+<p>Una nota importante: cuantas más cosas agregue en su sistema, también
+aumentará el tamaño de la ISO. Por lo tanto, generar y reutilizar la
+imagen personalizada llevará más tiempo procesarla en cualquier
+paso.</p>
+<p>Finalmente es hora de ejecutar la herramienta. Ejecuta el siguiente
+comando en una terminal:</p>
+<blockquote>
+<p><strong>cd distroshare-ubuntu-imager</strong></p>
+<p><strong>sudo ./distroshare-ubuntu-imager.sh</strong></p>
+<p><img
+src=".\\media\\11 Creando una imagen de tu sistema con distroshare/media/image4.jpg"
+style="width:4.72917in;height:3.09375in" /></p>
+<p><img
+src=".\\media\\11 Creando una imagen de tu sistema con distroshare/media/image5.jpg"
+style="width:5.39583in;height:3.80208in" /></p>
+</blockquote>
+<p>En la primera ejecución, habrá algún software más que se instale en
+tu sistema que ayudarán a crear la imagen ISO reutilizable. Esto incluye
+la herramienta de instalación Ubiquity, encabezados de Linux, menú Grub
+y otras cosas.</p>
+<p>Después de instalar todas las dependencias en el sistema, la
+herramienta comenzará a generar la imagen en vivo. Es un proceso muy
+largo y, dependiendo del software de su sistema y otras
+personalizaciones, el proceso puede tardar horas en completarse.</p>
+<p>Deja que la herramienta haga su trabajo. Se recomienda
+encarecidamente que no te metas con nada o se interrumpirá el proceso de
+construcción. Una vez completado, encontrará la salida en el siguiente
+directorio</p>
+<blockquote>
+<p><strong>/home/distroshare/live-usb.iso</strong></p>
+<p><img
+src=".\\media\\11 Creando una imagen de tu sistema con distroshare/media/image6.jpg"
+style="width:5.36458in;height:3.39583in" /></p>
+</blockquote>
+<p>Todo perfecto, pero de esta manera solo se genera una ISO que no
+supere los 4GB. Si tenemos muchas aplicaciones instaladas, lo más
+probable es que lo superemos y para solucionarlo tendremos que hacerlo
+con la opción que nos dan en Distroshare para generar una ISO de nivel
+3.</p>
+<p>El proceso será el mismo pero esta vez empezaremos clonando la
+versión MMG:</p>
+<p><a
+href="https://github.com/budgierless/mmg-distroshare-ubuntu-imager">https://github.com/budgierless/mmg-distroshare-ubuntu-imager</a></p>
+<p><strong>git clone
+https://github.com/budgierless/mmg-distroshare-ubuntu-imager.git</strong></p>
+<p>Nos dirigimos al directorio:</p>
+<p><strong>cd mmg-distroshare ubuntu-imager</strong></p>
+<p>Le damos permisos:</p>
+<p><strong>sudo chmod +x distroshare-ubuntu-imager.sh</strong></p>
+<p>y ejecutamos:</p>
+<p><strong>sudo ./distroshare-ubuntu-imager.sh</strong></p>
+<p>Una vez todo terminado y la iso copiada, seguramente queramos borrar
+la ISO generada en el directorio home:</p>
+<p><strong>sudo rm -r live-cd.iso</strong></p>
+<blockquote>
+<p><img
+src=".\\media\\11 Creando una imagen de tu sistema con distroshare/media/image7.jpg"
+style="width:2.40625in;height:1.02083in" /></p>
+<p><img
+src=".\\media\\11 Creando una imagen de tu sistema con distroshare/media/image8.jpg"
+style="width:5.22917in;height:3.61458in" /></p>
+<p>El creador de Ubuntu Startup Disk no podrá convertir el iso en un
+bootable USB drive desde Distroshare Ubuntu Imager utiliza grub2 como el
+gestor de arranque.</p>
+</blockquote>
+<script src="nav.js"></script>
+</body>
+</html>

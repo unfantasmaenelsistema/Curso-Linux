@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>28 Escaneo y Enumeración de una red local con Nmap en Kali Linux</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><img
+src=".\\media\\28 Escaneo y Enumeración de una red local con Nmap en Kali Linux/media/image1.jpg"
+style="width:6.26806in;height:3.58175in" /></p>
+<p>Escaneo y Enumeración de una red local con Nmap en Kali Linux</p>
+<h1 id="introducción">Introducción</h1>
+<p>En este proyecto, aprenderá a utilizar Nmap, una potente herramienta
+de escaneo de red, para descubrir dispositivos y servicios que se
+ejecutan en una red local. El escaneo y la enumeración de redes son
+habilidades críticas para hackers éticos, ya que ayudan a identificar
+posibles objetivos y vulnerabilidades dentro de una red. Al final de
+este proyecto, podrá realizar escaneos básicos de red, identificar
+puertos abiertos y recopilar información sobre los dispositivos de su
+red utilizando Kali Linux.</p>
+<h1 id="pre-requisitos">Pre-requisitos</h1>
+<ul>
+<li><p>Comprención básica de los conceptos de redes (dirección IP,
+puertos, etc.).</p></li>
+<li><p>Familiaridad con el uso de la interfaz de línea de comandos
+(CLI).</p></li>
+<li><p>Kali Linux instalado en su máquina (ya sea de forma nativa, en
+una máquina virtual, o como una bota en vivo).</p></li>
+</ul>
+<h1 id="configuración-de-laboratorio-y-herramientas">Configuración de
+laboratorio y herramientas</h1>
+<h2 id="herramitas">Herramitas</h2>
+<ul>
+<li><p><strong>Kali Linux:</strong> Distribuición Linux derivado de
+Debian diseñada para pruebas forenses digitales y de
+penetración.</p></li>
+<li><p><strong>Nmap</strong> : Herramienta de exploración de redes y
+escáner de seguridad/porto (pre-instalado en Kali Linux).</p></li>
+<li><p>Una red local con múltiples dispositivos conectados (ordenadores,
+impresoras, dispositivos IoT, etc.).</p></li>
+</ul>
+<h2 id="instalación">Instalación</h2>
+<p>Nmap está preinstalado en Kali Linux. Puede verificar la instalación
+o actualizarlo usando el siguiente comando:</p>
+<p>sudo apt-get update &amp;&amp; sudo apt-get install nmap</p>
+<h1 id="tareas">Tareas</h1>
+<h2 id="tarea-1-escaneo-exploración-de-red-básica">Tarea 1: Escaneo
+exploración de red básica</h2>
+<p>Paso 1: Abra un terminal en su máquina Kali Linux. Paso 2: Ejecute un
+escaneo básico en su red local. Reemplaza 192.168.1.0/24 con el rango IP
+de su red.</p>
+<p>nmap 192.168.1.0/24</p>
+<p>Salida esperada: Una lista de dispositivos en su red, sus direcciones
+IP y los puertos abiertos.</p>
+<h2 id="tarea-2-escaneo-de-puertos-específicos">Tarea 2: Escaneo de
+puertos específicos</h2>
+<p>Paso 1: Para escanear puertos específicos (por ejemplo, HTTP port
+80), utilice la opción -p:</p>
+<p>nmap -p 80 192.168.1.0/24</p>
+<p>Salida esperada: Una lista de dispositivos con puerto 80 abierto.</p>
+<h2 id="tarea-3-detección-de-versión-de-servicio">Tarea 3: Detección de
+versión de servicio</h2>
+<p>Paso 1: Utilice la opción -sV para detectar la versión de los
+servicios que se ejecutan en puertos abiertos:</p>
+<p>nmap -sV 192.168.1.0/24</p>
+<p>Salida esperada: Una lista detallada de los puertos abiertos y los
+servicios que se ejecutan en ellos, incluyendo información de
+versión.</p>
+<h2 id="tarea-4-detección-del-sistema-operativo">Tarea 4: Detección del
+sistema operativo</h2>
+<p>Paso 1: Utiliza la opción -O para detectar los sistemas operativos de
+los dispositivos en la red:</p>
+<p>sudo nmap -O 192.168.1.0/24</p>
+<p>Salida esperada: Los detalles del sistema operativo de los
+dispositivos de la red.</p>
+<h2 id="tarea-5-escaneo-agresivo">Tarea 5: Escaneo agresivo</h2>
+<p>Paso 1: Realizar un escaneo agresivo usando la opción -A, que incluye
+detección de sistemas operativos, detección de versiones, escaneo de
+script y trazar ruta:</p>
+<p>sudo nmap -A 192.168.1.0/24</p>
+<p>Salida esperada: Información completa sobre los dispositivos de la
+red, incluyendo puertos abiertos, servicios, versiones, sistemas
+operativos y detalles de trazar rutas.</p>
+<script src="nav.js"></script>
+</body>
+</html>

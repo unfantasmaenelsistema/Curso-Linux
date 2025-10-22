@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>26 Personalizacion Server</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<h1 id="personalizar-tu-entrada-al-sistema"><strong>Personalizar tu
+entrada al sistema</strong></h1>
+<p>En Linux podemos personalizar los siguientes mensajes:</p>
+<ul>
+<li><p>Mensaje de inicio de Sesión al realizar un Login exitoso en el
+sistema (ya sea desde una terminal ó accediendo via SSH.</p></li>
+<li><p>Mensaje previo al Login (cuando accedemos por terminal directa al
+equipo)</p></li>
+</ul>
+<p><strong>1. Mensaje Previo al Login</strong></p>
+<p>Este mensaje se presenta al solicitar los datos de autenticación
+cuando intentamos acceder directamente desde una terminal al
+sistema.</p>
+<p>Para incluir un mensaje o banner personalizado editamos el
+archivo:</p>
+<p>sudo nano /etc/issue</p>
+<p>El archivo /etc/issue puede contener ciertos códigos de escape para
+mostrar el nombre del sistema, la fecha y la hora, etc. Todos los
+códigos de escape consisten en una barra diagonal inversa (\) seguida
+inmediatamente de una de las letras que se explican a continuación.</p>
+<p>\b Muestra la velocidad en baudios de la línea actual</p>
+<p>\d Muestra la fecha actual.</p>
+<p>\s Muestra el nombre del sistema, el nombre del sistema
+operativo.</p>
+<p>\l Muestra el nombre de la línea tty actual.</p>
+<p>\m Muestra el identificador de arquitectura de la máquina, por
+ejemplo, i486</p>
+<p>\n Muestra el nombre de nodo del equipo, también conocido como nombre
+de host.</p>
+<p>\o Muestra el nombre de dominio del equipo.</p>
+<p>\r Muestra el número de versión del sistema operativo, por ejemplo.
+1.1.9.</p>
+<p>\t Muestra la hora actual.</p>
+<p>\u Muestra el número de usuarios actuales que han iniciado
+sesión.</p>
+<p>\U Muestra la cadena "1 usuario" o "usuarios" donde es el número de
+usuarios actuales que han iniciado sesión.</p>
+<p>\v Muestra la versión del sistema operativo, por ejemplo, la fecha de
+compilación, etc.</p>
+<p>\4 Visualiza la dirección IP de la máquina</p>
+<p>\4{eth0} Solo visualiza la dirección IP de la tarjeta eth0 si hay
+varias en el sistema.</p>
+<p>Puedes ver las diferentes opciones y parámetros admitidos en tu
+sistema puedes hacerlo con:</p>
+<p>man getty</p>
+<p><strong>2. Archivo /etc/issue.net (Acceso Remoto SSH)</strong></p>
+<p>El archivo cumple una función similar a <strong>/etc/issue</strong>,
+pero se muestra cuando un usuario intenta conectarse al servidor de
+forma <strong>remota a través de SSH (Secure Shell) o
+Telnet.</strong></p>
+<ul>
+<li><p><strong>Cuándo se muestra:</strong> Antes de la solicitud de
+nombre de usuario <strong>del servicio (como sshd)</strong>.</p></li>
+<li><p><strong>Códigos de Escape:</strong> Soporta los mismos códigos de
+escape de que usamos antes (como , $\text{\r}$, $\text{\m}$,
+$\text{\4}$).</p></li>
+<li><p><strong>Uso Recomendado:</strong> Se utiliza a menudo para
+mostrar advertencias de seguridad o el logo del sistema.</p></li>
+</ul>
+<p><strong>Ejemplo de implementación:</strong></p>
+<p># Contenido de /etc/issue.net</p>
+<p>sudo nano /etc/issue.net</p>
+<p>FEVAL SERVER</p>
+<p>------------------------------------</p>
+<p>ACCESO RESTRINGIDO - SERVIDOR PRIVADO</p>
+<p>USER: feval</p>
+<p>PASS: dingdong</p>
+<p>=================================================</p>
+<p>\S</p>
+<p>Kernel \r en \m</p>
+<p>IP: \4</p>
+<p>Hostname: \n</p>
+<p>Tiempo de actividad: \t</p>
+<p>Fecha: \d</p>
+<p>Hora: \t</p>
+<p>Usuarios Logueados: \u</p>
+<p><strong>2. Archivo /etc/motd (Message of the Day)</strong></p>
+<p>El archivo es probablemente el más útil para la personalización y la
+información del sistema. Es lo que se muestra al usuario <strong>después
+de que inicia sesión correctamente</strong> (tanto en la consola como
+por SSH).</p>
+<p>A diferencia de los archivos que son estáticos, utiliza de forma
+dinámica a través de la carpeta /etc/update-motd.d/.</p>
+<p><strong>Personalización Estática</strong></p>
+<p>Puedes añadir contenido directamente al archivo base /etc/motd. Este
+contenido se mostrará antes o después de cualquier script dinámico.</p>
+<p><strong>Personalización Dinámica (Recomendada)</strong></p>
+<p>La mejor manera es crear <strong>scripts ejecutables</strong> en la
+carpeta /etc/update-motd.d/. Estos scripts generan contenido dinámico
+(uso de CPU, actualizaciones pendientes, etc.) cada vez que alguien
+inicia sesión.</p>
+<p><strong>Pasos para un script personalizado:</strong></p>
+<ol type="1">
+<li><p>Crea un nuevo script en la carpeta:</p></li>
+</ol>
+<p>sudo nano /etc/update-motd.d/90-custom-message</p>
+<ol start="2" type="1">
+<li><p>Añade tu mensaje y usa comandos para obtener información en
+tiempo real:</p></li>
+</ol>
+<p>#!/bin/bash</p>
+<p>echo
+"============================================================"</p>
+<p>echo "¡BIENVENIDO AL SERVIDOR DE FEVAL, ${USER}!"</p>
+<p>echo "El uso actual del disco en / es: $(df -h / | awk 'NR==2 {print
+$5}')"</p>
+<p>echo "Último inicio de sesión: $(last -1 | grep -v 'wtmp' | awk
+'{print $4, $5, $6}')"</p>
+<p>echo
+"============================================================"</p>
+<ol start="3" type="1">
+<li><p>Dale permisos de ejecución al script:</p></li>
+</ol>
+<p>sudo chmod +x /etc/update-motd.d/90-custom-message</p>
+<p><strong>Resultado:</strong> Cada vez que el usuario inicie sesión,
+verá tu mensaje personalizado con información en tiempo real, lo que le
+da un toque mucho más dinámico que el archivo /etc/issue.</p>
+<p>La forma más fácil de generar texto en arte ASCII es usando un
+programa llamado <strong>figlet</strong> y, opcionalmente,
+<strong>lolcat</strong> para darle color.</p>
+<p><strong>Pasos:</strong></p>
+<ol type="1">
+<li><p><strong>Instalar herramientas:</strong></p></li>
+</ol>
+<blockquote>
+<p>sudo apt install figlet lolcat</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Probar figlet:</strong> Escribe un texto y canalízalo a
+figlet.</p></li>
+</ol>
+<blockquote>
+<p>echo "FEVAL SERVER" | figlet</p>
+<p>o en dos líneas:</p>
+<p>echo -e "FEVAL\nSERVER" | figlet</p>
+</blockquote>
+<ol start="3" type="1">
+<li><p><strong>Probar lolcat (con color):</strong></p></li>
+</ol>
+<p>printf "FEVAL\nSERVER\n" | figlet -f slant | lolcat</p>
+<p>figlet -f slant usa una fuente diferente. Puedes ver más fuentes en
+/usr/share/figlet/.</p>
+<p>Puedes añadir la salida del comando printf "FEVAL\nSERVER\n" | figlet
+-f slant | lolcat al <strong>inicio</strong> del fichero /etc/issue</p>
+<h3
+id="generar-la-salida-de-figlet-y-guardarla-en-un-archivo-temporal"><strong>1.
+Generar la Salida de figlet y Guardarla en un Archivo
+Temporal</strong></h3>
+<p>La clave es guardar la salida del comando en un archivo nuevo y
+temporal. Dado que /etc/issue no soporta códigos de color (solo se ve al
+conectarse por SSH), solo necesitas la salida de figlet.</p>
+<p># 1. Ejecuta el comando y guarda la salida en un archivo
+temporal.</p>
+<p># Usamos 'printf' y 'figlet' (sin 'lolcat', ya que /etc/issue no
+soporta color).</p>
+<p>printf "FEVAL\nSERVER\n" | figlet -f slant &gt;
+/tmp/temp_header.txt</p>
+<h3 id="concatenar-y-reemplazar-el-archivo-original"><strong>2.
+Concatenar y Reemplazar el Archivo Original</strong></h3>
+<p>Ahora, concatenamos el contenido nuevo (/tmp/temp_header.txt) y el
+contenido antiguo (/etc/issue) en un nuevo archivo, y luego reemplazas
+el original.</p>
+<p># 2. Concatena el archivo temporal (nuevo) y el archivo original
+(/etc/issue)</p>
+<p># y redirige la salida al archivo temporal para la fusión.</p>
+<p>cat /tmp/temp_header.txt /etc/issue &gt;
+/tmp/temp_issue_merged.txt</p>
+<p># 3. Mueve (renombra) el archivo fusionado de vuelta a la ubicación
+original.</p>
+<p># Esto requiere permisos de root (sudo).</p>
+<p>sudo mv /tmp/temp_issue_merged.txt /etc/issue</p>
+<h3 id="limpiar-el-archivo-temporal"><strong>3. Limpiar el Archivo
+Temporal</strong></h3>
+<p># 4. Elimina el archivo temporal.</p>
+<p>rm /tmp/temp_header.txt</p>
+<p><strong>Recomendación para mantenerlo actualizado</strong></p>
+<p>Para que el archivo muestre datos actualizados (como IP o interfaz),
+puedes usar un script en /etc/rc.local o un servicio systemd que lo
+regenere en cada arranque:</p>
+<p>#!/bin/bash</p>
+<p>echo "======================================" &gt; /etc/issue</p>
+<p>echo " SERVER - ACCESO RESTRINGIDO" &gt;&gt; /etc/issue</p>
+<p>echo " IP: $(hostname -I | awk '{print $1}')" &gt;&gt; /etc/issue</p>
+<p>echo " Interfaz de red: $(hostname)" &gt;&gt; /etc/issue</p>
+<p>echo "======================================" &gt;&gt; /etc/issue</p>
+<p>uname -a &gt;&gt; /etc/issue</p>
+<p><strong>Configurar el Firewall (UFW)</strong></p>
+<p>Si el firewall de Ubuntu (UFW) está activo, bloqueará el puerto 23
+por defecto. Debes abrirlo explícitamente para permitir la conexión.</p>
+<p>sudo ufw allow 23/tcp</p>
+<p>sudo ufw status</p>
+<script src="nav.js"></script>
+</body>
+</html>

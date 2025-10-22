@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>06 Comandos divertidos</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<h1 id="comandos-divertidos-en-linux">Comandos divertidos en Linux</h1>
+<p>Los comandos Bash son conjunto de parámetros utilizados para la
+administración y configuración del sistema, así como un conjunto de
+combinaciones especiales de teclas para realizar tareas específicas en
+entornos Linux/Unix mediante un intérprete de comandos Bash.</p>
+<p>Hay cientos de comandos, algunos muy poderosos y útiles pero también
+podemos encontrar algunos que podríamos considerar “poco útiles” o
+“inútiles” pero que tiene su gracia.</p>
+<p>Veamos algunos de ellos:</p>
+<p><strong>1.- Una terminal que habla:</strong></p>
+<p>El <em>comandoespeak</em> sirve para que tu equipo recite lo que le
+indiques.</p>
+<p>Primero hay que instalar el paquete con:</p>
+<p><strong>sudo apt install espeak</strong></p>
+<p>Y su síntesis sería:</p>
+<p><strong>espeak -v spanish "Texto a reproducir" espeak -v spanish "Un
+fantasma en el sistema"</strong></p>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image1.png"
+style="width:5.96875in;height:1.21875in" /></p>
+</blockquote>
+<p><strong>2.- Una vaca en la terminal</strong></p>
+<p>Muestra una vaca en la terminal utilizando los símbolos ascii
+diciendo la frase que quieras mostrar.</p>
+<p>instalamos el paquete con:</p>
+<p><strong>sudo apt install cowsay</strong></p>
+<p>Síntesis:</p>
+<h2 id="cowsay-texto_a_mostrar">cowsay Texto_a_mostrar</h2>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image2.png"
+style="width:5.96875in;height:2.39583in" /></p>
+</blockquote>
+<p><strong>3.- Un pony en la terminal</strong></p>
+<p>Lo mismo que Cowsay pero en esta ocasión muestra lo que debería ser
+un pony o “algo parecido”, aunque más bien parece un jugador de fútbol
+diciendo la frase que quieras mostrar.</p>
+<p>instalamos el paquete con:</p>
+<p><strong>sudo snap install ponysay</strong></p>
+<p>Síntesis:</p>
+<h2 id="ponysay-texto_a_mostrar">ponysay Texto_a_mostrar</h2>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image3.png"
+style="width:4.94792in;height:2.76042in" /></p>
+</blockquote>
+<p><strong>4.- Una vaca pensando.</strong></p>
+<p>Es igual que <em>cowsay</em> pero en este caso muestra la salida a
+modo de pensamiento:</p>
+<p>Síntesis:</p>
+<h2 id="ponysay-texto_a_mostrar-1">ponysay Texto_a_mostrar</h2>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image4.png"
+style="width:5.96875in;height:2.44792in" /></p>
+</blockquote>
+<p><strong>5.- Un locomotora de vapor.</strong></p>
+<p>Uno de los comandos más usados es <em><strong>ls</strong></em> para
+listar el contenido de un directorio pero en ocasiones, con las prisas
+lo escribimos al revés y la terminal nos devuelve:</p>
+<p><em>No se ha encontrado la orden «sl», pero se puede instalar
+con:</em></p>
+<h2 id="sudo-apt-install-sl">sudo apt install sl</h2>
+<p>Si la instalamos, cada vez que pongamos <em><strong>sl</strong></em>
+nos aparecerá una locomotora recorriendo nuestra terminal:</p>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image5.png"
+style="width:4.95833in;height:2.66667in" /></p>
+</blockquote>
+<p><strong>6.- Repetir una cadena</strong></p>
+<p>El comando yes sólo sirve para repetir una cadena hasta que termines
+su proceso presionando Crtl+C. Aunque puede parecer inútil resulta muy
+interesante si queremos automatizar un script indicándole la ruta donde
+se encuentra.</p>
+<p>Síntesis:</p>
+<h2 id="yes-un-fantasma-en-el-sistema">yes Un fantasma en el
+sistema</h2>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image6.png"
+style="width:5.96875in;height:1.88542in" /></p>
+</blockquote>
+<p><strong>7.- Invertir la entrada</strong></p>
+<p>El comando <strong><em>rev</em></strong> tiene por “utilidad”
+revertir la entrada que le pongamos, es decir que si ponemos un a
+palabra la mostrará literalmente al revés. Se ejecutará hasta que lo
+detengamos con <em>Crtl+C</em> Síntesis:</p>
+<p>rev</p>
+<p>entrada_a_invertir</p>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image7.png"
+style="width:5.96875in;height:1.44792in" /></p>
+</blockquote>
+<p><strong>8.- Un banner en la terminal.</strong></p>
+<p>Con el comando <strong><em>banner</em></strong> puedes mostrar un
+texto a modo de banner en tu terminal.</p>
+<p>instalamos el paquete con:</p>
+<p><strong>sudo apt install sysvbanner</strong></p>
+<p>Síntesis:</p>
+<h2 id="banner-texto_a_mostrar">banner texto_a_mostrar</h2>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image8.png"
+style="width:4.30259in;height:1.9794in" /></p>
+</blockquote>
+<p><strong>9.- Frases aleatorias.</strong></p>
+<p>El comando <strong><em>fortune</em></strong> es el equivalente a las
+conocidas galletas de la fortuna; te muestra una frase o un texto de
+algún conocido autor y lo cita. instalamos el paquete con:</p>
+<p><strong>sudo apt install fortune-mod</strong></p>
+<p>Síntesis:</p>
+<h2 id="fortune">fortune</h2>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image9.png"
+style="width:4.70833in;height:2.07292in" /></p>
+</blockquote>
+<p><strong>10.- Textos coloridos.</strong></p>
+<p>Un comando muy similar a <strong><em>banner</em></strong> es
+<strong><em>toilet</em></strong> pero en este caso, la salida, es a
+color.</p>
+<p>Puedes ver las distintas opciones que te ofrece con:</p>
+<p><strong>man toilet</strong></p>
+<p>instalamos el paquete con:</p>
+<p><strong>sudo apt install toilet</strong></p>
+<p>Síntesis:</p>
+<h2 id="toilet--f-mono12--f-metal-un-fantasma-en-el-sistema">toilet -f
+mono12 -F metal Un Fantasma en el sistema</h2>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image10.png"
+style="width:4.90682in;height:1.60435in" /></p>
+</blockquote>
+<p><strong>11.- Un cronómetro.</strong></p>
+<p>La suma de los comandos <strong><em>time</em></strong> y
+<strong><em>cat</em></strong> se puede utilizar a modo de
+cronómetro.</p>
+<p>Se ejecuta en segundo plano hasta que lo detengas con <em>Crtl+C</em>
+y luego te informa del tiempo transcurrido entre el inicio y el final de
+su proceso:</p>
+<p>Síntesis:</p>
+<h2 id="time-cat">time cat</h2>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image11.png"
+style="width:6.11458in;height:1.73958in" /></p>
+</blockquote>
+<p><strong>12.- Calendario.</strong></p>
+<p>Puedes ver un calendario en la terminal con el comando
+<em><strong>cal</strong></em>. Para ver las distintas opciones que te
+ofrece utiliza su ayuda:</p>
+<p><strong>man cal</strong></p>
+<p>Síntesis:</p>
+<h2 id="cal">cal</h2>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image12.jpg"
+style="width:6.09375in;height:1.94792in" /></p>
+</blockquote>
+<p><strong>13.- Fuego en la terminal.</strong></p>
+<p>El comando <em><strong>aafire</strong></em> muestra un efecto de
+fuego en tu terminal hasta que lo detengamos con <em>Crtl+C</em>.</p>
+<p>instalamos el paquete con:</p>
+<p><strong>sudo apt install libaa-bin</strong></p>
+<p>Síntesis:</p>
+<h2 id="aafire">aafire</h2>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image13.png"
+style="width:4.3338in;height:2.62528in" /></p>
+</blockquote>
+<p><strong>14.- Escribe en ASCII</strong></p>
+<p>Si te gusta el arte ASCII, este es tu comando. El comando
+<em><strong>figlet</strong></em> transforma en ASCII cualquier cadena
+que le marques.</p>
+<p>Síntesis:</p>
+<p><strong>figlet</strong></p>
+<h2 id="texto_a_mostrar">Texto_a_mostrar</h2>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image14.png"
+style="width:6.11458in;height:2.01042in" /></p>
+</blockquote>
+<p><strong>15.- Un gato en la terminal</strong></p>
+<p>Con el comando <strong>oneko</strong> puedes poner un gato que
+perseguirá al cursor por toda la pantalla hasta que lo detengas con
+<em>Crtl+C</em>.</p>
+<p>instalamos el paquete con:</p>
+<p><strong>sudo apt install oneko</strong></p>
+<p>Síntesis:</p>
+<h2 id="oneko">oneko</h2>
+<p>Puedes incluso elegir tu mascota con las opciones que te ofrece:</p>
+<p><strong>oneko -tora</strong> (muestra un tigre)</p>
+<p><strong>oneko -dog</strong> (muestra un perro)</p>
+<p><strong>oneko -sakura</strong> (muestra a Sakura Kinomoto)</p>
+<p><strong>oneko -tomoyo</strong> (muestra a Tomoyo Daidouji)</p>
+<p>Puedes desinstalarlo con:</p>
+<h2 id="sudo-apt-remove-oneko">sudo apt remove oneko</h2>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image15.png"
+style="width:6.11458in;height:3.39583in" /></p>
+</blockquote>
+<p><strong>16.- Matrix</strong></p>
+<p>El comando <em><strong>cmatrix</strong></em> muestra en pantalla el
+conocido efecto Matrix hasta que lo detengas con <em>Crtl+C</em>
+instalamos el paquete con:</p>
+<p><strong>sudo apt install cmatrix</strong></p>
+<p>Síntesis:</p>
+<h2 id="cmatrix">cmatrix</h2>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image16.png"
+style="width:5.96875in;height:2.23958in" /></p>
+</blockquote>
+<p><strong>17.- Descomposición en factores primos.</strong></p>
+<p>Con el comando <em><strong>factor</strong></em> puedes dividir un
+número dado en factores primos.</p>
+<p>Síntesis:</p>
+<h2 id="factor-número_a_descomponer">factor número_a_descomponer</h2>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image17.jpg"
+style="width:5.95833in;height:1.21875in" /></p>
+</blockquote>
+<p><strong>18.- El comando más corto.</strong></p>
+<p>De entre todos los comandos, probablemente el más corto sea
+<em><strong>w</strong></em>.</p>
+<p>Este comando nos muestra información sobre los usuarios actuales,
+como su nombre, tiempo de inicio de sesión… Síntesis:</p>
+<p><strong>w</strong></p>
+<blockquote>
+<p><img src=".\\media\\06 Comandos divertidos/media/image18.jpg"
+style="width:5.95833in;height:1.48958in" /></p>
+</blockquote>
+<script src="nav.js"></script>
+</body>
+</html>

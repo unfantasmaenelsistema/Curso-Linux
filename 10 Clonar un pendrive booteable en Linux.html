@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>10 Clonar un pendrive booteable en Linux</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>Clonar un pendrive booteable en Linux</strong></p>
+<p>Hay varias formas de clonar un pendrive booteable en Linux, pero
+podemos hacerlo desde la terminal con el comando
+<em><strong>dd</strong></em>.</p>
+<p>En primer lugar, abriremos una terminal y utilizaremos el comando
+<em><strong>fdisk -l</strong></em> para que nos liste todas las unidades
+de disco que tenemos en nuestro equipo.</p>
+<p>Nos aparecerá <em><strong>sda</strong></em> con sus respectivas
+particiones <em><strong>sda1</strong></em>,
+<em><strong>sda2</strong></em>, <em><strong>sda3</strong></em> … que
+tengamos en nuestro equipo indicándonos el tamaño y tipo de cada una de
+ellas:</p>
+<blockquote>
+<p><img
+src=".\\media\\10 Clonar un pendrive booteable en Linux/media/image1.jpg"
+style="width:5.96875in;height:4.375in" /></p>
+</blockquote>
+<p>Ahora introducimos el pendrive que queremos clonar en un puerto usb y
+el sistema lo montará automáticamente.</p>
+<p>Una vez montado volveremos a usar el comando <em><strong>fdisk
+-l</strong></em> para que vuelva a listar las unidades.</p>
+<p>Ahora, además de mostrar <em><strong>sda</strong></em> con sus
+respectivas particiones nos mostrará el punto donde ha montado la
+memoria que queremos clonar.</p>
+<p>Debemos fijarnos y apuntar dónde la montada. Puede ser en
+<em><strong>sdb</strong></em> o en cualquier otro punto; en mi caso la
+ha montado en <em><strong>sdg</strong></em> por lo que también mostrará
+todas las particiones que tiene el usb booteable como
+<em><strong>sdg1</strong></em>, <em><strong>sdg2</strong></em>,
+<em><strong>sdg3</strong></em>…:</p>
+<blockquote>
+<p><img
+src=".\\media\\10 Clonar un pendrive booteable en Linux/media/image2.jpg"
+style="width:5.96875in;height:4.375in" /></p>
+</blockquote>
+<p>Vamos a volver a repetir la operación introduciendo el pendrive de
+destino donde vamos a clonar nuestro booteable que debe tener al menos
+la misma capacidad que el disco de origen y que previamente debemos de
+haber formateado en el mismo formato que tiene el pendrive original.
+Este proceso de formateo lo podemos hacer fácilmente con
+<strong>gparted</strong>.</p>
+<p>Una vez más escribimos el comando <em><strong>fdisk -l</strong></em>.
+Ahora, además de <em><strong>sda</strong></em> y
+<em><strong>sdg</strong></em> nos mostrará el punto de montaje de la
+memoria usb vacía que en mi caso ha sido
+<em><strong>sdh</strong></em>:</p>
+<blockquote>
+<p><img
+src=".\\media\\10 Clonar un pendrive booteable en Linux/media/image3.jpg"
+style="width:5.96875in;height:4.375in" /></p>
+</blockquote>
+<p>Estos pasos previos son muy importantes ya que si nos equivocamos al
+elegir el disco o en el orden podemos dejar nuestra memoria en blanco o
+incluso formatear el disco duro. Ahora ha llegado el momento de clonar
+el pendrive booteable con el comando <em><strong>dd</strong></em>:</p>
+<p><em><strong>sudo dd if=/dev/sdg of=/dev/sdh</strong></em></p>
+<p>donde <strong>if</strong> (input file) es el pendrive origen y
+<strong>of</strong> (output file) es el pendrive destino:</p>
+<blockquote>
+<p><img
+src=".\\media\\10 Clonar un pendrive booteable en Linux/media/image4.jpg"
+style="width:5.96875in;height:4.375in" /></p>
+</blockquote>
+<p>Una vez transcurrido el proceso de clonado habremos realizado una
+copia exacta de nuestro pendrive booteable incluido el registro de
+arranque principal, las particiones y todos los archivos que componen el
+sistema.</p>
+<script src="nav.js"></script>
+</body>
+</html>

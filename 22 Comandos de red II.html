@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>22 Comandos de red II</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>Comandos de red</strong></p>
+<p><strong>1. Comandos de Diagnóstico y Conectividad</strong></p>
+<p>Estos comandos se usan para probar si la red está funcionando y medir
+el rendimiento.</p>
+<p><strong>ping: Prueba de Conectividad (ICMP Echo)</strong></p>
+<p>ping (Packet InterNet Groper) es la herramienta fundamental para
+probar la conectividad a nivel de red (Capa 3). Envía paquetes ICMP Echo
+Request y espera una respuesta.</p>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 89%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>-c N</strong></td>
+<td>Limita el número de paquetes a enviar a <strong>N</strong>.</td>
+</tr>
+<tr>
+<td><strong>-i N</strong></td>
+<td>Intervalo de segundos a esperar entre el envío de cada paquete.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico: Probar la conectividad con un
+límite</strong></p>
+<p>Verificar si hay conexión a Google DNS, pero solo enviando 4
+paquetes.</p>
+<p>ping -c 4 8.8.8.8</p>
+<p>PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.</p>
+<p>64 bytes from 8.8.8.8: icmp_seq=1 ttl=117 time=25.4 ms</p>
+<p>64 bytes from 8.8.8.8: icmp_seq=2 ttl=117 time=25.3 ms</p>
+<p>64 bytes from 8.8.8.8: icmp_seq=3 ttl=117 time=25.5 ms</p>
+<p>64 bytes from 8.8.8.8: icmp_seq=4 ttl=117 time=25.4 ms</p>
+<p>--- 8.8.8.8 ping statistics ---</p>
+<p>4 packets transmitted, 4 received, 0% packet loss, time 3004ms</p>
+<p>El valor <strong>Time To Live (TTL)</strong> que ves en la respuesta
+de un ping está directamente relacionado con el <strong>sistema
+operativo (SO) del host de destino</strong> y el <strong>número de
+<em>saltos</em> (routers)</strong> que el paquete tuvo que recorrer para
+llegar hasta allí y regresar.</p>
+<p>El valor de TTL que recibes en la respuesta <strong>no es el TTL
+inicial</strong> del destino, sino el <strong>TTL inicial menos los
+saltos</strong> que el paquete realizó.</p>
+<h2 id="valores-ttl-iniciales-típicos"><strong>Valores TTL Iniciales
+Típicos</strong></h2>
+<p>El sistema operativo del host de destino es el que establece el valor
+inicial del TTL. Los valores más comunes que te permiten identificar el
+SO son:</p>
+<table>
+<colgroup>
+<col style="width: 68%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Sistema Operativo del Destino</strong></th>
+<th><strong>TTL Inicial Típico</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Windows</strong> (moderno)</td>
+<td><strong>128</strong></td>
+</tr>
+<tr>
+<td><strong>Linux/macOS/FreeBSD</strong></td>
+<td><strong>64</strong></td>
+</tr>
+<tr>
+<td><strong>Sistemas Unix Antiguos</strong> (o especializados)</td>
+<td><strong>255</strong> (o 64)</td>
+</tr>
+<tr>
+<td><strong>Solaris/AIX</strong></td>
+<td><strong>254</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="cómo-interpretar-el-ttl-de-la-respuesta"><strong>Cómo
+Interpretar el TTL de la Respuesta</strong></h2>
+<p>El TTL que ves en la respuesta de tu ping disminuye en 1 en cada
+<em>salto</em> (router) que atraviesa el paquete.</p>
+<p>TTL de Respuesta=TTL Inicial del Destino−Nuˊmero de Saltos de Retorno</p>
+<p><strong>Ejemplo Práctico:</strong></p>
+<ol type="1">
+<li><p>Haces ping a un servidor web que corre en <strong>Linux</strong>.
+Su TTL inicial es <strong>64</strong>.</p></li>
+<li><p>El paquete de ida atraviesa <strong>7 routers</strong>.</p></li>
+<li><p>El paquete de respuesta del servidor también atraviesa <strong>7
+routers</strong> hasta llegar a ti.</p></li>
+</ol>
+<p>TTL Recibido=64−7=57</p>
+<p>Si recibes un TTL de 57, sabes que el TTL inicial era 64, lo que
+sugiere fuertemente que el servidor de destino utiliza un sistema
+<strong>Linux</strong> o <strong>macOS</strong>.</p>
+<h3 id="detección-del-sistema-operativo"><strong>Detección del Sistema
+Operativo</strong></h3>
+<p>Puedes estimar el sistema operativo del destino si el TTL recibido en
+la respuesta está <strong>cerca de 64 o 128</strong>.</p>
+<ul>
+<li><p>Si el TTL de respuesta es, por ejemplo, <strong>120</strong>, es
+casi seguro que el SO es <strong>Windows</strong> (TTL inicial 128, con
+8 saltos de red).</p></li>
+<li><p>Si el TTL de respuesta es, por ejemplo, <strong>59</strong>, es
+casi seguro que el SO es <strong>Linux/macOS</strong> (TTL inicial 64,
+con 5 saltos de red).</p></li>
+</ul>
+<p>Si el TTL es muy bajo (ej. 30), el servidor está muy lejos o el
+paquete ha atravesado muchas redes.</p>
+<p><strong>traceroute: Trazar la Ruta de Paquetes</strong></p>
+<p>traceroute muestra la ruta (los saltos o <em>hops</em>) que toma un
+paquete para ir desde el host local hasta el destino, identificando cada
+router intermedio.</p>
+<p><strong>Ejemplo Práctico: Trazar la ruta a un sitio web</strong></p>
+<p>sudo apt install traceroute</p>
+<p>o</p>
+<p>sudo apt install inetutils-traceroute</p>
+<p>Quieres ver la ruta que toman sus paquetes hasta el sitio web de
+Wikipedia.</p>
+<p>traceroute wikipedia.org</p>
+<p>traceroute to wikipedia.org (208.80.154.224), 30 hops max, 60 byte
+packets</p>
+<p>1 router.local (192.168.1.1) 1.234 ms 1.345 ms 1.456 ms</p>
+<p>2 ip-del-isp-de-jose (10.0.0.1) 8.765 ms 9.876 ms 10.987 ms</p>
+<p>3 * * *</p>
+<p>4 backbone.isp.net (62.xx.xx.xx) 25.123 ms 26.234 ms 27.345 ms</p>
+<p>... (Continúa hasta el destino)</p>
+<p>El símbolo <strong>* * *</strong> en la salida del comando traceroute
+significa que <strong>no se recibió ninguna respuesta</strong> del
+<em>router</em> (salto) correspondiente a ese número.</p>
+<h2 id="significado-de-los"><strong>Significado de los * *
+*</strong></h2>
+<p>Cada línea de traceroute muestra los resultados de tres pruebas de
+latencia (tiempo de respuesta) al mismo salto. Si ves * * *, puede
+deberse a varias razones, siendo las más comunes:</p>
+<ol type="1">
+<li><p><strong>Firewall (Cortafuegos):</strong> Es la causa más
+frecuente. El <em>router</em> en ese salto está configurado con un
+<em>firewall</em> que <strong>bloquea los paquetes ICMP</strong>
+(Internet Control Message Protocol), que son los utilizados por
+traceroute (y ping) para obtener respuestas. El <em>router</em> recibe
+el paquete, pero no envía la respuesta de vuelta.</p></li>
+<li><p><strong>Tráfico Congestionado o Priorización:</strong> El
+<em>router</em> está tan ocupado procesando tráfico de datos prioritario
+que descarta los paquetes ICMP de traceroute para ahorrar
+recursos.</p></li>
+<li><p><strong>Ruta Asimétrica o Pérdida de Paquetes:</strong> Los
+paquetes de respuesta se pierden en el camino de regreso, o el paquete
+de respuesta toma una ruta completamente diferente y nunca llega a tu
+máquina.</p></li>
+</ol>
+<p>Que veas * * * <strong>no significa necesariamente que tu conexión
+esté fallando</strong>.</p>
+<p>Si el traceroute no llega a su destino dentro de los 30 saltos
+máximos (que es el límite por defecto), verás los asteriscos hasta el
+final de la lista. En este caso, el servidor de destino es el que está
+en silencio o la ruta es inalcanzable.</p>
+<p><strong>2. Comandos de Información de Red e Interfaces</strong></p>
+<p>Estos comandos muestran la configuración de las interfaces de red del
+host local.</p>
+<p><strong>ip: Mostrar/Manipular Enrutamiento, Dispositivos y Túneles
+(Moderno)</strong></p>
+<p>El comando ip es la herramienta moderna y preferida en Linux para
+configurar interfaces, rutas y túneles.</p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 11%" />
+<col style="width: 64%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Función</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ip a</strong></td>
+<td><strong>a</strong>ddress</td>
+<td>Muestra todas las direcciones IP de todas las interfaces.</td>
+</tr>
+<tr>
+<td><strong>ip r</strong></td>
+<td><strong>r</strong>oute</td>
+<td>Muestra la tabla de enrutamiento del kernel.</td>
+</tr>
+<tr>
+<td><strong>ip link set eth0 up</strong></td>
+<td><strong>link</strong></td>
+<td>Activa la interfaz eth0 (requiere sudo).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico: Ver la configuración IP</strong></p>
+<p>ip a</p>
+<p>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state
+UNKNOWN group default qlen 1000</p>
+<p>inet 127.0.0.1/8 scope host lo</p>
+<p>2: ens33: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc
+fq_codel state UP group default qlen 1000</p>
+<p>inet 192.168.1.50/24 brd 192.168.1.255 scope global dynamic ens33</p>
+<p><em>(Aquí, <strong>jose</strong> tiene la IP 192.168.1.50 en la
+interfaz ens33.)</em></p>
+<p><strong>ifconfig: Configuración de Interfaces (Legado)</strong></p>
+<p>ifconfig es la herramienta de configuración de red tradicional y ha
+sido reemplazada por ip en distribuciones modernas, pero sigue siendo
+útil y común.</p>
+<p><strong>Ejemplo Práctico: Ver interfaces (similar a ip
+a)</strong></p>
+<p>ifconfig</p>
+<p>ens33: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt; mtu 1500</p>
+<p>inet 192.168.1.50 netmask 255.255.255.0 broadcast 192.168.1.255</p>
+<p>...</p>
+<p>lo: flags=73&lt;UP,LOOPBACK,RUNNING&gt; mtu 65536</p>
+<p>inet 127.0.0.1 netmask 255.0.0.0</p>
+<p>...</p>
+<p><strong>hostname: Mostrar/Establecer el Nombre del Host</strong></p>
+<p>El comando hostname se usa para mostrar o cambiar el nombre del host
+del sistema.</p>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 88%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>-I</strong></td>
+<td>Muestra todas las direcciones IP locales del host.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico: Ver el nombre del host y sus
+IPs</strong></p>
+<p>hostname</p>
+<p>Ubuntu-24-04</p>
+<p>hostname -I</p>
+<p>192.168.1.50 172.17.0.1</p>
+<p><strong>3. Comandos de Conexiones de Red y Sockets</strong></p>
+<p>Estos comandos listan las conexiones activas, puertos abiertos y
+sockets.</p>
+<p><strong>netstat: Estadísticas de Red (Legado)</strong></p>
+<p>netstat (<strong>net</strong>work <strong>stat</strong>istics) es una
+herramienta antigua para monitorear las conexiones de red.</p>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 89%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>-tulpn</strong></td>
+<td>Muestra sockets <strong>t</strong>cp, <strong>u</strong>dp,
+<strong>l</strong>istening (escuchando), <strong>p</strong>rograma/PID,
+<strong>n</strong>uméricos.</td>
+</tr>
+<tr>
+<td><strong>-r</strong></td>
+<td>Muestra la tabla de <strong>r</strong>utas (similar a ip r).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico: Ver todos los puertos de escucha y sus
+programas</strong></p>
+<p>netstat -tulpn | grep LISTEN</p>
+<p>(Not all processes could be identified, non-owned process info</p>
+<p>will not be shown, you would have to be root to see it all.)</p>
+<p>tcp 0 0 0.0.0.0:22 0.0.0.0:* LISTEN -</p>
+<p>tcp 0 0 127.0.0.53:53 0.0.0.0:* LISTEN -</p>
+<p><em>(Vemos que el puerto 22 (SSH) y el 53 (DNS) están
+escuchando.)</em></p>
+<p><strong>ss: Estadísticas de Socket (Moderno)</strong></p>
+<p>ss es el reemplazo moderno de netstat, mucho más rápido y
+eficiente.</p>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 89%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>-l</strong></td>
+<td>Muestra solo los sockets en estado de <strong>l</strong>istening
+(escucha).</td>
+</tr>
+<tr>
+<td><strong>-t</strong></td>
+<td>Muestra solo los sockets <strong>t</strong>cp.</td>
+</tr>
+<tr>
+<td><strong>-u</strong></td>
+<td>Muestra solo los sockets <strong>u</strong>dp.</td>
+</tr>
+<tr>
+<td><strong>-p</strong></td>
+<td>Muestra el <strong>p</strong>roceso que usa el socket.</td>
+</tr>
+<tr>
+<td><strong>-n</strong></td>
+<td>Muestra direcciones y puertos <strong>n</strong>uméricos.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico: Listar conexiones TCP
+establecidas</strong></p>
+<p>Quieres ver todas las conexiones TCP que están actualmente
+establecidas.</p>
+<p>ss -t state established</p>
+<p>Netid State Recv-Q Send-Q Local Address:Port Peer Address:Port</p>
+<p>tcp ESTAB 0 0 192.168.1.50:52345 142.250.203.14:443</p>
+<p>tcp ESTAB 0 0 192.168.1.50:48912 172.67.158.42:80</p>
+<p><strong>4. Comandos de Consulta DNS</strong></p>
+<p>Estos comandos se utilizan para consultar el Sistema de Nombres de
+Dominio (DNS).</p>
+<p><strong>nslookup: Consulta de Nombres de Servidor
+(Legado)</strong></p>
+<p>nslookup es una herramienta antigua y sencilla para realizar
+consultas DNS.</p>
+<p><strong>Ejemplo Práctico: Encontrar la IP de un dominio</strong></p>
+<p>nslookup google.com</p>
+<p>Server: 127.0.0.53</p>
+<p>Address: 127.0.0.53#53</p>
+<p>Non-authoritative answer:</p>
+<p>Name: google.com</p>
+<p>Address: 142.250.186.46</p>
+<p><strong>dig: Dominio Information Groper (Moderno y
+Profesional)</strong></p>
+<p>dig es la herramienta preferida por los administradores de red para
+realizar consultas DNS detalladas.</p>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 85%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>@servidor</strong></td>
+<td>Especifica qué servidor DNS consultar.</td>
+</tr>
+<tr>
+<td><strong>TIPO</strong></td>
+<td>Especifica el tipo de registro (ej. MX para registros de correo, NS
+para servidores de nombres).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico: Consultar el registro MX (Mail
+Exchanger)</strong></p>
+<p>Quieres saber qué servidores manejan el correo de un dominio.</p>
+<p>dig example.com MX</p>
+<p>...</p>
+<p>;; ANSWER SECTION:</p>
+<p>example.com. 86400 IN MX 10 mail.example.com.</p>
+<p>...</p>
+<p><strong>5. Comandos de Transferencia de Datos</strong></p>
+<p>Estos comandos se utilizan para descargar o cargar datos a través de
+protocolos de red.</p>
+<p><strong>curl: Transferencia de Datos (Con URL)</strong></p>
+<p>curl es una herramienta versátil y potente para transferir datos con
+sintaxis de URL, compatible con una gran variedad de protocolos (HTTP,
+HTTPS, FTP, etc.).</p>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 84%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>-O</strong></td>
+<td>Guarda la salida en un archivo con el <strong>O</strong>riginal
+nombre remoto.</td>
+</tr>
+<tr>
+<td><strong>-o archivo</strong></td>
+<td>Guarda la salida en el archivo especificado.</td>
+</tr>
+<tr>
+<td><strong>-I</strong></td>
+<td>Muestra solo los <strong>E</strong>ncabezados (Headers) HTTP.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico 1: Descargar un archivo</strong></p>
+<p>Quieres descargar un archivo y guardarlo con su nombre original.</p>
+<p>curl -O http://example.com/imagen.jpg</p>
+<p>% Total % Received % Xferd Average Speed Time Time Time Current</p>
+<p>Dload Upload Total Spent Left Speed</p>
+<p>100 12.5M 100 12.5M 0 0 2388k 0 0:00:05 0:00:05 --:--:-- 2899k</p>
+<p><strong>Ejemplo Práctico 2: Ver solo los encabezados
+HTTP</strong></p>
+<p>curl -I http://example.com</p>
+<p>HTTP/1.1 200 OK</p>
+<p>Content-Encoding: gzip</p>
+<p>Accept-Ranges: bytes</p>
+<p>Cache-Control: max-age=604800</p>
+<p>Content-Type: text/html; charset=UTF-8</p>
+<p>...</p>
+<p><strong>wget: Descargador No Interactivo</strong></p>
+<p>wget es una herramienta simple para descargar archivos de la web,
+ideal para scripts ya que opera de forma <strong>no interactiva</strong>
+(funciona en segundo plano sin terminal).</p>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 85%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>-P /ruta/</strong></td>
+<td>Especifica el <strong>P</strong>refijo (directorio) donde guardar el
+archivo.</td>
+</tr>
+<tr>
+<td><strong>-b</strong></td>
+<td>Ejecuta el comando en <strong>B</strong>ackground (segundo
+plano).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico: Descargar un archivo y guardarlo en un
+directorio específico</strong></p>
+<p>wget -P /home/jose/Descargas/ http://example.com/documento.zip</p>
+<p>--2025-10-09 07:20:00-- http://example.com/documento.zip</p>
+<p>Saving to: ‘/home/jose/Descargas/documento.zip’</p>
+<p>documento.zip 100%[===================&gt;] 2.50M 8.00MB/s in
+0.3s</p>
+<p><strong>Ejercicios:</strong></p>
+<p><strong>Índice de comandos de red</strong></p>
+<ul>
+<li><p>ping</p></li>
+<li><p>ip</p></li>
+<li><p>ifconfig</p></li>
+<li><p>netstat</p></li>
+<li><p>ss</p></li>
+<li><p>nslookup</p></li>
+<li><p>dig</p></li>
+<li><p>hostname</p></li>
+<li><p>traceroute</p></li>
+<li><p>curl</p></li>
+<li><p>wget</p></li>
+</ul>
+<p><strong>1. ping – Comprobar conectividad a un host</strong></p>
+<p><strong>Sintaxis:</strong></p>
+<p>ping [opciones] destino</p>
+<p><strong>Ejemplos prácticos:</strong></p>
+<p><strong>Comprobar si tienes acceso a internet:</strong></p>
+<p>ping -c 4 google.com</p>
+<p><strong>Hacer ping a una IP local:</strong></p>
+<p>ping -c 4 192.168.1.1</p>
+<p><strong>Hacer ping de forma continua (Ctrl+C para
+parar):</strong></p>
+<p>ping google.com</p>
+<p><strong>2. ip – Mostrar y gestionar configuración de red</strong></p>
+<p>Reemplaza a ifconfig (más moderno)</p>
+<p><strong>Sintaxis:</strong></p>
+<p>ip [opciones]</p>
+<p><strong>Ejemplos prácticos:</strong></p>
+<p><strong>Mostrar interfaces de red:</strong></p>
+<p>ip a</p>
+<p># o</p>
+<p>ip address</p>
+<p><strong>Mostrar rutas de red:</strong></p>
+<p>ip route</p>
+<p><strong>Levantar una interfaz (requiere sudo):</strong></p>
+<p>sudo ip link set eth0 up</p>
+<p><strong>Asignar IP manualmente (modo estático):</strong></p>
+<p>sudo ip addr add 192.168.1.100/24 dev eth0</p>
+<p><strong>3. ifconfig – Mostrar y configurar interfaces de
+red</strong></p>
+<p>Obsoleto, pero aún disponible (instalar con net-tools)</p>
+<p>sudo apt install net-tools</p>
+<p><strong>Uso:</strong></p>
+<p>Ifconfig</p>
+<p><strong>Ejemplo práctico:</strong></p>
+<p><strong>Ver interfaces de red:</strong></p>
+<p>Ifconfig</p>
+<p><strong>Levantar interfaz:</strong></p>
+<p>sudo ifconfig eth0 up</p>
+<p><strong>4. netstat – Ver conexiones y puertos de red (también
+obsoleto)</strong></p>
+<p>Requiere net-tools, reemplazado por ss.</p>
+<p>sudo apt install net-tools</p>
+<p><strong>Uso:</strong></p>
+<p>netstat [opciones]</p>
+<p><strong>Ejemplos:</strong></p>
+<p><strong>Ver puertos abiertos:</strong></p>
+<p>netstat -tuln</p>
+<p><strong>Ver conexiones establecidas:</strong></p>
+<p>netstat -ant</p>
+<p><strong>5. ss – Ver conexiones de red activas (reemplazo de
+netstat)</strong></p>
+<p><strong>Uso:</strong></p>
+<p>ss [opciones]</p>
+<p><strong>Ejemplos prácticos:</strong></p>
+<p><strong>Ver sockets abiertos (TCP y UDP):</strong></p>
+<p>ss -tuln</p>
+<p><strong>Ver conexiones establecidas:</strong></p>
+<p>ss -s</p>
+<p><strong>Ver puertos usados por procesos:</strong></p>
+<p>ss -plnt</p>
+<p><strong>6. nslookup – Consultar servidores DNS (resolución de
+nombres)</strong></p>
+<p><strong>Uso:</strong></p>
+<p>nslookup dominio</p>
+<p><strong>Ejemplos prácticos:</strong></p>
+<p><strong>Obtener IP de un dominio:</strong></p>
+<p>nslookup google.com</p>
+<p><strong>Consultar un servidor DNS específico:</strong></p>
+<p>nslookup google.com 1.1.1.1</p>
+<p><strong>7. dig – Herramienta avanzada de consulta DNS</strong></p>
+<p>Requiere instalación:</p>
+<p>sudo apt install dnsutils</p>
+<p><strong>Uso:</strong></p>
+<p>dig [opciones] dominio</p>
+<p><strong>Ejemplos:</strong></p>
+<p><strong>Consulta básica:</strong></p>
+<p>dig google.com</p>
+<p><strong>Ver solo la IP (respuesta corta):</strong></p>
+<p>dig +short google.com</p>
+<p><strong>Consultar registros MX (correo):</strong></p>
+<p>dig google.com MX</p>
+<p><strong>Usar servidor DNS personalizado:</strong></p>
+<p>dig @8.8.8.8 openai.com</p>
+<p><strong>8. hostname – Mostrar o cambiar el nombre del
+host</strong></p>
+<p><strong>Uso:</strong></p>
+<p>Hostname</p>
+<p><strong>Ver el nombre del host actual:</strong></p>
+<p>Hostname</p>
+<p><strong>Cambiar hostname temporalmente:</strong></p>
+<p>sudo hostname nueva-maquina</p>
+<p><strong>Cambiar hostname permanentemente:</strong></p>
+<p>sudo hostnamectl set-hostname nueva-maquina</p>
+<p><strong>9. traceroute – Rastrear ruta de red hacia un
+host</strong></p>
+<p>Requiere instalación:</p>
+<p>sudo apt install traceroute</p>
+<p><strong>Uso:</strong></p>
+<p>traceroute dominio_o_ip</p>
+<p><strong>Ejemplo:</strong></p>
+<p><strong>Ver ruta hasta Google:</strong></p>
+<p>traceroute google.com</p>
+<p><strong>10. curl – Hacer solicitudes HTTP/HTTPS desde la
+terminal</strong></p>
+<p><strong>Uso:</strong></p>
+<p>curl [opciones] URL</p>
+<p><strong>Ejemplos prácticos:</strong></p>
+<p><strong>Descargar una página web:</strong></p>
+<p>curl <a href="https://example.com">https://example.com</a></p>
+<p><strong>Guardar contenido en un archivo:</strong></p>
+<p>curl -o pagina.html <a
+href="https://example.com">https://example.com</a></p>
+<p><strong>Ver encabezados HTTP:</strong></p>
+<p>curl -I <a href="https://openai.com">https://openai.com</a></p>
+<p><strong>Enviar datos por POST:</strong></p>
+<p>curl -X POST -d "usuario=jose&amp;clave=123" <a
+href="https://ejemplo.com/login">https://ejemplo.com/login</a></p>
+<p>El comando le dice a tu máquina que <strong>envíe la información del
+usuario (jose) y la contraseña (123)</strong> en el cuerpo de una
+petición <strong>POST</strong> a la página de inicio de sesión ubicada
+en https://ejemplo.com/login. Es la forma en la que se comunican los
+navegadores con los servidores al iniciar sesión, solo que aquí se hace
+directamente desde la terminal.</p>
+<p><strong>11. wget – Descargar archivos desde web</strong></p>
+<p><strong>Uso:</strong></p>
+<p>wget URL</p>
+<p><strong>Ejemplos prácticos:</strong></p>
+<p><strong>Descargar un archivo:</strong></p>
+<p>wget <a
+href="https://example.com/archivo.zip">https://example.com/archivo.zip</a></p>
+<p><strong>Descargar y renombrar:</strong></p>
+<p>wget -O nuevo_nombre.zip <a
+href="https://example.com/archivo.zip">https://example.com/archivo.zip</a></p>
+<p><strong>Descargar un sitio completo (modo espejo):</strong></p>
+<p>wget --mirror -p --convert-links -P /home/jose/sitio/ <a
+href="https://example.com/">https://example.com/</a></p>
+<p>El comando le pide a wget que <strong>rastree recursivamente</strong>
+todo el contenido de https://example.com/, se asegure de descargar
+<strong>todos los archivos asociados</strong> (CSS, imágenes, JS),
+<strong>modifique los enlaces</strong> para que funcionen localmente, y
+<strong>guarde todo</strong> dentro de la carpeta /home/jose/sitio/.</p>
+<p><strong>Ejercicio práctico de red</strong></p>
+<ol type="1">
+<li><p><strong>Verificar conectividad:</strong></p></li>
+</ol>
+<p>ping -c 4 1.1.1.1</p>
+<ol start="2" type="1">
+<li><p><strong>Ver IP asignada:</strong></p></li>
+</ol>
+<p>ip a</p>
+<ol start="3" type="1">
+<li><p><strong>Ver rutas de red:</strong></p></li>
+</ol>
+<p>ip route</p>
+<ol start="4" type="1">
+<li><p><strong>Ver puertos abiertos:</strong></p></li>
+</ol>
+<p>ss -tuln</p>
+<ol start="5" type="1">
+<li><p><strong>Consultar dominio:</strong></p></li>
+</ol>
+<p>dig openai.com</p>
+<ol start="6" type="1">
+<li><p><strong>Ver ruta hasta OpenAI:</strong></p></li>
+</ol>
+<p>traceroute openai.com</p>
+<ol start="7" type="1">
+<li><p><strong>Descargar página y ver encabezado:</strong></p></li>
+</ol>
+<p>curl -I https://openai.com</p>
+<p><strong>Checklist – Fase de Mapeo de Red</strong></p>
+<p><strong>Identificar interfaces y configuración de red</strong></p>
+<p>Antes de escanear, confirma tu IP, máscara y gateway.</p>
+<p>ip a</p>
+<p>ip route</p>
+<p>hostname -I</p>
+<p>ifconfig        # (alternativa clásica)</p>
+<p><strong>Comprobar conectividad básica</strong></p>
+<p>ping -c 4 192.168.1.1        # Ping a un host concreto</p>
+<p>ping -b 192.168.1.255        # Ping broadcast (si está permitido)</p>
+<p><strong>Descubrimiento de hosts en la red local</strong></p>
+<p><strong>ARP Scan</strong></p>
+<p>sudo arp-scan -l</p>
+<p>sudo arp-scan 192.168.1.0/24</p>
+<p>sudo arp-scan -I eth0 -g 192.168.1.0/24</p>
+<h2 id="section"></h2>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 31%" />
+<col style="width: 18%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Alcance del Escaneo</strong></th>
+<th><strong>Interfaz de Red</strong></th>
+<th><strong>Nivel de Especificación</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>arp-scan -l</strong></td>
+<td>Escanea la red <strong>local</strong> (la subred de la interfaz
+configurada por defecto).</td>
+<td><strong>Automático</strong> (usa la interfaz por defecto).</td>
+<td>Mínimo (rápido para redes simples).</td>
+</tr>
+<tr>
+<td><strong>sudo arp-scan 192.168.1.0/24</strong></td>
+<td>Escanea el <strong>rango</strong> de red especificado
+(192.168.1.0/24).</td>
+<td><strong>Automático</strong> (usa la interfaz por defecto).</td>
+<td>Medio (requiere especificar la red).</td>
+</tr>
+<tr>
+<td><strong>sudo arp-scan -I eth0 -g 192.168.1.0/24</strong></td>
+<td>Escanea el <strong>rango</strong> especificado, usando una
+<strong>interfaz y dirección IP de origen</strong> definidas.</td>
+<td><strong>Específico</strong> (eth0).</td>
+<td>Máximo (requiere especificar interfaz y rango).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="arp-scan--l-local-subnet-scan">1. arp-scan -l (Local Subnet
+Scan)</h3>
+<ul>
+<li><p><strong>-l</strong> significa "local" o "localnet".</p></li>
+<li><p>Este es el método <strong>más simple</strong> y rápido. arp-scan
+detecta automáticamente qué interfaz de red estás usando (por ejemplo,
+eth0 o enp0s3) y cuál es la dirección IP y la máscara de subred
+asignadas a esa interfaz (por ejemplo, 192.168.1.100/24).</p></li>
+<li><p>Luego, escanea <strong>toda esa subred local</strong>
+completa.</p></li>
+</ul>
+<p><strong>Uso:</strong> Ideal para una comprobación rápida de los
+dispositivos conectados a la misma red física que tu máquina, sin
+necesidad de conocer la configuración IP.</p>
+<h3 id="sudo-arp-scan-192.168.1.024-specified-network-scan">2. sudo
+arp-scan 192.168.1.0/24 (Specified Network Scan)</h3>
+<ul>
+<li><p>Aquí, le estás diciendo explícitamente a arp-scan <strong>qué
+rango de red debe escanear</strong> (192.168.1.0 con una máscara de
+/24).</p></li>
+<li><p>Aunque especificas el rango, el comando <strong>sigue usando la
+interfaz de red por defecto</strong> que el sistema operativo ha elegido
+para alcanzar esa red.</p></li>
+<li><p>Requiere sudo si el rango especificado no coincide con la red a
+la que está conectada tu interfaz por defecto.</p></li>
+</ul>
+<p><strong>Uso:</strong> Útil cuando quieres escanear una red diferente
+a la que estás conectado directamente, o si quieres limitar el escaneo a
+un rango específico dentro de tu propia subred.</p>
+<h3
+id="sudo-arp-scan--i-eth0--g-192.168.1.024-interface-and-gateway-scan">3.
+sudo arp-scan -I eth0 -g 192.168.1.0/24 (Interface and Gateway
+Scan)</h3>
+<ul>
+<li><p><strong>-I eth0</strong> (Interface): Le dice a arp-scan que
+<strong>debe usar exclusivamente la interfaz de red eth0</strong> para
+enviar los paquetes ARP. Esto es crucial en sistemas con múltiples
+interfaces de red.</p></li>
+<li><p><strong>-g 192.168.1.0/24</strong> (Generate): En este caso, la
+bandera -g se utiliza para especificar el <strong>rango de red</strong>
+que se va a escanear (el comando arp-scan en versiones recientes usa la
+notación CIDR directamente, por lo que a menudo se usa como sinónimo de
+especificar el rango, aunque históricamente significaba usar la
+dirección del <em>gateway</em>).</p></li>
+</ul>
+<p><strong>Uso:</strong> Es el método <strong>más preciso y
+explícito</strong>. Se utiliza cuando necesitas controlar exactamente
+<strong>qué interfaz</strong> envía los paquetes ARP o cuando quieres
+simular un escaneo desde una dirección IP de origen específica. Siempre
+requiere sudo porque manipular interfaces de red y enviar paquetes ARP
+de bajo nivel necesita privilegios de superusuario.</p>
+<p><strong>Netdiscover</strong></p>
+<p>sudo netdiscover -r 192.168.1.0/24</p>
+<p>sudo netdiscover -i eth0 -r 192.168.1.0/24</p>
+<p>Ambos comandos realizan un escaneo pasivo/activo en el rango de red
+(-r 192.168.1.0/24), pero solo el segundo garantiza que el escaneo se
+realice a través de una interfaz específica.</p>
+<h3 id="sudo-netdiscover--r-192.168.1.024">1. sudo netdiscover -r
+192.168.1.0/24</h3>
+<ul>
+<li><p><strong>-r 192.168.1.0/24</strong>: Indica el <strong>rango de
+red</strong> completo a escanear (en notación CIDR). netdiscover
+intentará escanear todas las IP desde 192.168.1.0 hasta
+192.168.1.255.</p></li>
+<li><p><strong>Interfaz</strong>: El programa <strong>elige la interfaz
+de red por defecto</strong> que el sistema operativo ha configurado para
+el tráfico de salida. En un sistema con una sola tarjeta de red, esto
+suele ser eth0 o similar, pero en sistemas con múltiples interfaces
+(como Wi-Fi y Ethernet, o múltiples tarjetas virtuales), la elección
+puede ser ambigua o incorrecta.</p></li>
+</ul>
+<h3 id="sudo-netdiscover--i-eth0--r-192.168.1.024">2. sudo netdiscover
+-i eth0 -r 192.168.1.0/24</h3>
+<ul>
+<li><p><strong>-i eth0</strong>: Esta es la <strong>diferencia
+clave</strong>. La bandera -i (interface) obliga a netdiscover a
+utilizar la interfaz <strong>eth0</strong> para enviar y recibir todos
+los paquetes de escaneo.</p></li>
+<li><p><strong>-r 192.168.1.0/24</strong>: Mantiene el mismo
+<strong>rango de red</strong> a escanear.</p></li>
+</ul>
+<p>La diferencia se reduce a <strong>control y precisión</strong>:</p>
+<ul>
+<li><p><strong>Primer Comando (Sin -i)</strong>: Se basa en la
+configuración por defecto del sistema. Es <strong>más fácil de
+usar</strong> pero <strong>menos preciso</strong> en entornos de red
+complejos.</p></li>
+<li><p><strong>Segundo Comando (Con -i eth0)</strong>: Ofrece
+<strong>mayor control</strong>. Es <strong>necesario</strong> si tienes
+múltiples interfaces de red y quieres asegurarte de que el escaneo se
+realiza a través de la interfaz que está conectada a la red
+192.168.1.x.</p></li>
+</ul>
+<p><strong>En resumen:</strong> Siempre es una <strong>buena
+práctica</strong> utilizar -i para especificar la interfaz, ya que
+elimina ambigüedades y garantiza que los paquetes de escaneo ARP/DHCP se
+envíen a través del segmento de red correcto.</p>
+<p><strong>Fping (ping masivo)</strong></p>
+<p>fping -a -g 192.168.1.0/24 2&gt;/dev/null</p>
+<p>fping -I eth0 -g 192.168.1.0/24 -a 2&gt;/dev/null</p>
+<p>Ambos comandos fping tienen el mismo objetivo: escanear el rango de
+red 192.168.1.0/24 en busca de hosts activos, mostrando solo los que
+responden (-a). La diferencia principal, al igual que con arp-scan y
+netdiscover, es la <strong>especificación de la interfaz de
+red</strong>.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 36%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Característica</strong></th>
+<th><strong>fping -a -g 192.168.1.0/24 2&gt;/dev/null</strong></th>
+<th><strong>fping -I eth0 -g 192.168.1.0/24 -a
+2&gt;/dev/null</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Interfaz (-I)</strong></td>
+<td><strong>Automática</strong> (Utiliza la interfaz de red por
+defecto).</td>
+<td><strong>Específica</strong> (-I eth0). Fuerza el uso de la interfaz
+eth0.</td>
+</tr>
+<tr>
+<td><strong>Rango (-g)</strong></td>
+<td>Explícitamente definido (192.168.1.0/24).</td>
+<td>Explícitamente definido (192.168.1.0/24).</td>
+</tr>
+<tr>
+<td><strong>Salida (-a)</strong></td>
+<td>Muestra solo los hosts <strong>activos</strong> (-a).</td>
+<td>Muestra solo los hosts <strong>activos</strong> (-a).</td>
+</tr>
+<tr>
+<td><strong>Redirección (2&gt;/dev/null)</strong></td>
+<td>Oculta la salida de errores (E/S Estándar de Error).</td>
+<td>Oculta la salida de errores (E/S Estándar de Error).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="section-1"></h3>
+<h3 id="fping--a--g-192.168.1.024-2devnull">1. fping -a -g
+192.168.1.0/24 2&gt;/dev/null</h3>
+<p>Este comando se basa en la <strong>configuración de red por
+defecto</strong> de tu sistema. El sistema operativo decidirá qué
+interfaz usar para enviar los paquetes ICMP Echo Request (ping).</p>
+<ul>
+<li><p>Es el método más <strong>sencillo</strong> y funcional si solo
+tienes una interfaz de red o si la interfaz correcta es la
+predeterminada del sistema.</p></li>
+</ul>
+<h3 id="fping--i-eth0--g-192.168.1.024--a-2devnull">2. fping -I eth0 -g
+192.168.1.0/24 -a 2&gt;/dev/null</h3>
+<p>El uso de la opción <strong>-I eth0</strong> (Interface) es la
+diferencia crucial.</p>
+<ul>
+<li><p>Esta opción <strong>fuerza</strong> a fping a vincular los
+paquetes ICMP <strong>exclusivamente a la interfaz
+eth0</strong>.</p></li>
+<li><p>Es esencial en sistemas con <strong>múltiples interfaces de
+red</strong> (como tu VirtualBox, que podría tener eth0 y una interfaz
+de <em>loopback</em>, o más) para garantizar que el escaneo de la subred
+se origine desde la interfaz correcta que está conectada a la red
+192.168.1.x.</p></li>
+</ul>
+<p><strong>En resumen:</strong> Si solo tienes una interfaz de red
+relevante, los resultados serán idénticos. Si tienes varias interfaces,
+el segundo comando es <strong>más fiable</strong> porque elimina
+cualquier ambigüedad sobre qué interfaz debe usarse para el escaneo.</p>
+<p><strong>Nmap</strong></p>
+<p><strong>Nmap – Ping Sweep</strong></p>
+<p>sudo nmap -sn 192.168.1.0/24</p>
+<p><strong>Escaneo de puertos y servicios</strong></p>
+<p>Nmap – Puertos comunes</p>
+<p>sudo nmap -T4 -F 192.168.1.0/24</p>
+<p>La diferencia principal entre estos dos comandos
+<strong>Nmap</strong> es su <strong>propósito y profundidad del
+escaneo</strong>: el primero realiza solo un <strong>"Ping Sweep"
+(detección de hosts)</strong> para saber qué direcciones IP están
+activas, mientras que el segundo realiza un <strong>escaneo de
+puertos</strong> más rápido y detallado en esos hosts activos.</p>
+<h2 id="sudo-nmap--sn-192.168.1.024-ping-sweep-detección-de-hosts">1.
+sudo nmap -sn 192.168.1.0/24 (Ping Sweep / Detección de Hosts)</h2>
+<p>Este comando tiene como único objetivo identificar qué hosts
+(dispositivos) están <strong>activos</strong> en el rango de red
+especificado (192.168.1.0/24).</p>
+<ul>
+<li><p><strong>-sn (Scan No port):</strong> Es la abreviatura de "Ping
+Scan" (antes era -sP). Le indica a Nmap que <strong>no realice escaneos
+de puertos</strong> (TCP/UDP).</p></li>
+<li><p><strong>Función:</strong> Envía peticiones ARP, ICMP (ping), y
+paquetes TCP/UDP a los hosts del rango para determinar si están
+<strong>encendidos y conectados</strong> a la red.</p></li>
+<li><p><strong>Resultado:</strong> Solo te mostrará una lista de las
+<strong>direcciones IP que respondieron</strong>, pero
+<strong>no</strong> te dirá qué servicios o puertos tienen
+abiertos.</p></li>
+<li><p><strong>Velocidad:</strong> Es un escaneo <strong>muy
+rápido</strong>.</p></li>
+</ul>
+<h2
+id="sudo-nmap--t4--f-192.168.1.024-escaneo-rápido-de-puertos-y-servicios">2.
+sudo nmap -T4 -F 192.168.1.0/24 (Escaneo Rápido de Puertos y
+Servicios)</h2>
+<p>Este comando es un escaneo de puertos y servicios con opciones de
+velocidad y enfoque. Asume que se ha realizado una detección de hosts y
+procede a examinar los puertos.</p>
+<ul>
+<li><p><strong>-T4 (Tiempo Agresivo):</strong> Le indica a Nmap que use
+un <strong>nivel de temporización 4</strong>. Esto acelera el escaneo
+para que se ejecute más rápido, aunque puede ser ligeramente más ruidoso
+o menos preciso en redes lentas.</p></li>
+<li><p><strong>-F (Fast mode):</strong> Le indica a Nmap que escanee
+solo los <strong>100 puertos TCP más comunes</strong> (o "populares"),
+en lugar de los 1000 puertos por defecto. Esto reduce drásticamente el
+tiempo de escaneo.</p></li>
+<li><p><strong>Función:</strong> Una vez que un host es detectado, Nmap
+intenta establecer una conexión con los puertos TCP más comunes para
+determinar si están <strong>abiertos, cerrados o
+filtrados</strong>.</p></li>
+<li><p><strong>Resultado:</strong> Muestra la dirección IP, el
+<strong>estado de los puertos</strong> (por ejemplo, 80/tcp abierto), y
+generalmente intenta identificar el <strong>servicio</strong> que se
+está ejecutando en ese puerto (por ejemplo, HTTP).</p></li>
+<li><p><strong>Velocidad:</strong> Es un escaneo <strong>moderadamente
+rápido</strong> (gracias a -T4 y -F), mucho más lento que el "Ping
+Sweep" pero mucho más rápido que un escaneo de 65535 puertos.</p></li>
+</ul>
+<h2 id="section-2"></h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 37%" />
+<col style="width: 29%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Objetivo Principal</strong></th>
+<th><strong>Tipo de Escaneo</strong></th>
+<th><strong>¿Muestra Puertos?</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>nmap -sn</strong></td>
+<td><strong>Descubrir hosts</strong> (¿Qué está encendido?).</td>
+<td>Detección de Hosts (Ping Sweep).</td>
+<td><strong>NO</strong></td>
+</tr>
+<tr>
+<td><strong>nmap -T4 -F</strong></td>
+<td><strong>Descubrir servicios</strong> (¿Qué está abierto?).</td>
+<td>Escaneo Rápido de Puertos.</td>
+<td><strong>SÍ</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Escaneo rápido de grandes rangos</strong></p>
+<p><strong>sudo apt install masscan unicornscan</strong></p>
+<p><strong>Masscan</strong> (muy veloz, <strong>cuidado con el
+rate</strong>)</p>
+<p>sudo masscan 192.168.1.0/24 -p1-65535 --rate=1000</p>
+<p>Masscan es conocida por su capacidad de escanear la Internet completa
+en minutos, por lo que es extremadamente rápido incluso en redes
+locales.</p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 25%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Parte del Comando</strong></th>
+<th><strong>Significado</strong></th>
+<th><strong>Explicación</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>sudo masscan</strong></td>
+<td>Ejecutar Masscan con privilegios de root.</td>
+<td>Masscan requiere privilegios elevados (sudo) para enviar paquetes
+RAW (crudos) a alta velocidad.</td>
+</tr>
+<tr>
+<td><strong>192.168.1.0/24</strong></td>
+<td>Rango objetivo (Target).</td>
+<td>Especifica la <strong>subred completa</strong> de clase C (256
+direcciones IP, de 192.168.1.1 a 192.168.1.254) que se va a
+escanear.</td>
+</tr>
+<tr>
+<td><strong>-p1-65535</strong></td>
+<td>Rango de puertos.</td>
+<td>Indica que se escanearán <strong>todos los 65.535 puertos
+TCP</strong> posibles en cada una de las direcciones IP del rango
+especificado.</td>
+</tr>
+<tr>
+<td><strong>--rate=1000</strong></td>
+<td>Velocidad de escaneo.</td>
+<td>Limita la velocidad de escaneo a <strong>1000 paquetes por
+segundo</strong>.</td>
+</tr>
+</tbody>
+</table>
+<p>Este comando está diseñado para realizar un escaneo de puertos
+<strong>exhaustivo</strong> (-p1-65535) a una velocidad controlada
+(--rate=1000) en toda la red local.</p>
+<ol type="1">
+<li><p><strong>Escaneo de Puertos Completo:</strong> Al escanear todos
+los 65.535 puertos, te aseguras de no perderte ningún servicio inusual
+que se ejecute en un puerto no estándar.</p></li>
+<li><p><strong>Velocidad Controlada:</strong> La opción --rate=1000 se
+utiliza para <strong>evitar saturar</strong> la red local o que los
+sistemas de detección de intrusiones (IDS/IPS) te detecten
+inmediatamente. 1000 paquetes por segundo es relativamente rápido, pero
+aún permite que el sistema responda sin sobrecargarse.</p></li>
+<li><p><strong>Resultados:</strong> La salida mostrará una lista de las
+<strong>direcciones IP</strong> y los <strong>números de puerto</strong>
+en esa subred que están detectados como
+<strong>abiertos</strong>.</p></li>
+</ol>
+<p><strong>Unicornscan</strong></p>
+<p>sudo unicornscan -Iv 192.168.1.0/24:a</p>
+<p><strong>Unicornscan</strong>, que es un escáner de red asíncrono
+diseñado para ser muy rápido y flexible.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 24%" />
+<col style="width: 49%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Parte del Comando</strong></th>
+<th><strong>Significado</strong></th>
+<th><strong>Explicación</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>unicornscan</strong></td>
+<td>La herramienta de escaneo.</td>
+<td>Unicornscan es conocido por su alta velocidad, ya que utiliza
+métodos de escaneo asíncronos y sin estado (stateless) para procesar
+paquetes.</td>
+</tr>
+<tr>
+<td><strong>-Iv</strong></td>
+<td>Opciones de verbosidad (Verbose).</td>
+<td><strong>-I</strong> (o -i) significa "informational" (informativo) y
+<strong>-v</strong> significa "verbose" (verboso). Estas opciones
+combinadas indican a Unicornscan que muestre información detallada (y a
+menudo más ruidosa) sobre el proceso y los resultados del escaneo.</td>
+</tr>
+<tr>
+<td><strong>192.168.1.0/24:a</strong></td>
+<td>Target y Modo de Escaneo.</td>
+<td>Esta es la parte más crucial y específica de Unicornscan:</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>192.168.1.0/24</strong></td>
+<td>Especifica la <strong>subred</strong> completa de Clase C (256
+direcciones IP) como el objetivo del escaneo.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>:a</strong></td>
+<td>Es el <strong>rango de puertos o el modo de escaneo</strong>. El
+sufijo :a es un atajo que indica a Unicornscan que escanee <strong>todos
+los puertos TCP (1-65535)</strong> en cada dirección IP del rango.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="propósito-del-escaneo"><strong>Propósito del
+Escaneo</strong></h2>
+<p>El objetivo de este comando es realizar un <strong>escaneo completo y
+rápido de todos los puertos TCP</strong> en todas las máquinas de la
+subred 192.168.1.0/24, mostrando una salida detallada del proceso.</p>
+<ul>
+<li><p><strong>Alcance:</strong> Escanea las 254 direcciones IP
+utilizables en el rango.</p></li>
+<li><p><strong>Profundidad:</strong> Escanea 65.535 puertos por cada IP
+(es decir, un escaneo de puertos completo).</p></li>
+<li><p><strong>Resultado:</strong> La salida mostrará una lista de los
+puertos detectados como <strong>abiertos</strong> o
+<strong>cerrados</strong> en cada host activo dentro de la red.</p></li>
+</ul>
+<script src="nav.js"></script>
+</body>
+</html>

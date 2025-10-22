@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>21 Comandos de red I</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>route - Mostrar/Modificar la Tabla de
+Enrutamiento</strong></p>
+<p>El comando route (aunque obsoleto y reemplazado por ip route, sigue
+siendo funcional) se utiliza para ver y manipular las entradas en la
+tabla de enrutamiento del núcleo. Esta tabla determina por dónde deben
+enviarse los paquetes de red para llegar a diferentes destinos.</p>
+<p><strong>Opciones Comunes</strong></p>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 88%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-n</td>
+<td>Muestra direcciones y números de puerto numéricamente (evita la
+resolución de nombres DNS, haciendo que la salida sea más rápida).</td>
+</tr>
+<tr>
+<td>add</td>
+<td>Agrega una ruta a la tabla.</td>
+</tr>
+<tr>
+<td>del</td>
+<td>Elimina una ruta de la tabla.</td>
+</tr>
+<tr>
+<td>default</td>
+<td>Se refiere a la puerta de enlace (gateway) por defecto.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p>Ver la tabla de enrutamiento del sistema
+(numéricamente):</p></li>
+</ol>
+<p>Este es el uso más común y te muestra las redes conectadas
+directamente y la puerta de enlace predeterminada.</p>
+<p>route -n</p>
+<p><em>Salida esperada:</em></p>
+<p>Kernel IP routing table</p>
+<p>Destination Gateway Genmask Flags Metric Ref Use Iface</p>
+<p>0.0.0.0 192.168.1.1 0.0.0.0 UG 100 0 0 ens33 &lt;- Ruta por defecto
+(Gateway)</p>
+<p>192.168.1.0 0.0.0.0 255.255.255.0 U 100 0 0 ens33 &lt;- Red local</p>
+<ol start="2" type="1">
+<li><p>Agregar una ruta estática (requiere sudo):</p></li>
+</ol>
+<p>Imagina que la red 172.16.0.0/16 solo es accesible a través de un
+router específico con la IP 192.168.1.254.</p>
+<p>sudo route add -net 172.16.0.0 netmask 255.255.0.0 gw 192.168.1.254
+dev ens33</p>
+<h2 id="section"></h2>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 77%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Parte del Comando</strong></th>
+<th><strong>Explicación</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>route</strong></td>
+<td>Es la utilidad de red utilizada para <strong>mostrar o manipular la
+tabla de enrutamiento IP</strong> (kernel) del sistema.</td>
+</tr>
+<tr>
+<td><strong>add</strong></td>
+<td>Es una opción del comando route que indica que se va a
+<strong>añadir una nueva ruta</strong> a la tabla.</td>
+</tr>
+<tr>
+<td><strong>-net 172.16.0.0</strong></td>
+<td>Especifica la <strong>red de destino</strong>. En este caso, la ruta
+se aplicará a todo el tráfico destinado a la red IP
+<strong>172.16.0.0</strong>.</td>
+</tr>
+<tr>
+<td><strong>netmask 255.255.0.0</strong></td>
+<td>Define la <strong>máscara de subred</strong> para la red de destino.
+Una máscara de <strong>255.255.0.0</strong> indica que los primeros 16
+bits de la dirección IP (los dos primeros octetos) identifican la red,
+lo que significa que la red es <strong>172.16.0.0/16</strong> (una
+subred de clase B).</td>
+</tr>
+<tr>
+<td><strong>gw 192.168.1.254</strong></td>
+<td>Significa <strong>"gateway"</strong> (puerta de enlace). Especifica
+la dirección IP del <strong>router o el siguiente salto</strong> al que
+se debe enviar el tráfico destinado a la red
+<strong>172.16.0.0/16</strong>. El tráfico se enviará a la IP
+<strong>192.168.1.254</strong>.</td>
+</tr>
+<tr>
+<td><strong>dev ens33</strong></td>
+<td>Indica la <strong>interfaz de red local</strong> que el sistema debe
+utilizar para alcanzar la puerta de enlace (192.168.1.254).
+<strong>ens33</strong> es el nombre de la interfaz de red (por ejemplo,
+una tarjeta de red virtual o física) del sistema que ejecuta el
+comando.</td>
+</tr>
+</tbody>
+</table>
+<p>El propósito del comando es:</p>
+<p><strong>"Para alcanzar cualquier dirección dentro de la red
+172.16.0.0 con máscara de subred 255.255.0.0 (es decir, la red
+172.16.x.x), envía los paquetes al router cuya dirección IP es
+192.168.1.254, utilizando la interfaz de red local llamada
+ens33."</strong></p>
+<h3 id="nota-importante">Nota Importante:</h3>
+<p>Esta ruta agregada con el comando route (o la herramienta más moderna
+ip route) es <strong>temporal</strong> y se perderá al reiniciar el
+sistema. Para hacer la ruta persistente, se requerirían modificaciones
+en archivos de configuración específicos del sistema operativo (por
+ejemplo, /etc/network/interfaces en Debian/Ubuntu antiguos, o usar
+netplan, NetworkManager o archivos de configuración de ruta en
+/etc/sysconfig/network-scripts/ en sistemas basados en Red Hat).</p>
+<ol start="3" type="1">
+<li><p><strong>Eliminar la ruta que acabas de crear (requiere
+sudo):</strong></p></li>
+</ol>
+<p>sudo route del -net 172.16.0.0 netmask 255.255.0.0</p>
+<p><strong>arp - Ver la Caché ARP</strong></p>
+<p>El Protocolo de Resolución de Direcciones (ARP) mapea direcciones IP
+(Capa 3) a direcciones físicas MAC (Capa 2) dentro de una red local. El
+comando arp te permite inspeccionar y manipular la caché ARP del
+sistema.</p>
+<p><strong>Opciones Comunes</strong></p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 79%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-a</td>
+<td>Muestra todas las entradas en la caché ARP (el uso más común).</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>Elimina una entrada específica.</td>
+</tr>
+<tr>
+<td>-i &lt;interfaz&gt;</td>
+<td>Muestra entradas solo para la interfaz especificada.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p>Mostrar todas las entradas en la caché ARP:</p></li>
+</ol>
+<p>Esto te mostrará la IP y la dirección MAC de los dispositivos con los
+que te has comunicado recientemente en tu red local (como el router o el
+servidor DNS).</p>
+<p>arp -a</p>
+<p><em>Salida esperada:</em></p>
+<p>? (192.168.1.1) at 00:50:56:ff:ff:ff [ether] on ens33 &lt;-
+Router/Gateway</p>
+<p>? (192.168.1.5) at 08:00:27:01:02:03 [ether] on ens33</p>
+<ol start="2" type="1">
+<li><p>Eliminar una entrada específica de la caché ARP (requiere
+sudo):</p></li>
+</ol>
+<p>Útil para diagnosticar problemas o forzar una nueva resolución
+ARP.</p>
+<p>sudo arp -d 192.168.1.5</p>
+<p><strong>tcpdump - Capturar Tráfico de Red</strong></p>
+<p>tcpdump es un potente analizador de paquetes de línea de comandos. Se
+utiliza para capturar, filtrar y examinar los paquetes que viajan a
+través de una interfaz de red.</p>
+<p>sudo apt install tcpdump</p>
+<p><strong>Opciones Comunes</strong></p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 81%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-i &lt;interfaz&gt;</td>
+<td>Escucha paquetes en la interfaz especificada (ej. ens33 o lo).</td>
+</tr>
+<tr>
+<td>-n</td>
+<td>No resuelve nombres DNS (muestra IPs numéricas).</td>
+</tr>
+<tr>
+<td>-c &lt;N&gt;</td>
+<td>Detiene la captura después de capturar N paquetes.</td>
+</tr>
+<tr>
+<td>-w &lt;archivo&gt;</td>
+<td>Escribe los paquetes capturados en un archivo para analizarlos
+posteriormente (formato .pcap).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p><strong>Capturar 5 paquetes en la interfaz de red principal
+(ens33) sin resolver nombres (requiere sudo):</strong></p></li>
+</ol>
+<p>sudo tcpdump -i ens33 -n -c 5</p>
+<ol start="2" type="1">
+<li><p>Capturar solo el tráfico HTTP (puerto 80) y guardarlo en un
+archivo:</p></li>
+</ol>
+<p>Útil para auditorías o análisis específicos.</p>
+<p>sudo tcpdump -i ens33 port 80 -w http_traffic.pcap</p>
+<p><em>Después de capturar algunos paquetes, presiona
+<strong>Ctrl+C</strong> para detener la captura.</em></p>
+<p><strong>1. Comprobar Interfaces y Modo Básico</strong></p>
+<p>Antes de empezar, necesitas saber qué interfaces de red están
+disponibles.</p>
+<p><strong>1.1. Listar interfaces disponibles</strong></p>
+<p>sudo tcpdump -D</p>
+<p><strong>Explicación:</strong> La opción -D (Display) te muestra las
+interfaces de red disponibles (eth0, wlan0, lo para <em>loopback</em>, o
+any para todas). Una vez que sepas el nombre de tu interfaz principal
+(ej. eth0, ens33 o similar), lo usarás en los siguientes comandos. Si no
+estás seguro, usa any.</p>
+<p><strong>1.2. Captura básica en tiempo real</strong></p>
+<p>sudo tcpdump -i any</p>
+<p><strong>Explicación:</strong> Captura <strong>todo el
+tráfico</strong> que pasa por <strong>cualquier</strong> interfaz (-i
+any) y lo muestra en la terminal. Presiona <strong>Ctrl+C</strong> para
+detener la captura.</p>
+<p><strong>2. Generar Archivos de Captura para Inspección</strong></p>
+<p>La práctica más útil es guardar la captura en un archivo con
+extensión .pcap para poder analizarlo más tarde con herramientas como
+<strong>Wireshark</strong> o con el mismo tcpdump.</p>
+<p><strong>2.1. Guardar los primeros 100 paquetes</strong></p>
+<p># Reemplaza 'eth0' con tu interfaz si es necesario.</p>
+<p>sudo tcpdump -i eth0 -c 100 -w mi_captura.pcap</p>
+<p><strong>Explicación:</strong></p>
+<ul>
+<li><p>-i eth0: Especifica la interfaz.</p></li>
+<li><p>-c 100: Captura solo los primeros <strong>100 paquetes</strong> y
+se detiene automáticamente.</p></li>
+<li><p>-w mi_captura.pcap: Guarda el tráfico capturado en el archivo
+mi_captura.pcap.</p></li>
+</ul>
+<p><strong>2.2. Captura de tráfico de navegación web
+(HTTP/HTTPS)</strong></p>
+<p>Este es un ejemplo muy común y útil.</p>
+<p># Captura en cualquier interfaz, guardando en un archivo</p>
+<p>sudo tcpdump -i any 'port 80 or port 443' -w trafico_web.pcap</p>
+<p><strong>Explicación:</strong></p>
+<ul>
+<li><p>'port 80 or port 443': Es el filtro que limita la captura solo a
+los puertos <strong>80</strong> (HTTP) y <strong>443</strong>
+(HTTPS).</p></li>
+<li><p>Mientras el comando esté corriendo, abre un navegador y visita
+algunas páginas web.</p></li>
+</ul>
+<p><strong>3. Filtrar Capturas por Destino y Protocolo</strong></p>
+<p>Estos ejemplos te ayudan a aislar el tráfico relevante.</p>
+<p><strong>3.1. Capturar tráfico dirigido a una IP
+específica</strong></p>
+<p>Puedes usar una IP externa (ej. un sitio web) o una interna (ej. otro
+equipo en tu red).</p>
+<p># Captura 50 paquetes destinados a Google DNS (8.8.8.8) en la
+interfaz eth0</p>
+<p>sudo tcpdump -i eth0 -c 50 dst host 8.8.8.8 -w dns_google.pcap</p>
+<ul>
+<li><p>El comando está esperando <strong>50 paquetes</strong> que
+coincidan con el filtro dst host 8.8.8.8 (tráfico con destino a Google
+DNS).</p></li>
+<li><p>Si tu sistema está haciendo peticiones DNS activamente (por
+ejemplo, estás navegando o haciendo un ping), puede que los 50 paquetes
+se capturen en <strong>cuestión de segundos</strong>.</p></li>
+<li><p>Si tu sistema está inactivo, puede tardar más, incluso minutos,
+hasta que se generen esos 50 paquetes de tráfico DNS.</p></li>
+<li><p>Si tu sistema está usando un servidor DNS diferente (por ejemplo,
+el de tu proveedor de internet o uno local), es posible que la captura
+tarde <strong>mucho</strong> en llegar a 50, o incluso que no lo haga
+nunca, si no hay tráfico dirigido a 8.8.8.8.</p></li>
+</ul>
+<p><strong>Cómo comprobarlo y acelerarlo</strong></p>
+<p>Para garantizar que el comando termine rápidamente, puedes forzar el
+tráfico:</p>
+<ol type="1">
+<li><p><strong>Deja el comando tcpdump ejecutándose</strong> en una
+terminal.</p></li>
+<li><p><strong>Abre una segunda terminal</strong> (o sal de la sesión
+remota y vuelve a conectarte si estás por SSH) y ejecuta:</p></li>
+</ol>
+<p>ping -c 50 8.8.8.8</p>
+<p>Esto generará 50 paquetes de tráfico ICMP <strong>dirigidos a
+8.8.8.8</strong>, lo cual debería ser suficiente para que el tcpdump
+complete su cuenta y termine casi de inmediato.</p>
+<p><strong>3.2. Capturar tráfico de un protocolo específico
+(DNS)</strong></p>
+<p>El protocolo DNS usa el puerto <strong>53</strong> y es útil para ver
+peticiones de resolución de nombres.</p>
+<p>sudo tcpdump -i any udp port 53 -w peticiones_dns.pcap</p>
+<p><strong>Explicación:</strong> El tráfico DNS se realiza
+principalmente a través del protocolo <strong>UDP</strong> en el puerto
+<strong>53</strong>. Mientras este comando se ejecuta, puedes probar un
+ping google.com para generar tráfico DNS.</p>
+<p><strong>4. Inspeccionar un Archivo de Captura Existente</strong></p>
+<p>Una vez que tienes tu archivo .pcap, puedes revisarlo sin necesidad
+de Wireshark.</p>
+<p><strong>4.1. Leer el archivo y mostrar solo las cabeceras
+IP</strong></p>
+<p>tcpdump -r mi_captura.pcap</p>
+<p><strong>Explicación:</strong> La opción -r (read) lee el archivo.
+Mostrará la información básica de cada paquete capturado.</p>
+<p><strong>4.2. Mostrar más detalles y evitar la resolución de
+nombres</strong></p>
+<p>Para una inspección más detallada de las direcciones IP y puertos sin
+que tcpdump intente resolver nombres (lo cual a veces es lento):</p>
+<p>tcpdump -nnvvS -r mi_captura.pcap</p>
+<p><strong>Explicación:</strong></p>
+<ul>
+<li><p>-n: No resuelve direcciones IP a nombres de host.</p></li>
+<li><p>-nn: No resuelve direcciones IP ni números de puerto a nombres de
+servicio (muestra 80 en lugar de http).</p></li>
+<li><p>-vv: Aumenta el nivel de verbosidad (más detalles).</p></li>
+<li><p>-S: Muestra los números de secuencia TCP absolutos.</p></li>
+</ul>
+<p><strong>¿Qué significa "who-has"?</strong></p>
+<p>En el contexto de ARP, la frase <strong>who-has</strong> (quién
+tiene) se refiere a una <strong>petición o solicitud ARP</strong> (ARP
+Request).</p>
+<p><strong>Su significado es:</strong></p>
+<p>"Quiero saber la dirección MAC (Media Access Control) asociada a esta
+dirección IP."</p>
+<p><strong>Desglose del Paquete ARP</strong></p>
+<p>03:18:39.774904 ARP, Ethernet (len 6), IPv4 (len 4), Request who-has
+192.168.1.201 tell 192.168.1.1, length 46</p>
+<ol type="1">
+<li><p><strong>ARP, ... Request</strong>: Confirma que es un mensaje de
+Solicitud del protocolo ARP.</p></li>
+<li><p><strong>who-has 192.168.1.201</strong>: Es la pregunta central.
+El dispositivo que envía este mensaje está preguntando: <strong>"¿Quién
+tiene la dirección IP 192.168.1.201?"</strong> (y, por lo tanto, ¿cuál
+es su dirección MAC?).</p></li>
+<li><p><strong>tell 192.168.1.1</strong>: Esto indica <strong>quién está
+haciendo la pregunta</strong> (el remitente). En este caso, el
+dispositivo con la IP <strong>192.168.1.1</strong> (que muy
+probablemente es el <strong>router</strong> o <em>gateway</em> local)
+está buscando la dirección MAC de ese otro host.</p></li>
+</ol>
+<p>En resumen, estos paquetes representan una actividad normal de la red
+donde el <em>router</em> está intentando descubrir las direcciones MAC
+de los hosts con las IPs .201, .202, y .203 para poder enviarles tráfico
+a nivel de enlace (Capa 2).</p>
+<p><strong>ARP: ¿Por qué es necesario?</strong></p>
+<p>ARP es vital porque los datos viajan por la red en <strong>dos
+niveles clave</strong>:</p>
+<ol type="1">
+<li><p><strong>Nivel 3 (IP):</strong> Para enrutar el tráfico a través
+de diferentes redes (Internet).</p></li>
+<li><p><strong>Nivel 2 (MAC/Ethernet):</strong> Para entregar el tráfico
+dentro de la <strong>red local</strong> (LAN).</p></li>
+</ol>
+<p>Cuando un dispositivo quiere enviar datos a otro host en la misma red
+local, solo conoce su <strong>dirección IP</strong>. Necesita usar ARP
+para traducir esa dirección IP a su correspondiente <strong>dirección
+MAC</strong> antes de que el tráfico pueda ser realmente transmitido a
+través del cable o Wi-Fi.</p>
+<p><strong>Conclusión</strong></p>
+<p>El dispositivo <strong>192.168.1.1</strong> está enviando peticiones
+ARP repetidas para las IPs .201, .202, y .203. Esto podría indicar:</p>
+<ul>
+<li><p><strong>Actividad normal:</strong> El <em>router</em> está
+construyendo o actualizando su caché ARP.</p></li>
+<li><p><strong>Hosts inactivos:</strong> El <em>router</em> está
+intentando contactar a esos hosts, pero no están respondiendo (no están
+conectados, están apagados o están configurados con una IP
+diferente).</p></li>
+<li><p><strong>Escaneo/Broadcast:</strong> Podría ser el <em>router</em>
+o un host escaneando activamente la red para ver qué dispositivos están
+presentes.</p></li>
+</ul>
+<p><strong>Diferencia entre tcpdump y tshark</strong></p>
+<p>En esencia:</p>
+<ul>
+<li><p><strong>tcpdump</strong> es una herramienta de captura de
+paquetes ligera y nativa de muchos sistemas Unix, que usa el
+<strong>Filtro de Paquetes de Berkeley (BPF)</strong>.</p></li>
+<li><p><strong>tshark</strong> es la versión de <strong>línea de
+comandos</strong> del popular analizador de protocolos
+<strong>Wireshark</strong>, ofreciendo un análisis mucho más profundo y
+avanzado, y usa <strong>filtros de visualización (Display
+Filters)</strong> al estilo Wireshark.</p></li>
+</ul>
+<p><strong>Comparativa Detallada</strong></p>
+<table>
+<colgroup>
+<col style="width: 35%" />
+<col style="width: 29%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Característica</strong></th>
+<th><strong>tcpdump</strong></th>
+<th><strong>tshark</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Origen</strong></td>
+<td>Herramienta original, nativa de UNIX.</td>
+<td>Componente de la suite de software <strong>Wireshark</strong>.</td>
+</tr>
+<tr>
+<td><strong>Análisis</strong></td>
+<td><strong>Básico</strong>. Captura y muestra paquetes sin un análisis
+profundo de protocolos (a menos que se use la opción -v o similar).</td>
+<td><strong>Avanzado</strong>. Utiliza los mismos
+<strong>dissectores</strong> de protocolos que Wireshark, permitiendo un
+análisis detallado de la capa de aplicación.</td>
+</tr>
+<tr>
+<td><strong>Interfaz</strong></td>
+<td><strong>Línea de comandos (CLI)</strong>. Diseñado para ser muy
+ligero y rápido.</td>
+<td><strong>Línea de comandos (CLI)</strong>. Más robusto y con más
+opciones que tcpdump.</td>
+</tr>
+<tr>
+<td><strong>Filtros de Captura</strong></td>
+<td>Utiliza la sintaxis de <strong>Filtros de Paquetes de Berkeley
+(BPF)</strong> (ej: port 80, host 192.168.1.1).</td>
+<td>Utiliza sintaxis <strong>BPF</strong> para la captura.</td>
+</tr>
+<tr>
+<td><strong>Filtros de Análisis/Visualización</strong></td>
+<td>No tiene un sistema de filtros de visualización dedicados; el
+análisis se hace con comandos externos (grep, awk).</td>
+<td>Utiliza la sintaxis avanzada de <strong>Filtros de Visualización de
+Wireshark</strong> (ej: http.request, ip.addr == 192.168.1.1).</td>
+</tr>
+<tr>
+<td><strong>Uso Típico</strong></td>
+<td>Capturas rápidas, <em>debugging</em> inicial, análisis en
+<strong>servidores remotos (sin GUI)</strong>, uso en <em>scripts</em>
+automatizados por su ligereza.</td>
+<td>Análisis detallado de un protocolo específico, exportación de datos,
+uso de las amplias funcionalidades de Wireshark sin la interfaz
+gráfica.</td>
+</tr>
+<tr>
+<td><strong>Requisitos</strong></td>
+<td>Muy ligero. Suele estar preinstalado o es fácil de instalar.</td>
+<td>Generalmente requiere la instalación de la suite Wireshark (o al
+menos sus componentes principales), lo que lo hace más pesado.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>¿Cuándo usar cada uno?</strong></p>
+<p><strong>Usa tcpdump cuando:</strong></p>
+<ol type="1">
+<li><p><strong>Necesitas ligereza:</strong> Estás en un servidor con
+recursos limitados o donde la instalación de Wireshark/TShark es difícil
+o innecesaria.</p></li>
+<li><p><strong>Solo necesitas la información esencial:</strong> Quieres
+verificar rápidamente si el tráfico llega (ej: <em>pings</em>,
+peticiones TCP/UDP).</p></li>
+<li><p><strong>Estás en un entorno minimalista:</strong> Trabajas en un
+servidor sin interfaz gráfica (GUI) y quieres una herramienta de captura
+mínima.</p></li>
+<li><p><strong>Quieres un alto rendimiento:</strong> Necesitas capturar
+un gran volumen de tráfico con la menor sobrecarga posible.</p></li>
+</ol>
+<p><strong>Usa tshark cuando:</strong></p>
+<ol type="1">
+<li><p><strong>Necesitas análisis de protocolo profundo:</strong>
+Quieres diseccionar el tráfico en las capas de aplicación (HTTP, DNS,
+SIP, etc.) para ver la estructura exacta del paquete.</p></li>
+<li><p><strong>Quieres usar filtros complejos de Wireshark:</strong>
+Necesitas filtrar paquetes basándote en campos de protocolo específicos
+(ej: mostrar solo respuestas DNS que fallaron, o solo encabezados HTTP
+específicos).</p></li>
+<li><p><strong>Buscas integración con Wireshark:</strong> Quieres
+capturar el tráfico en un servidor (con tshark) y luego transferir el
+archivo de captura (.pcap) a tu PC para analizarlo cómodamente con la
+interfaz gráfica de Wireshark.</p></li>
+<li><p><strong>Necesitas exportar datos:</strong> Quieres exportar
+campos específicos de paquetes a un formato legible por máquina (CSV,
+JSON).</p></li>
+</ol>
+<p><strong>whois - Consulta de Dominios y Redes</strong></p>
+<p>El comando whois consulta bases de datos públicas para obtener
+información de registro sobre un nombre de dominio o una dirección IP.
+Te proporciona detalles sobre el registrante, el administrador, las
+fechas de creación/expiración y los servidores de nombres.</p>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p><strong>Consultar la información de registro de un
+dominio:</strong></p></li>
+</ol>
+<p>whois adidas.es</p>
+<p>─$ whois adidas.es</p>
+<p>This TLD has no whois server, but you can access the whois database
+at https://www.dominios.es/en</p>
+<p>La herramienta <strong>whois</strong> en tu sistema no sabe
+directamente cómo consultar la información para los dominios que
+terminan en <strong>.es</strong> (el TLD de España).</p>
+<p>En lugar de usar un servidor WHOIS estándar como lo haría con un
+dominio .com o .org, el registrador oficial de dominios .es requiere que
+la consulta se haga a través de su propia plataforma web.</p>
+<p><strong>Solución: Cómo Consultar el WHOIS para .es</strong></p>
+<p>Para obtener la información WHOIS del dominio adidas.es, tienes dos
+opciones:</p>
+<p><strong>Opción 1: Usar la web oficial (Recomendado)</strong></p>
+<p>Debes visitar el enlace que el mismo mensaje te proporcionó y
+realizar la búsqueda allí:</p>
+<ol type="1">
+<li><p>Abre un navegador web en tu máquina Kali.</p></li>
+<li><p>Ve a la dirección:
+<strong>https://www.dominios.es/en</strong></p></li>
+<li><p>Ingresa <strong>adidas.es</strong> en la barra de búsqueda
+WHOIS.</p></li>
+</ol>
+<p><strong>Opción 2: Forzar la consulta a un servidor
+específico</strong></p>
+<p>Algunas versiones de whois te permiten especificar manualmente el
+servidor que debe consultar. El servidor oficial para los dominios .es a
+veces es <strong>whois.nic.es</strong>.</p>
+<p>Puedes intentar el siguiente comando en tu terminal de Kali, aunque
+no siempre funciona si el servidor requiere un formato de consulta
+específico:</p>
+<p>whois -h whois.nic.es adidas.es</p>
+<p>Si esto funciona, obtendrás directamente en la terminal los datos del
+registrante, las fechas de registro y expiración, y los servidores DNS
+de adidas.es.</p>
+<p><strong>Nota:</strong> Es común que los registros de dominios de
+código de país (ccTLD) como .es, .uk o .de tengan servidores WHOIS
+personalizados o incluso solo permitan la consulta a través de su sitio
+web por motivos de política local.</p>
+<p>La forma más fácil de probar el comando whois para dominios .com o
+.org es usar sitios web de alta visibilidad, ya que su información WHOIS
+es pública y está alojada en servidores estándar:</p>
+<p>whois wikipedia.org</p>
+<p><em>Salida:</em></p>
+<ul>
+<li><p>Información del registrante, que será la <strong>Wikimedia
+Foundation, Inc.</strong></p></li>
+<li><p>El <strong>ID del registrador</strong> y la URL de
+contacto.</p></li>
+<li><p>Los datos de contacto (aunque a menudo están ofuscados o usan
+servicios de privacidad).</p></li>
+</ul>
+<ol start="2" type="1">
+<li><p>Consultar información sobre un bloque de direcciones IP:</p></li>
+</ol>
+<p>Esto te mostrará a qué Organización Regional de Registro de Internet
+(RIR) pertenece el bloque IP, quién lo administra y su rango.</p>
+<p>whois 8.8.8.8</p>
+<p><em>Salida (fragmento):</em> Mostrará que la IP 8.8.8.8 pertenece a
+Google LLC.</p>
+<p>whois google.com</p>
+<ul>
+<li><p>La <strong>Registrant Organization</strong> (organización
+registrante, probablemente Google LLC).</p></li>
+<li><p>Las <strong>fechas clave</strong> (creación, expiración y última
+actualización del registro).</p></li>
+<li><p>Los <strong>servidores de nombres (Name Servers)</strong> que usa
+el dominio (ej. ns1.google.com).</p></li>
+<li><p>El <strong>Estado del Dominio</strong> (Domain Status), que suele
+ser clientTransferProhibited para evitar transferencias no
+autorizadas.</p></li>
+</ul>
+<p><strong>3. Dominio con privacidad (Ej. WordPress)</strong></p>
+<p>A veces es útil ver un dominio que usa un servicio de privacidad para
+enmascarar los datos personales del registrante, aunque la consulta
+sigue funcionando:</p>
+<p>whois wordpress.com</p>
+<ul>
+<li><p>En lugar de un nombre personal o de la empresa, es probable que
+veas información genérica o de un servicio de privacidad (como "Privacy
+Protection Service"). Esto demuestra cómo los registrantes protegen su
+identidad.</p></li>
+</ul>
+<p><strong>mtr - Diagnóstico de Ruta de Red</strong></p>
+<p>mtr (My Traceroute) es una poderosa herramienta que combina las
+funciones de ping y traceroute. Muestra continuamente la ruta a un
+destino, junto con estadísticas de latencia y pérdida de paquetes en
+cada salto (router intermedio).</p>
+<p><strong>Opciones Comunes</strong></p>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 89%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-n</td>
+<td>Muestra direcciones IP numéricamente.</td>
+</tr>
+<tr>
+<td>-c &lt;N&gt;</td>
+<td>Envía N paquetes (en lugar de ejecutarse indefinidamente).</td>
+</tr>
+<tr>
+<td>-r</td>
+<td>Muestra la salida en modo informe (report) y termina.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p>Diagnóstico continuo de la ruta a Google:</p></li>
+</ol>
+<p>Esto se ejecuta en tiempo real hasta que presionas 'q' o Ctrl+C.
+Observa las estadísticas en cada router.</p>
+<p>mtr google.com</p>
+<ol start="2" type="1">
+<li><p>Generar un informe de ruta con 10 paquetes y salir:</p></li>
+</ol>
+<p>Útil para compartir un diagnóstico rápido y concreto.</p>
+<p>mtr -r -c 10 8.8.8.8</p>
+<p><strong>vnstat - Monitor de Tráfico de Red</strong></p>
+<p>vnstat es un monitor de tráfico de red basado en consola que mantiene
+un registro del tráfico de red para las interfaces seleccionadas. Los
+datos de uso se almacenan en una base de datos y se utilizan para
+generar informes por hora, día o mes.</p>
+<p><strong>Pasos Necesarios (Instalación y Setup)</strong></p>
+<ol type="1">
+<li><p><strong>Instalar vnstat:</strong></p></li>
+</ol>
+<p>sudo apt update &amp;&amp; sudo apt install vnstat</p>
+<ol start="2" type="1">
+<li><p><strong>Identificar la interfaz</strong> (ej. ens33 )</p></li>
+<li><p><strong>Inicializar la base de datos</strong> (requiere
+sudo):</p></li>
+</ol>
+<p>sudo vnstat -u -i ens33</p>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p><strong>Ver un resumen del tráfico actual/diario/mensual (el uso
+más común):</strong></p></li>
+</ol>
+<p>Vnstat</p>
+<ol start="2" type="1">
+<li><p>Mostrar las estadísticas de tráfico por hora:</p></li>
+</ol>
+<p>Muestra cuánto tráfico se ha usado en las últimas horas.</p>
+<p>vnstat -h</p>
+<ol start="3" type="1">
+<li><p>Monitoreo en tiempo real (similar a top):</p></li>
+</ol>
+<p>Muestra la velocidad de transmisión y recepción actual hasta que
+presionas Ctrl+C.</p>
+<p>vnstat -l</p>
+<p><strong>Comandos de Red Fundamentales en Linux</strong></p>
+<p><strong>Los comandos ifconfig, route, mii-tool e iwconfig son
+considerados obsoletos o se han movido a herramientas modernas (como ip
+e ss).</strong></p>
+<p>Usuario: jose</p>
+<p>Máquina: Ubuntu 24.04</p>
+<p>Interfaz de Red Principal: eth0</p>
+<ol type="1">
+<li><p><strong>Configuración y Estado Básico de Interfaces (ifconfig,
+ifup/ifdown, dhclient)</strong></p></li>
+</ol>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 45%" />
+<col style="width: 29%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+<th><strong>Requisitos</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ifconfig eth0</td>
+<td>Muestra la configuración de la interfaz eth0.</td>
+<td>Instalación de net-tools</td>
+</tr>
+<tr>
+<td>ifup eth0 / ifdown eth0</td>
+<td>Activa o desactiva la interfaz eth0.</td>
+<td>Permisos sudo</td>
+</tr>
+<tr>
+<td>dhclient eth0</td>
+<td>Fuerza a eth0 a obtener una IP por DHCP.</td>
+<td>Permisos sudo, dhcp-client</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos con eth0</strong></p>
+<ol type="1">
+<li><p><strong>Mostrar la configuración de la tarjeta de red
+eth0:</strong></p></li>
+</ol>
+<p>ifconfig eth0</p>
+<ol start="2" type="1">
+<li><p>Configurar una dirección IP estática en eth0:</p></li>
+</ol>
+<p>Esto asigna la IP 192.168.1.1 con máscara de subred 255.255.255.0 a
+la interfaz.</p>
+<p>sudo ifconfig eth0 192.168.1.1 netmask 255.255.255.0</p>
+<ol start="3" type="1">
+<li><p>Configurar eth0 en modo Promiscuo (para Sniffing):</p></li>
+</ol>
+<p>Permite a la interfaz capturar todo el tráfico del segmento de red,
+no solo el dirigido a ella.</p>
+<p>sudo ifconfig eth0 promisc</p>
+<p>El comando sudo ifconfig eth0 promisc se utiliza para poner la
+interfaz de red <strong>eth0 en Modo Promiscuo</strong> (Promiscuous
+Mode).</p>
+<h2 id="uso-principal-sniffing-o-análisis-de-red"><strong>Uso principal
+(Sniffing o Análisis de Red)</strong></h2>
+<p>El uso principal de este comando es permitir que la interfaz de red
+(eth0 en este caso) <strong>capture absolutamente todo el
+tráfico</strong> que pasa por el segmento de red al que está conectada,
+no solo los paquetes que están dirigidos a su propia dirección MAC o
+IP.</p>
+<h3 id="por-qué-es-necesario"><strong>¿Por qué es
+necesario?</strong></h3>
+<p>Normalmente, una tarjeta de red (NIC) opera en <strong>Modo
+No-Promiscuo</strong> (el modo estándar). En este modo, el
+<em>hardware</em> de la tarjeta filtra a nivel bajo (capa 2) y descarta
+automáticamente:</p>
+<ul>
+<li><p>Paquetes que no tienen como destino su propia <strong>dirección
+MAC</strong>.</p></li>
+<li><p>Paquetes que no son de <em>broadcast</em> (dirigidos a todos,
+como ARP) o <em>multicast</em> (dirigidos a un grupo).</p></li>
+</ul>
+<p>Al ejecutar sudo ifconfig eth0 promisc:</p>
+<ol type="1">
+<li><p>Se <strong>desactiva</strong> ese filtrado del
+<em>hardware</em>.</p></li>
+<li><p>La interfaz le dice al sistema operativo: "Pásame todos los
+paquetes que vea, sin importar el destinatario".</p></li>
+<li><p>Esto es fundamental para herramientas de <strong>análisis de
+red</strong> (<em>sniffers</em>) como <strong>Wireshark</strong> o
+<strong>tcpdump</strong>, ya que necesitan ver el tráfico que circula
+entre otras máquinas en el mismo segmento de red (por ejemplo, en un
+<em>switch</em> antiguo o en una red Wi-Fi).</p></li>
+</ol>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 77%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Uso</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Análisis de Red (Debugging)</strong></td>
+<td>Para diagnosticar problemas de conexión o latencia, viendo
+exactamente qué paquetes se están enviando entre dos dispositivos.</td>
+</tr>
+<tr>
+<td><strong>Seguridad Informática</strong></td>
+<td>Se utiliza para detectar ataques, monitorizar la actividad maliciosa
+o, en el contexto de pruebas de penetración, para capturar credenciales
+o datos sensibles que viajan sin cifrar.</td>
+</tr>
+<tr>
+<td><strong>Monitoreo de Carga</strong></td>
+<td>Para medir con precisión la carga total de tráfico que pasa por un
+segmento de la red, independientemente de los destinos específicos.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Nota:</strong> En redes modernas con <em>switches</em>
+inteligentes, es posible que el Modo Promiscuo solo capture el tráfico
+que el <em>switch</em> <em>decide</em> enviarle (que suele ser solo el
+tráfico dirigido a tu máquina). Para capturar todo el tráfico en una red
+conmutada, a menudo se requiere configurar un <strong>puerto espejo
+(SPAN)</strong> en el <em>switch</em>.</p>
+<p><em>Para volver al modo normal:</em></p>
+<p>sudo ifconfig eth0 -promisc</p>
+<ol start="4" type="1">
+<li><p><strong>Activar la interfaz eth0 en modo DHCP (obtener IP
+automática):</strong></p></li>
+</ol>
+<p>sudo dhclient eth0</p>
+<p><strong>2. Gestión de Enrutamiento (route)</strong></p>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 55%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+<th><strong>Requisitos</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>route -n</td>
+<td>Muestra la tabla de enrutamiento con IPs numéricas.</td>
+<td>Instalación de net-tools</td>
+</tr>
+<tr>
+<td>route add</td>
+<td>Agrega una entrada de ruta.</td>
+<td>Permisos sudo</td>
+</tr>
+<tr>
+<td>route del</td>
+<td>Elimina una entrada de ruta.</td>
+<td>Permisos sudo</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p><strong>Mostrar la tabla de recorrido
+(enrutamiento):</strong></p></li>
+</ol>
+<p>route -n</p>
+<ol start="2" type="1">
+<li><p>Configurar una ruta predeterminada (Gateway):</p></li>
+</ol>
+<p>Esto indica a dónde enviar el tráfico que no tiene una ruta
+específica. Reemplaza 192.168.1.1 con la IP de tu router
+(IP_Gateway).</p>
+<p># 1. Eliminar la ruta predeterminada existente (si la hay)</p>
+<p>sudo route del 0/0 gw 192.168.1.1</p>
+<p># 2. Configurar la nueva entrada predeterminada</p>
+<p>sudo route add -net 0/0 gw 192.168.1.1</p>
+<ol start="3" type="1">
+<li><p>Configurar una ruta estática para una subred específica:</p></li>
+</ol>
+<p>Indica que cualquier tráfico para la red 192.168.0.0/16 debe pasar
+por el gateway 192.168.1.1.</p>
+<p>sudo route add -net 192.168.0.0 netmask 255.255.0.0 gw
+192.168.1.1</p>
+<ol start="4" type="1">
+<li><p>Activar el reenvío de IP (IP Forwarding):</p></li>
+</ol>
+<p>Convierte la máquina en un router básico, permitiendo el paso de
+paquetes entre diferentes redes.</p>
+<p>sudo echo "1" &gt; /proc/sys/net/ipv4/ip_forward</p>
+<p><strong>3. Resolución de Nombres y Hostname</strong></p>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 53%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+<th><strong>Requisitos</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>hostname</td>
+<td>Muestra el nombre del host del sistema.</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>host www.example.com</td>
+<td>Resuelve el nombre del host a una dirección IP (consulta DNS
+1).</td>
+<td>dnsutils</td>
+</tr>
+<tr>
+<td>nslookup www.example.com</td>
+<td>Resuelve el nombre del host a una dirección IP (consulta DNS
+2).</td>
+<td>dnsutils</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p><strong>Mostrar el nombre de la máquina:</strong></p></li>
+</ol>
+<p>hostname</p>
+<ol start="2" type="1">
+<li><p><strong>Buscar la IP de un dominio usando host:</strong></p></li>
+</ol>
+<p>host www.google.com</p>
+<ol start="3" type="1">
+<li><p><strong>Buscar la IP de un dominio usando
+nslookup:</strong></p></li>
+</ol>
+<p>nslookup www.google.com</p>
+<p><strong>4. Diagnóstico de Hardware y Enlace</strong></p>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 69%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+<th><strong>Requisitos</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ip link show</td>
+<td>Muestra el estado de enlace de <strong>todas</strong> las interfaces
+(moderno).</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>mii-tool enp0s3</td>
+<td>Se usa principalmente para ver y manipular el estado del enlace y la
+velocidad de una interfaz de red.</td>
+<td>Obsoleto</td>
+</tr>
+<tr>
+<td>ethtool enp0s3</td>
+<td>Es una herramienta más moderna y completa para ver y modificar toda
+la configuración de la tarjeta de red (NIC), incluyendo velocidad,
+duplex, capacidades, estadísticas y más.</td>
+<td>Vigente</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p><strong>Mostrar el estado de enlace de todas las interfaces
+(preferido):</strong></p></li>
+</ol>
+<p>ip link show</p>
+<ol start="2" type="1">
+<li><p><strong>Mostrar el estado de enlace (cable conectado) de
+eth0:</strong></p></li>
+</ol>
+<p>sudo mii-tool eth0</p>
+<ol start="3" type="1">
+<li><p><strong>Mostrar las estadísticas detalladas de la tarjeta de red
+eth0:</strong></p></li>
+</ol>
+<p>ethtool eth0</p>
+<p><strong>5. Conexiones, Servicios y Tráfico (netstat,
+tcpdump)</strong></p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 59%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+<th><strong>Requisitos</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>netstat -tup</td>
+<td>Muestra conexiones <strong>T</strong>CP y <strong>U</strong>DP
+activas con sus <strong>P</strong>ID/Programa.</td>
+<td>net-tools, sudo</td>
+</tr>
+<tr>
+<td>netstat -tupl</td>
+<td>Muestra servicios de <strong>e</strong>scucha
+(<strong>L</strong>istening) TCP/UDP con sus
+<strong>P</strong>ID/Programa.</td>
+<td>net-tools, sudo</td>
+</tr>
+<tr>
+<td>tcpdump tcp port 80</td>
+<td>Muestra todo el tráfico TCP dirigido al puerto 80 (HTTP).</td>
+<td>tcpdump, sudo</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p><strong>Mostrar todas las conexiones de red activas y sus
+PID:</strong></p></li>
+</ol>
+<p>sudo netstat -tup</p>
+<ol start="2" type="1">
+<li><p><strong>Mostrar todos los servicios de escucha de red en el
+sistema y sus PID:</strong></p></li>
+</ol>
+<p>sudo netstat -tupl</p>
+<ol start="3" type="1">
+<li><p><strong>Mostrar todo el tráfico HTTP pasando por
+eth0:</strong></p></li>
+</ol>
+<p>Se requiere sudo. Presiona Ctrl+C para detener la captura.</p>
+<p>sudo tcpdump -i eth0 tcp port 80</p>
+<p><strong>6. Configuración Inalámbrica (iwlist, iwconfig)</strong></p>
+<p><em>Nota: Estos comandos se utilizan típicamente en interfaces
+inalámbricas como wlan0 o eth1 (como en el ejemplo), no en la interfaz
+principal eth0 si es cableada.</em></p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 58%" />
+<col style="width: 24%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+<th><strong>Requisitos</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>iwlist scan</td>
+<td>Muestra las redes inalámbricas disponibles.</td>
+<td>wireless-tools, sudo</td>
+</tr>
+<tr>
+<td>iwconfig eth1</td>
+<td>Muestra la configuración de la tarjeta de red inalámbrica eth1.</td>
+<td>wireless-tools</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos con eth1 (simulando interfaz
+inalámbrica)</strong></p>
+<ol type="1">
+<li><p><strong>Mostrar las redes inalámbricas:</strong></p></li>
+</ol>
+<p>sudo iwlist eth1 scan</p>
+<ol start="2" type="1">
+<li><p><strong>Mostrar la configuración de la tarjeta de red inalámbrica
+eth1:</strong></p></li>
+</ol>
+<p>iwconfig eth1</p>
+<script src="nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>36 Automatización de Auditorías de Seguridad con Bash</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><img
+src=".\\media\\36 Automatización de Auditorías de Seguridad con Bash/media/image1.jpg"
+style="width:6.26806in;height:3.58175in" /></p>
+<p>Automatización de Auditorías de Seguridad con Bash</p>
+<p><img
+src=".\\media\\36 Automatización de Auditorías de Seguridad con Bash/media/image2.jpg"
+style="width:1.70833in;height:1.70833in" /></p>
+<h1 id="objetivo-del-proyecto">Objetivo del Proyecto</h1>
+<p>Desarrollar un script que pudiera realizar las siguientes tareas de
+forma automática:</p>
+<p>1.Verificar si el sistema tiene parches de seguridad pendientes.</p>
+<p>2.Comprobar la configuración del firewall (UFW).</p>
+<p>3.Identificar cuentas inactivas o con privilegios de root que podrían
+representar un riesgo.</p>
+<p>4.Generar un reporte consolidado con la información recolectada.</p>
+<h1 id="creación-del-script">Creación del Script</h1>
+<h1 id="paso-1-configuración-del-entorno">Paso 1: Configuración del
+Entorno</h1>
+<p>Primero, abre la terminal y actualiza el sistema:</p>
+<p><strong>sudo apt update &amp;&amp; sudo apt upgrade -y</strong></p>
+<p>Luego crea un nuevo archivo en tu directorio de trabajo para escribir
+el script:</p>
+<p><strong>nano auditoria.sh</strong></p>
+<h1 id="paso-2-escribe-el-código">Paso 2: Escribe el Código</h1>
+<p>Añade las siguientes líneas al archivo para que el script cubriera
+cada objetivo definido:</p>
+<p><strong>Script de Auditoría de Seguridad Revisado</strong></p>
+<p>auditoria.sh.</p>
+<p>#!/bin/bash</p>
+<p># --- Configuración y Variables ---</p>
+<p>DATE=$(date +%Y-%m-%d_%H%M%S)</p>
+<p>REPORT_FILE="reporte_auditoria_${DATE}.txt"</p>
+<p># Usamos 'tee -a' en lugar de redireccionar varias veces para
+simplificar</p>
+<p># y asegurar que el contenido se muestra en pantalla y se guarda en
+el archivo.</p>
+<p># Inicialmente limpiamos el archivo de reporte, luego siempre usamos
+-a (append)</p>
+<p># --- Encabezado del Reporte ---</p>
+<p>echo "==================================================" | tee
+"$REPORT_FILE"</p>
+<p>echo " REPORTE DE AUDITORÍA DE SEGURIDAD " | tee -a
+"$REPORT_FILE"</p>
+<p>echo "Fecha: $(date)" | tee -a "$REPORT_FILE"</p>
+<p>echo "==================================================" | tee -a
+"$REPORT_FILE"</p>
+<p>echo "" | tee -a "$REPORT_FILE"</p>
+<p># --------------------------------------------------</p>
+<p># #1. Verificar Actualizaciones y Parches de Seguridad</p>
+<p># --------------------------------------------------</p>
+<p>echo "### [1] Verificando Actualizaciones y Parches de Seguridad..."
+| tee -a "$REPORT_FILE"</p>
+<p>sudo apt update &gt; /dev/null</p>
+<p>echo "Actualizaciones pendientes:" | tee -a "$REPORT_FILE"</p>
+<p># Se usa 'apt list --upgradable' que es más estándar que 'apt-get -s
+upgrade | grep Inst'</p>
+<p>apt list --upgradable 2&gt;/dev/null | grep -v 'Listing...' | tee -a
+"$REPORT_FILE"</p>
+<p>echo "Actualizaciones pendientes listadas." | tee -a
+"$REPORT_FILE"</p>
+<p>echo "" | tee -a "$REPORT_FILE"</p>
+<p># --------------------------------------------------</p>
+<p># #2. Comprobar configuración de Firewall (UFW)</p>
+<p># --------------------------------------------------</p>
+<p>echo "### [2] Verificando configuración de Firewall (UFW)..." | tee
+-a "$REPORT_FILE"</p>
+<p>if sudo ufw status | grep -q "active"; then</p>
+<p>echo "Firewall está habilitado (activo)." | tee -a "$REPORT_FILE"</p>
+<p># Muestra las reglas detalladas</p>
+<p>sudo ufw status verbose | tee -a "$REPORT_FILE"</p>
+<p>else</p>
+<p>echo "⚠️ ¡Firewall NO está habilitado (inactivo)!" | tee -a
+"$REPORT_FILE"</p>
+<p>fi</p>
+<p>echo "" | tee -a "$REPORT_FILE"</p>
+<p># --------------------------------------------------</p>
+<p># #3. Detectar cuentas de usuario con acceso root</p>
+<p># --------------------------------------------------</p>
+<p>echo "### [3] Revisando cuentas con privilegios de root..." | tee -a
+"$REPORT_FILE"</p>
+<p>echo "Cuentas con UID=0 (Root):" | tee -a "$REPORT_FILE"</p>
+<p># El campo ':$3' debe ser ':$3=='0'' para buscar el UID 0.</p>
+<p># Además, se puede incluir el nombre del usuario ($1) y la shell
+($7)</p>
+<p>awk -F: '($3 == "0") {print "Usuario: "$1", UID: "$3", Shell: "$7}'
+/etc/passwd | tee -a "$REPORT_FILE"</p>
+<p>echo "Cuentas con UID=0 listadas." | tee -a "$REPORT_FILE"</p>
+<p>echo "" | tee -a "$REPORT_FILE"</p>
+<p># --------------------------------------------------</p>
+<p># #4. Detectar usuarios inactivos</p>
+<p># --------------------------------------------------</p>
+<p>echo "### [4] Buscando inicios de sesión recientes y fallidos..." |
+tee -a "$REPORT_FILE"</p>
+<p># El grep original ('grep "Never logged in"') solo funciona en
+algunas distribuciones.</p>
+<p># Usamos 'lastlog' y filtramos usuarios con 'Never logged in' o una
+fecha muy antigua.</p>
+<p>echo "Usuarios que nunca han iniciado sesión o con inicio de sesión
+muy antiguo (requiere revisión manual):" | tee -a "$REPORT_FILE"</p>
+<p>sudo lastlog | grep -E 'Never|**' | tee -a "$REPORT_FILE"</p>
+<p>echo "Inicios de sesión inactivos/antiguos listados." | tee -a
+"$REPORT_FILE"</p>
+<p>echo "" | tee -a "$REPORT_FILE"</p>
+<p># --------------------------------------------------</p>
+<p># #5. Escaneo básico de puertos abiertos</p>
+<p># --------------------------------------------------</p>
+<p>echo "### [5] Escaneo básico de puertos abiertos..." | tee -a
+"$REPORT_FILE"</p>
+<p># Se usa 'ss -tuln' que es el reemplazo moderno y más rápido de
+'netstat -tuln'</p>
+<p>echo "Puertos abiertos (LISTEN) en TCP y UDP (IPv4 e IPv6):" | tee -a
+"$REPORT_FILE"</p>
+<p>sudo ss -tuln | tee -a "$REPORT_FILE"</p>
+<p>echo "Puertos abiertos listados." | tee -a "$REPORT_FILE"</p>
+<p>echo "" | tee -a "$REPORT_FILE"</p>
+<p># --------------------------------------------------</p>
+<p># Conclusión</p>
+<p># --------------------------------------------------</p>
+<p>echo "==================================================" | tee -a
+"$REPORT_FILE"</p>
+<p>echo "Auditoría finalizada. Revisa el archivo de reporte:
+$REPORT_FILE" | tee -a "$REPORT_FILE"</p>
+<p>echo "==================================================" | tee -a
+"$REPORT_FILE"</p>
+<p><strong>1. Variables y Salida</strong></p>
+<ul>
+<li><p>Se definió $REPORT_FILE y se utiliza <strong>| tee -a
+"$REPORT_FILE"</strong> para que la salida se muestre en la terminal
+(por donde lo estás ejecutando) y, a la vez, se guarde en el archivo de
+reporte (-a para añadir contenido).</p></li>
+</ul>
+<p><strong>2. Actualizaciones</strong></p>
+<ul>
+<li><p><strong>apt list --upgradable</strong>, que es el método moderno
+y más claro en Ubuntu/Debian para listar paquetes que pueden
+actualizarse.</p></li>
+</ul>
+<p><strong>3. Firewall</strong></p>
+<ul>
+<li><p>Usa ufw status. El módulo ufw está instalado por defecto en
+Ubuntu 24.04, por lo que este chequeo es muy pertinente.</p></li>
+</ul>
+<p><strong>4. Cuentas Root</strong></p>
+<ul>
+<li><p><strong>awk -F: '($3 == "0") {print "Usuario:
+"$1",..."}'</strong>. Esto filtra <strong>exactamente</strong> las
+cuentas con UID 0 (root), que son las que tienen privilegios máximos, y
+te da más información de contexto.</p></li>
+</ul>
+<p><strong>5. Usuarios Inactivos</strong></p>
+<ul>
+<li><p>uso de lastlog, pero se mejoró el filtro para buscar patrones que
+indiquen un inicio de sesión nunca realizado (Never) o uno con una fecha
+no registrada (**).</p></li>
+</ul>
+<p><strong>6. Escaneo de Puertos (Actualizado)</strong></p>
+<ul>
+<li><p><strong>ss -tuln</strong>. El comando ss (Socket Statistics) es
+el reemplazo moderno de netstat y es mucho más rápido y preferido en
+sistemas Linux recientes como Ubuntu 24.04.</p></li>
+</ul>
+<p><strong>Pasos para la Implementación</strong></p>
+<ol type="1">
+<li><p><strong>Guarda el script:</strong> Copia el código revisado y
+guárdalo en un archivo llamado auditoria.sh.</p></li>
+<li><p><strong>Da permisos de ejecución:</strong></p></li>
+</ol>
+<p>chmod +x auditoria.sh</p>
+<ol start="3" type="1">
+<li><p><strong>Ejecútalo:</strong></p></li>
+</ol>
+<p>sudo ./auditoria.sh</p>
+<p>(Se requiere sudo para ejecutar apt update, ufw status, ss, y
+lastlog).</p>
+<p><img
+src=".\\media\\36 Automatización de Auditorías de Seguridad con Bash/media/image3.png"
+style="width:6.26806in;height:3.34375in" /></p>
+<p>Al finalizar, verás la salida en la terminal y se generará un archivo
+llamado reporte_auditoria_YYYY-MM-DD_HHMMSS.txt en el mismo directorio
+con todos los hallazgos.</p>
+<p><img
+src=".\\media\\36 Automatización de Auditorías de Seguridad con Bash/media/image4.png"
+style="width:6.26806in;height:4.3375in" /></p>
+<p>Al abrirlo con cat o nano, pude ver un resumen detallado:</p>
+<p>1.Actualizaciones pendientes: Una lista de paquetes que necesitan ser
+actualizados, identificando posibles parches críticos.</p>
+<p>2.Firewall: Confirmó si el firewall estaba habilitado y mostró
+detalles sobre las reglas configuradas.</p>
+<p>3.Cuentas con UID 0: Identificó si había usuarios con privilegios de
+root, lo cual es crucial para la seguridad.</p>
+<p>4.Usuarios inactivos: Listó cuentas que nunca habían iniciado
+sesión.</p>
+<p>5.Puertos abiertos: Un mapeo de los servicios escuchando en la
+máquina.</p>
+<script src="nav.js"></script>
+</body>
+</html>

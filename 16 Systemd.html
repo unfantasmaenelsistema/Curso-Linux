@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>16 Systemd</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>Servicio personalizado con systemd</strong></p>
+<p><strong>Objetivo</strong></p>
+<ul>
+<li><p>Crear un <strong>script de respaldo automático</strong>.</p></li>
+<li><p>Convertirlo en un <strong>servicio systemd</strong>.</p></li>
+<li><p>Configurar <strong>logs y reinicios
+automáticos</strong>.</p></li>
+</ul>
+<p><strong>1. Preparar el script de respaldo</strong></p>
+<p>Creamos un script en /usr/local/bin/respaldo.sh:</p>
+<p>sudo nano /usr/local/bin/respaldo.sh</p>
+<p>#!/bin/bash</p>
+<p># Script simple de respaldo</p>
+<p>FECHA=$(date +%Y-%m-%d_%H-%M-%S)</p>
+<p>ORIGEN="/home"</p>
+<p>DESTINO="/var/backups/home_$FECHA.tar.gz"</p>
+<p>echo "[$(date)] Iniciando respaldo de $ORIGEN a $DESTINO" &gt;&gt;
+/var/log/respaldo.log</p>
+<p>tar -czf $DESTINO $ORIGEN 2&gt;&gt; /var/log/respaldo.log</p>
+<p>if [ $? -eq 0 ]; then</p>
+<p>echo "[$(date)] Respaldo completado con éxito." &gt;&gt;
+/var/log/respaldo.log</p>
+<p>else</p>
+<p>echo "[$(date)] Error durante el respaldo." &gt;&gt;
+/var/log/respaldo.log</p>
+<p>fi</p>
+<p>Dar permisos de ejecución:</p>
+<p>sudo chmod +x /usr/local/bin/respaldo.sh</p>
+<p><strong>2. Crear la unidad systemd</strong></p>
+<p>Archivo de servicio: /etc/systemd/system/respaldo.service</p>
+<p>sudo nano /etc/systemd/system/respaldo.service</p>
+<p>[Unit]</p>
+<p>Description=Servicio de respaldo automático</p>
+<p>After=network.target</p>
+<p>[Service]</p>
+<p>Type=simple</p>
+<p>ExecStart=/usr/local/bin/respaldo.sh</p>
+<p>Restart=on-failure</p>
+<p>RestartSec=30</p>
+<p>StandardOutput=append:/var/log/respaldo.log</p>
+<p>StandardError=append:/var/log/respaldo.log</p>
+<p>[Install]</p>
+<p>WantedBy=multi-user.target</p>
+<p>Explicación:</p>
+<ul>
+<li><p><strong>ExecStart</strong>: comando que se ejecuta (nuestro
+script).</p></li>
+<li><p><strong>Restart=on-failure</strong>: reinicia el servicio si
+falla.</p></li>
+<li><p><strong>RestartSec=30</strong>: espera 30s antes de
+reiniciar.</p></li>
+<li><p><strong>StandardOutput/Error=append</strong>: redirige logs al
+archivo /var/log/respaldo.log.</p></li>
+</ul>
+<p><strong>3. Recargar systemd y probar</strong></p>
+<p>sudo systemctl daemon-reload</p>
+<p>sudo systemctl start respaldo.service</p>
+<p>sudo systemctl status respaldo.service</p>
+<p><img src=".\\media\\16 Systemd/media/image1.png"
+style="width:5.90556in;height:1.85764in" /></p>
+<p>Para habilitar en arranque:</p>
+<p>sudo systemctl enable respaldo.service</p>
+<p><img src=".\\media\\16 Systemd/media/image2.png"
+style="width:5.90556in;height:0.35208in" /></p>
+<p><strong>4. Automatizar con un timer (opcional)</strong></p>
+<p>En lugar de arrancar el servicio manualmente, se puede usar un
+<strong>timer</strong> (como cron pero integrado en systemd).</p>
+<p>Crear /etc/systemd/system/respaldo.timer:</p>
+<p>[Unit]</p>
+<p>Description=Ejecutar respaldo automáticamente cada día</p>
+<p>[Timer]</p>
+<p>OnCalendar=daily</p>
+<p>Persistent=true</p>
+<p>[Install]</p>
+<p>WantedBy=timers.target</p>
+<p>Activar el timer:</p>
+<p>sudo systemctl enable --now respaldo.timer</p>
+<p>Comprobar timers activos:</p>
+<p>systemctl list-timers</p>
+<p><strong>5. Verificación de logs</strong></p>
+<p>Logs vía journal:</p>
+<p>journalctl -u respaldo.service</p>
+<p>O bien revisar el archivo:</p>
+<p>tail -f /var/log/respaldo.log</p>
+<p><strong>En Resumen:</strong></p>
+<p>Con todo lo que hemos hecho, hemos conseguido <strong>implementar un
+sistema completo de respaldo automático bajo systemd</strong>, con
+varias ventajas clave:</p>
+<p><strong>1️ Script de respaldo funcional</strong></p>
+<ul>
+<li><p>Has creado /usr/local/bin/respaldo.sh que <strong>comprime la
+carpeta /home</strong> y la guarda en /var/backups con <strong>nombre
+basado en la fecha</strong>.</p></li>
+<li><p>El script también registra cada paso en /var/log/respaldo.log
+(inicio, éxito, errores).</p></li>
+<li><p>Resultado: un script que puede ejecutar respaldos de manera
+autónoma y documentar su actividad.</p></li>
+</ul>
+<p><strong>2️ Servicio systemd (respaldo.service)</strong></p>
+<ul>
+<li><p>Convertiste el script en un <strong>servicio systemd</strong>, lo
+que significa que ahora <strong>systemd controla su
+ejecución</strong>.</p></li>
+<li><p>Configuración lograda:</p>
+<ul>
+<li><p>ExecStart → ejecuta el script.</p></li>
+<li><p>Restart=on-failure → reinicia automáticamente si falla.</p></li>
+<li><p>StandardOutput/Error=append → todos los logs van al archivo de
+log.</p></li>
+<li><p>After=network.target → se asegura de que arranque después de la
+red (útil si más adelante incluyes respaldos remotos).</p></li>
+</ul></li>
+<li><p>Resultado: respaldo confiable, con reinicios automáticos y
+logging centralizado.</p></li>
+</ul>
+<p><strong>3️ Habilitación en arranque</strong></p>
+<ul>
+<li><p>Con systemctl enable respaldo.service → el servicio se ejecuta
+automáticamente cada vez que se inicia el sistema.</p></li>
+<li><p>Resultado: <strong>no necesitas iniciar manualmente el
+script</strong>; funciona desde el arranque.</p></li>
+</ul>
+<p><strong>4️ Timer systemd (respaldo.timer)</strong></p>
+<ul>
+<li><p>Crear un timer permite que el servicio <strong>se ejecute
+automáticamente a intervalos programados</strong>, en este caso
+<strong>diario</strong> (OnCalendar=daily).</p></li>
+<li><p>Persistent=true asegura que, si el sistema estaba apagado, al
+arrancar se ejecutará el respaldo pendiente.</p></li>
+<li><p>Resultado: automatización completa sin depender de cron, control
+total desde systemd.</p></li>
+</ul>
+<p><strong>5️ Logs y verificación</strong></p>
+<ul>
+<li><p>Toda la actividad queda registrada en /var/log/respaldo.log y
+también es accesible desde journalctl -u respaldo.service.</p></li>
+<li><p>Esto permite:</p>
+<ul>
+<li><p>Revisar rápidamente errores.</p></li>
+<li><p>Confirmar que los respaldos se están ejecutando
+correctamente.</p></li>
+<li><p>Auditar historial de respaldos.</p></li>
+</ul></li>
+</ul>
+<p><strong>Conclusión</strong></p>
+<p>Con todo esto, hemos conseguido:</p>
+<ol type="1">
+<li><p><strong>Un respaldo automático y confiable</strong> de
+/home.</p></li>
+<li><p><strong>Servicio controlado por systemd</strong>, con reinicios
+automáticos si falla.</p></li>
+<li><p><strong>Automatización diaria</strong> con
+respaldo.timer.</p></li>
+<li><p><strong>Registro centralizado de logs</strong>, fácil de
+auditar.</p></li>
+<li><p><strong>Integración completa en Linux moderno</strong>, sin
+depender de cron, usando únicamente herramientas de systemd.</p></li>
+</ol>
+<script src="nav.js"></script>
+</body>
+</html>

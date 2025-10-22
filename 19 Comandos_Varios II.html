@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>19 Comandos_Varios II</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>comandos de conversión de ficheros</strong></p>
+<p><strong>Nota Importante:</strong> Estos comandos requieren que estén
+instalados. En Ubuntu, dos2unix viene en su propio paquete y recode
+también. Si recibes un error de "comando no encontrado", puedes
+instalarlos con:</p>
+<p>sudo apt update</p>
+<p>sudo apt install dos2unix recode</p>
+<p><strong>dos2unix - Conversión de Ficheros de DOS a UNIX</strong></p>
+<p>El comando dos2unix elimina los caracteres de <strong>retorno de
+carro</strong> (\r o CR) que se utilizan al final de cada línea en los
+archivos de texto de Windows/MS-DOS. En Linux/UNIX, solo se utiliza el
+salto de línea (\n o LF).</p>
+<table>
+<colgroup>
+<col style="width: 41%" />
+<col style="width: 58%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando/Sintaxis</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>dos2unix &lt;fichero_entrada&gt; &lt;fichero_salida&gt;</td>
+<td>Convierte el fichero de entrada y guarda el resultado en un nuevo
+fichero de salida.</td>
+</tr>
+<tr>
+<td>dos2unix &lt;fichero&gt;</td>
+<td>Convierte el fichero <strong>en el mismo sitio</strong> (sobrescribe
+el original).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p>Crear un fichero con formato DOS (Simulación):</p></li>
+</ol>
+<p>Para que el ejemplo sea práctico, primero simulamos un archivo de
+DOS/Windows (los archivos creados con nano en Linux tienen formato UNIX
+por defecto, por lo que lo modificamos para el ejemplo):</p>
+<p># Creamos un archivo de texto</p>
+<p>echo "Linea 1" &gt; filedos.txt</p>
+<p>echo "Linea 2" &gt;&gt; filedos.txt</p>
+<p># Añadimos los caracteres de retorno de carro para simular el formato
+DOS</p>
+<p># (Esto es una forma avanzada de simular el formato CR-LF de DOS)</p>
+<p>sed -i 's/$/\r/' filedos.txt</p>
+<p>cat filedos.txt</p>
+<p>No muestra esos caracteres, pero los podemos ver con:</p>
+<p>cat -A filedos.txt</p>
+<p>El comando <strong>cat en Linux está diseñado para ignorar o no
+mostrar explícitamente el carácter de Retorno de Carro (\r)</strong>
+cuando se encuentra en un archivo de texto.</p>
+<h3 id="por-qué-cat-no-lo-muestra"><strong>¿Por qué cat no lo
+muestra?</strong></h3>
+<p>En los sistemas Unix (Linux, macOS):</p>
+<ul>
+<li><p>El fin de línea es solo el carácter <strong>Nueva Línea</strong>
+(LF o \n).</p></li>
+<li><p>El carácter <strong>Retorno de Carro</strong> (CR o \r) no es
+considerado parte del final de línea; su propósito histórico es mover el
+cursor al inicio de la línea.</p></li>
+</ul>
+<p>Cuando cat encuentra el patrón de final de línea de DOS/Windows
+(\r\n), simplemente procesa el \r (Retorno de Carro) como un carácter
+que no se imprime y luego salta a la nueva línea con el \n (Nueva
+Línea). Visualmente, el archivo se ve idéntico al formato Unix original,
+ocultando el \r.</p>
+<h3 id="cómo-confirmar-que-el-r-está-ahí"><strong>Cómo confirmar que el
+\r está ahí</strong></h3>
+<p>Para demostrar que el carácter \r fue añadido por sed, puedes usar un
+comando que esté diseñado para mostrar caracteres no imprimibles o que
+muestre los archivos en formato hexadecimal.</p>
+<h4 id="usando-el-comando-cat--a-o--vet">1. Usando el comando cat -A (o
+-vET)</h4>
+<p>La opción -A del comando cat (que equivale a -vET) fuerza la
+visualización de caracteres especiales.</p>
+<p>cat -A filedos.txt</p>
+<p><strong>Resultado esperado:</strong></p>
+<p>Linea 1^M$</p>
+<p>Linea 2^M$</p>
+<ul>
+<li><p><strong>^M</strong>: Es la representación visible del carácter
+<strong>Retorno de Carro (\r)</strong>.</p></li>
+<li><p><strong>$</strong>: Es la representación visible del carácter
+<strong>Nueva Línea (\n)</strong> (gracias a la opción -E).</p></li>
+</ul>
+<h4 id="usando-el-comando-od-octal-dump">2. Usando el comando od (Octal
+Dump)</h4>
+<p>Este comando muestra el contenido del archivo en formato octal o
+hexadecimal, revelando los códigos de los caracteres:</p>
+<p>od -c filedos.txt</p>
+<p><strong>Resultado esperado (parcial):</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 33%" />
+<col style="width: 41%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Parte del archivo</strong></th>
+<th><strong>Formato Unix original</strong></th>
+<th><strong>Después del sed (Formato DOS)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fin de línea</td>
+<td>\n (Código octal: \012)</td>
+<td><strong>\r\n</strong> (Código octal: <strong>\015\012</strong>)</td>
+</tr>
+</tbody>
+</table>
+<p>Si ejecutas od -c filedos.txt, verás el código \r (\015) antes de
+cada código \n (\012), <strong>confirmando que la acción de sed fue
+exitosa</strong>.</p>
+<ol start="2" type="1">
+<li><p><strong>Convertir un fichero de MSDOS a UNIX (guardando en un
+nuevo fichero):</strong></p></li>
+</ol>
+<p>dos2unix -n filedos.txt fileunix.txt</p>
+<p><em>Resultado:</em> El archivo fileunix.txt ahora tendrá el formato
+de línea correcto para UNIX. El archivo original filedos.txt permanece
+sin cambios.</p>
+<ol start="3" type="1">
+<li><p><strong>Convertir y sobrescribir el fichero original (uso más
+común):</strong></p></li>
+</ol>
+<p>dos2unix filedos.txt</p>
+<p><em>Resultado:</em> El archivo filedos.txt se convierte a formato
+UNIX.</p>
+<p><strong>unix2dos - Conversión de Ficheros de UNIX a DOS</strong></p>
+<p>El comando unix2dos hace la operación inversa: añade los caracteres
+de <strong>retorno de carro</strong> (\r o CR) antes de cada salto de
+línea, creando un archivo con el formato de terminación de línea (CR-LF)
+esperado por los sistemas Windows/MS-DOS.</p>
+<table>
+<colgroup>
+<col style="width: 41%" />
+<col style="width: 58%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando/Sintaxis</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>unix2dos &lt;fichero_entrada&gt; &lt;fichero_salida&gt;</td>
+<td>Convierte el fichero de entrada y guarda el resultado en un nuevo
+fichero de salida.</td>
+</tr>
+<tr>
+<td>unix2dos &lt;fichero&gt;</td>
+<td>Convierte el fichero <strong>en el mismo sitio</strong> (sobrescribe
+el original).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p><strong>Crear un fichero con formato UNIX (Formato predeterminado
+en Ubuntu):</strong></p></li>
+</ol>
+<p>echo "Este archivo esta en formato UNIX." &gt; fileunix.txt</p>
+<ol start="2" type="1">
+<li><p><strong>Convertir un fichero de UNIX a MSDOS (guardando en un
+nuevo fichero):</strong></p></li>
+</ol>
+<p>unix2dos -n fileunix.txt filedos.txt</p>
+<p>cat -A filedos.txt</p>
+<p><em>Resultado:</em> El archivo filedos.txt ahora contiene la
+secuencia CR-LF al final de cada línea, haciéndolo compatible con
+editores de texto antiguos de DOS/Windows.</p>
+<p><strong>recode - Conversión de Codificación y Formato
+General</strong></p>
+<p>El comando recode es una herramienta muy potente y versátil para
+convertir la <strong>codificación de caracteres</strong> (p. ej.,
+ISO-8859-1 a UTF-8) y realizar conversiones de <strong>formato</strong>
+de texto, como de texto plano a HTML.</p>
+<p>sudo apt install recode</p>
+<p><strong>Opciones Comunes</strong></p>
+<table>
+<colgroup>
+<col style="width: 70%" />
+<col style="width: 29%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt;codificación_origen&gt;..&lt;codificación_destino&gt;</td>
+<td>Especifica el tipo de conversión a realizar.</td>
+</tr>
+<tr>
+<td>-l</td>
+<td>Lista todas las conversiones de codificación y formato
+disponibles.</td>
+</tr>
+<tr>
+<td>&lt; / &gt;</td>
+<td>Se utilizan para redirigir la entrada y salida, ya que recode
+procesa la entrada estándar por defecto.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p>Mostrar todas las conversiones de formato disponibles (recode -l
+| more):</p></li>
+</ol>
+<p>Este comando es esencial para saber qué tipos de conversión soporta
+recode (codificaciones como utf8, latin1, y formatos como html, latex,
+dos, etc.).</p>
+<p>recode -l | more</p>
+<p><em>Usa la tecla <strong>Espacio</strong> para avanzar una página o
+<strong>q</strong> para salir.</em></p>
+<ol start="2" type="1">
+<li><p>Convertir un fichero de texto a HTML (recode ..HTML):</p></li>
+</ol>
+<p>Se requiere que el archivo de texto se pase como entrada (&lt;) y el
+resultado se capture como salida (&gt;).</p>
+<p># 1. Crear el fichero de texto</p>
+<p>echo "Este es el titulo" &gt; page.txt</p>
+<p>echo "" &gt;&gt; page.txt</p>
+<p>echo "Contenido de la pagina." &gt;&gt; page.txt</p>
+<p># 2. Realizar la conversión</p>
+<p>recode ..HTML &lt; page.txt &gt; page.html</p>
+<p><em>Resultado:</em> El archivo page.html contendrá ahora el texto
+original rodeado de etiquetas HTML básicas (&lt;title&gt;, &lt;body&gt;,
+etc.).</p>
+<ol start="3" type="1">
+<li><p>Convertir la codificación de caracteres:</p></li>
+</ol>
+<p>Cambia la codificación del archivo de ISO-8859-1 (latin1) a la
+moderna UTF-8.</p>
+<p>recode latin1..utf8 mi_fichero.txt</p>
+<p># Paso 1: Crea el archivo temporal con caracteres especiales.</p>
+<p>echo "El camión de Jose mañana." &gt; archivo_latin1.txt</p>
+<p># Paso 2: Usa iconv para forzar la codificación a ISO-8859-1
+(Latin-1). Esto asegura que el archivo de entrada esté en la
+codificación correcta para la prueba.</p>
+<p>iconv -f UTF-8 -t ISO-8859-1 archivo_latin1.txt &gt;
+archivo_latin1_final.txt</p>
+<p># Limpia el archivo temporal</p>
+<p>rm archivo_latin1.txt</p>
+<p># Ahora, el archivo a convertir es 'archivo_latin1_final.txt'</p>
+<h3 id="ejecutar-la-conversión-con-recode">3. Ejecutar la Conversión con
+recode</h3>
+<p>Ahora, ejecuta el comando usando el archivo que acabamos de crear.
+recode realiza la conversión <strong>in-place</strong> (sobrescribe el
+archivo original por defecto).</p>
+<p>recode latin1..utf8 archivo_latin1_final.txt</p>
+<ul>
+<li><p><strong>Resultado Esperado:</strong> El comando se ejecuta sin
+mostrar salida (si es exitoso). El archivo archivo_latin1_final.txt ha
+sido sobrescrito con el mismo contenido, pero ahora codificado en
+<strong>UTF-8</strong>.</p></li>
+</ul>
+<h3 id="verificar-la-codificación">4. Verificar la Codificación</h3>
+<p>Puedes usar el comando file para confirmar que la codificación del
+archivo ha cambiado:</p>
+<p>file archivo_latin1_final.txt</p>
+<p><strong>Salida Esperada (después de la conversión):</strong></p>
+<p>archivo_latin1_final.txt: UTF-8 Unicode text</p>
+<p><strong>Comandos de información del sistema</strong></p>
+<p><strong>Nota Importante:</strong> Varios de los comandos para
+información de hardware requieren permisos de administrador (sudo), y
+algunos (hdparm, dmidecode, lspci, lsusb) pueden necesitar instalación
+previa si no están disponibles en la instalación base de Ubuntu:</p>
+<p>sudo apt update</p>
+<p>sudo apt install dmidecode hdparm pciutils usbutils</p>
+<ol type="I">
+<li><p><strong>Información General del Sistema y
+Hardware</strong></p></li>
+</ol>
+<p><strong>Arquitectura, Kernel y Componentes</strong></p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 54%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+<th><strong>Ejemplo Práctico</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>arch</td>
+<td>Muestra la arquitectura de la máquina (ej. x86_64).</td>
+<td>arch</td>
+</tr>
+<tr>
+<td>uname -m</td>
+<td>Muestra la arquitectura del hardware de la máquina (ej.
+x86_64).</td>
+<td>uname -m</td>
+</tr>
+<tr>
+<td>uname -r</td>
+<td>Muestra la versión del kernel Linux en uso.</td>
+<td>uname -r</td>
+</tr>
+<tr>
+<td>cat /proc/version</td>
+<td>Muestra la versión completa del kernel, junto con el compilador GCC
+usado.</td>
+<td>cat /proc/version</td>
+</tr>
+<tr>
+<td>dmidecode -q</td>
+<td>Muestra los detalles de los componentes del sistema (BIOS, placa
+base, CPU, RAM) leyendo la tabla DMI/SMBIOS.</td>
+<td>sudo dmidecode -q</td>
+</tr>
+</tbody>
+</table>
+<p><strong>II. Dispositivos PCI y USB</strong></p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 70%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+<th><strong>Ejemplo Práctico</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lspci -tv</td>
+<td>Muestra los dispositivos conectados al bus <strong>PCI</strong>
+(tarjeta gráfica, tarjetas de red, controladores SATA) en formato de
+árbol (-tv).</td>
+<td>lspci -tv</td>
+</tr>
+<tr>
+<td>lsusb -tv</td>
+<td>Muestra los dispositivos conectados al bus <strong>USB</strong>
+(teclado, ratón, pendrives, impresoras) en formato de árbol (-tv).</td>
+<td>lsusb -tv</td>
+</tr>
+</tbody>
+</table>
+<p><strong>III. Discos Duros y Rendimiento</strong></p>
+<p><strong>Nota:</strong> Utilizaremos /dev/sda como el disco duro
+principal. El uso de hdparm requiere permisos de administrador
+(sudo).</p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 60%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+<th><strong>Ejemplo Práctico</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>hdparm -i /dev/sda</td>
+<td>Muestra las características de identificación del disco duro
+(modelo, número de serie, firmware).</td>
+<td>sudo hdparm -i /dev/sda</td>
+</tr>
+<tr>
+<td>hdparm -tT /dev/sda</td>
+<td>Realiza una prueba de lectura de velocidad de caché y buffer (-T) y
+del disco directamente (-t).</td>
+<td>sudo hdparm -tT /dev/sda</td>
+</tr>
+</tbody>
+</table>
+<p><strong>IV. Archivos de Información del Sistema (/proc y
+/sys)</strong></p>
+<p>Los ficheros en el directorio /proc son pseudo-archivos que reflejan
+el estado actual del kernel y el sistema.</p>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 25%" />
+<col style="width: 36%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Fichero</strong></th>
+<th><strong>Descripción</strong></th>
+<th><strong>Ejemplo Práctico</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cat</td>
+<td>/proc/cpuinfo</td>
+<td>Muestra información detallada sobre la <strong>CPU</strong> (modelo,
+núcleos, caché, flags).</td>
+<td>cat /proc/cpuinfo</td>
+</tr>
+<tr>
+<td>cat</td>
+<td>/proc/meminfo</td>
+<td>Verifica el <strong>uso de memoria RAM</strong> (total, libre,
+buffers, caché).</td>
+<td>cat /proc/meminfo</td>
+</tr>
+<tr>
+<td>cat</td>
+<td>/proc/swaps</td>
+<td>Muestra los <strong>ficheros y particiones swap</strong>
+activos.</td>
+<td>cat /proc/swaps</td>
+</tr>
+<tr>
+<td>cat</td>
+<td>/proc/mounts</td>
+<td>Muestra el <strong>sistema de ficheros montado</strong> actualmente
+(similar a mount, pero más detallado).</td>
+<td>cat /proc/mounts</td>
+</tr>
+<tr>
+<td>cat</td>
+<td>/proc/interrupts</td>
+<td>Muestra las <strong>interrupciones</strong> del hardware asignadas a
+la CPU.</td>
+<td>cat /proc/interrupts</td>
+</tr>
+<tr>
+<td>cat</td>
+<td>/proc/net/dev</td>
+<td>Muestra los <strong>adaptadores de red</strong> y estadísticas de
+tráfico por interfaz (bytes, paquetes enviados/recibidos).</td>
+<td>cat /proc/net/dev</td>
+</tr>
+</tbody>
+</table>
+<p><strong>V. Fecha y Hora del Sistema</strong></p>
+<p><strong>sudo apt install ncal</strong></p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 37%" />
+<col style="width: 36%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+<th><strong>Ejemplo Práctico</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>date</td>
+<td>Muestra la fecha y hora actual del sistema.</td>
+<td>date</td>
+</tr>
+<tr>
+<td>cal 2011</td>
+<td>Muestra el almanaque (calendario) completo del año 2011.</td>
+<td>cal 2011</td>
+</tr>
+<tr>
+<td>cal 07 2011</td>
+<td>Muestra el almanaque para el mes de <strong>julio</strong> (07) de
+2011.</td>
+<td>cal 07 2011</td>
+</tr>
+<tr>
+<td>date MMDDhhmmYYYY.ss</td>
+<td><strong>Coloca (ajusta) la fecha y hora</strong> del sistema.
+Formato: Mes, Día, hora, minuto, Año, segundos.</td>
+<td>sudo date 041217002011.00 (Ajusta a 12 de abril de 2011 a las
+17:00:00)</td>
+</tr>
+<tr>
+<td>clock -w</td>
+<td><strong>Guarda la hora</strong> actual del sistema (la hora de
+software) en el reloj de hardware (BIOS/CMOS).</td>
+<td>sudo clock -w</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Comandos de apagado, reinicio y cierre de sesión</strong></p>
+<p><strong>Nota Importante:</strong> Todos los comandos de apagado y
+reinicio del sistema requieren permisos de administrador (sudo), ya que
+afectan a todos los usuarios y al estado completo de la máquina.</p>
+<p><strong>I. Comandos de Apagado del Sistema (Halt)</strong></p>
+<p>Estos comandos detienen el sistema operativo de forma segura y cortan
+la alimentación eléctrica.</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 65%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+<th><strong>Requisitos</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>shutdown -h now</strong></td>
+<td><strong>Apagado inmediato</strong> (-h de <em>halt</em>, now de
+inmediato). Es el método preferido y más moderno.</td>
+<td>sudo</td>
+</tr>
+<tr>
+<td><strong>halt</strong></td>
+<td>Un comando simple que ejecuta un apagado inmediato.
+<strong>Equivalente a shutdown -h now</strong>.</td>
+<td>sudo</td>
+</tr>
+<tr>
+<td><strong>init 0</strong></td>
+<td>Cambia al nivel de ejecución (runlevel) <strong>0</strong>, que está
+definido para apagar el sistema.</td>
+<td>sudo</td>
+</tr>
+<tr>
+<td><strong>telinit 0</strong></td>
+<td>Es un enlace simbólico a init 0, por lo que tiene el mismo efecto:
+apagar el sistema.</td>
+<td>sudo</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p><strong>Apagar el sistema inmediatamente (Método
+recomendado):</strong></p></li>
+</ol>
+<p>sudo shutdown -h now</p>
+<ol start="2" type="1">
+<li><p><strong>Apagar el sistema inmediatamente (Alternativa
+simple):</strong></p></li>
+</ol>
+<p>sudo halt</p>
+<ol start="3" type="1">
+<li><p><strong>Apagar el sistema usando el nivel de ejecución 0 (Método
+tradicional):</strong></p></li>
+</ol>
+<p>sudo init 0</p>
+<p><strong>II. Apagado Planificado y Cancelación</strong></p>
+<p>El comando shutdown permite planificar el apagado del sistema para un
+momento futuro o un intervalo de tiempo, y cancelarlo si es
+necesario.</p>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 57%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+<th><strong>Requisitos</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>shutdown -h hours:minutes &amp;</strong></td>
+<td>Apagado planificado a una hora específica (por ejemplo, 17:30). El
+&amp; hace que el comando se ejecute en segundo plano.</td>
+<td>sudo</td>
+</tr>
+<tr>
+<td><strong>shutdown -h +minutes</strong></td>
+<td>Apagado planificado en X minutos.</td>
+<td>sudo</td>
+</tr>
+<tr>
+<td><strong>shutdown -c</strong></td>
+<td><strong>Cancela</strong> cualquier apagado planificado.</td>
+<td>sudo</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p>Apagar el sistema a las 17:00 de hoy (Hora absoluta):</p></li>
+</ol>
+<p>El sistema envía una advertencia a todos los usuarios conectados.</p>
+<p>sudo shutdown -h 17:00</p>
+<ol start="2" type="1">
+<li><p><strong>Planificar un apagado en 30 minutos, con un mensaje para
+los usuarios:</strong></p></li>
+</ol>
+<p>sudo shutdown -h +30 "El servidor se apagará en 30 minutos para
+mantenimiento."</p>
+<ol start="3" type="1">
+<li><p>Cancelar el apagado planificado:</p></li>
+</ol>
+<p>Si te arrepientes o terminas el trabajo antes de tiempo.</p>
+<p>sudo shutdown -c</p>
+<p><strong>III. Comandos de Reinicio del Sistema (Reboot)</strong></p>
+<p>Estos comandos detienen el sistema de forma segura y luego lo
+reinician inmediatamente.</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 65%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+<th><strong>Requisitos</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>shutdown -r now</strong></td>
+<td><strong>Reinicio inmediato</strong> (-r de <em>reboot</em>). Es el
+método recomendado.</td>
+<td>sudo</td>
+</tr>
+<tr>
+<td><strong>reboot</strong></td>
+<td>Un comando simple que ejecuta un reinicio inmediato.
+<strong>Equivalente a shutdown -r now</strong>.</td>
+<td>sudo</td>
+</tr>
+<tr>
+<td><strong>init 6</strong></td>
+<td>Cambia al nivel de ejecución (runlevel) <strong>6</strong>, que está
+definido para reiniciar el sistema.</td>
+<td>sudo</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p><strong>Reiniciar el sistema inmediatamente (Método
+recomendado):</strong></p></li>
+</ol>
+<p>sudo shutdown -r now</p>
+<ol start="2" type="1">
+<li><p><strong>Reiniciar el sistema inmediatamente (Alternativa
+simple):</strong></p></li>
+</ol>
+<p>sudo reboot</p>
+<ol start="3" type="1">
+<li><p><strong>Reiniciar el sistema usando el nivel de ejecución 6
+(Método tradicional):</strong></p></li>
+</ol>
+<p>sudo init 6</p>
+<p><strong>IV. Cierre de Sesión (Logout)</strong></p>
+<p>Este comando no apaga la máquina; solo cierra la sesión actual del
+usuario.</p>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 52%" />
+<col style="width: 35%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+<th><strong>Requisitos</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>logout</strong></td>
+<td>Cierra la sesión del usuario actual en la terminal o consola.</td>
+<td>Ninguno (lo ejecuta el propio usuario)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico</strong></p>
+<ol type="1">
+<li><p>Cerrar la sesión de la terminal:</p></li>
+</ol>
+<p>Si estás en una sesión SSH o en una terminal de consola.</p>
+<p>logout</p>
+<p><em>Alternativamente, puedes usar <strong>Ctrl + D</strong> para
+lograr el mismo resultado.</em></p>
+<p><strong>El comando grep (Global Regular Expression
+Print)</strong></p>
+<p>Para practicar, primero crearemos dos archivos de ejemplo en el
+directorio de <strong>jose</strong>:</p>
+<ol type="1">
+<li><p><strong>documento.txt:</strong> Un archivo de texto
+simple.</p></li>
+<li><p><strong>logs.log:</strong> Un archivo que simula registros del
+sistema.</p></li>
+</ol>
+<p>echo "Linux es un sistema operativo potente." &gt; documento.txt</p>
+<p>echo "Aprenderemos a usar GREP hoy." &gt;&gt; documento.txt</p>
+<p>echo "grep busca texto rapido." &gt;&gt; documento.txt</p>
+<p>echo "Ubuntu 24.04 es la version actual." &gt;&gt; documento.txt</p>
+<p>echo "ERROR: Fallo de conexion en el puerto 80." &gt; logs.log</p>
+<p>echo "INFO: Usuario jose ha iniciado sesion." &gt;&gt; logs.log</p>
+<p>echo "WARN: Memoria libre baja (90MB)." &gt;&gt; logs.log</p>
+<p>echo "ERROR: El disco esta lleno (99%)." &gt;&gt; logs.log</p>
+<p><strong>I. Uso Básico y Opciones Fundamentales</strong></p>
+<p>El uso más simple de grep es buscar un patrón (una palabra o frase)
+dentro de un archivo.</p>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 89%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Básico</strong></td>
+<td>Busca el patrón en el archivo.</td>
+</tr>
+<tr>
+<td><strong>-i</strong></td>
+<td>Ignora mayúsculas y minúsculas (búsqueda <em>insensible</em> a
+mayúsculas).</td>
+</tr>
+<tr>
+<td><strong>-v</strong></td>
+<td>Invierte la búsqueda: muestra las líneas <strong>que NO
+coinciden</strong> con el patrón.</td>
+</tr>
+<tr>
+<td><strong>-w</strong></td>
+<td>Fuerza a que la coincidencia sea una <strong>palabra
+completa</strong>.</td>
+</tr>
+<tr>
+<td><strong>-n</strong></td>
+<td>Muestra el <strong>número de línea</strong> donde se encontró la
+coincidencia.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p><strong>Búsqueda simple (sensible a
+mayúsculas):</strong></p></li>
+</ol>
+<blockquote>
+<p>grep "grep" documento.txt</p>
+<p># Salida: grep busca texto rapido.</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Ignorar mayúsculas y minúsculas (-i):</strong></p></li>
+</ol>
+<blockquote>
+<p>grep -i "linux" documento.txt</p>
+<p># Salida: Linux es un sistema operativo potente.</p>
+</blockquote>
+<ol start="3" type="1">
+<li><p>Mostrar las líneas que NO contienen la palabra "ERROR"
+(-v):</p></li>
+</ol>
+<blockquote>
+<p>Útil para filtrar mensajes normales o de información.</p>
+<p>grep -v "ERROR" logs.log</p>
+<p># Salida:</p>
+<p># INFO: Usuario jose ha iniciado sesion.</p>
+<p># WARN: Memoria libre baja (90MB).</p>
+</blockquote>
+<ol start="4" type="1">
+<li><p>Buscar la palabra "es" completa (-w) y mostrar número de línea
+(-n):</p></li>
+</ol>
+<blockquote>
+<p>Sin -w, también coincidiría con palabras como "estudio" o
+"ses**ion".</p>
+<p>grep -w -n "es" documento.txt</p>
+<p># Salida: 1:Linux es un sistema operativo potente.</p>
+</blockquote>
+<p><strong>II. Opciones de Contexto y Formato</strong></p>
+<p>Estas opciones son cruciales para el análisis de <em>logs</em> o
+archivos grandes, ya que ayudan a entender la coincidencia en su
+contexto.</p>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 89%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>-c</strong></td>
+<td>Muestra solo la <strong>cantidad de líneas</strong> que contienen la
+coincidencia.</td>
+</tr>
+<tr>
+<td><strong>-l</strong></td>
+<td>Muestra solo el <strong>nombre del archivo</strong> donde se
+encontró la coincidencia.</td>
+</tr>
+<tr>
+<td><strong>-A N</strong></td>
+<td>Muestra <strong>N líneas de texto DESPUÉS</strong> de la línea que
+coincide (After).</td>
+</tr>
+<tr>
+<td><strong>-B N</strong></td>
+<td>Muestra <strong>N líneas de texto ANTES</strong> de la línea que
+coincide (Before).</td>
+</tr>
+<tr>
+<td><strong>-C N</strong></td>
+<td>Muestra <strong>N líneas de contexto ALREDEDOR</strong> de la línea
+que coincide.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p><strong>Contar cuántos errores hay en los logs
+(-c):</strong></p></li>
+</ol>
+<blockquote>
+<p>grep -c "ERROR" logs.log</p>
+<p># Salida: 2</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p>Mostrar la línea del ERROR y las 2 líneas siguientes (-A
+2):</p></li>
+</ol>
+<blockquote>
+<p>Usaremos el primer ERROR para el ejemplo.</p>
+<p>grep -A 2 "Fallo de conexion" logs.log</p>
+<p># Salida:</p>
+<p># ERROR: Fallo de conexion en el puerto 80.</p>
+<p># INFO: Usuario jose ha iniciado sesion.</p>
+<p># WARN: Memoria libre baja (90MB).</p>
+</blockquote>
+<ol start="3" type="1">
+<li><p><strong>Mostrar 1 línea de contexto alrededor del aviso (-C
+1):</strong></p></li>
+</ol>
+<blockquote>
+<p>grep -C 1 "WARN" logs.log</p>
+<p># Salida:</p>
+<p># INFO: Usuario jose ha iniciado sesion.</p>
+<p># WARN: Memoria libre baja (90MB).</p>
+<p># ERROR: El disco esta lleno (99%).</p>
+</blockquote>
+<p><strong>III. Búsqueda Recursiva y Múltiples Archivos</strong></p>
+<p>grep puede buscar en múltiples archivos a la vez, incluyendo
+subdirectorios.</p>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 85%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>-r</strong></td>
+<td>Busca <strong>recursivamente</strong> en todos los
+subdirectorios.</td>
+</tr>
+<tr>
+<td><strong>*</strong></td>
+<td>El comodín busca en <strong>todos los archivos</strong> del
+directorio actual.</td>
+</tr>
+<tr>
+<td><strong>--exclude</strong></td>
+<td>Omite archivos o directorios específicos durante la búsqueda.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p><strong>Buscar "Ubuntu" en todos los archivos del directorio
+actual (*):</strong></p></li>
+</ol>
+<blockquote>
+<p>grep "Ubuntu" *</p>
+<p># Salida:</p>
+<p># documento.txt:Ubuntu 24.04 es la version actual.</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p>Búsqueda recursiva de "jose" en todo el directorio actual
+(-r):</p></li>
+</ol>
+<blockquote>
+<p>Asumiendo que el directorio de jose tiene subcarpetas con más
+archivos.</p>
+<p>grep -r "jose"</p>
+<p># Salida:</p>
+<p># ./logs.log:INFO: Usuario jose ha iniciado sesion.</p>
+</blockquote>
+<ol start="3" type="1">
+<li><p><strong>Buscar recursivamente pero excluyendo un archivo
+específico (--exclude):</strong></p></li>
+</ol>
+<blockquote>
+<p>grep -r --exclude=logs.log "es"</p>
+<p># Salida:</p>
+<p># ./documento.txt:Linux es un sistema operativo potente.</p>
+<p># ./documento.txt:grep busca texto rapido.</p>
+<p># ./documento.txt:Ubuntu 24.04 es la version actual.</p>
+</blockquote>
+<p><strong>IV. Expresiones Regulares (Extended y Fixed)</strong></p>
+<p>grep utiliza por defecto expresiones regulares básicas (Basic Regular
+Expressions - BRE). Para expresiones más potentes (como +, ? o |), se
+recomienda usar la opción extendida.</p>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 89%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>-E</strong></td>
+<td>Habilita las <strong>Expresiones Regulares Extendidas</strong>
+(E-grep). Permite usar símbolos como `</td>
+</tr>
+<tr>
+<td><strong>-F</strong></td>
+<td>Trata el patrón como una cadena de <strong>texto fijo</strong>
+(Fixed-grep). Desactiva las expresiones regulares, lo que hace la
+búsqueda más rápida.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p>Usar OR (|) para buscar múltiples patrones (-E):</p></li>
+</ol>
+<blockquote>
+<p>Busca líneas que contengan "ERROR" o "WARN".</p>
+<p>grep -E "ERROR|WARN" logs.log</p>
+<p># Salida:</p>
+<p># ERROR: Fallo de conexion en el puerto 80.</p>
+<p># WARN: Memoria libre baja (90MB).</p>
+<p># ERROR: El disco esta lleno (99%).</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p>Buscar el inicio de línea usando el ancla ^ (BRE):</p></li>
+</ol>
+<blockquote>
+<p>Busca todas las líneas que inician con "INFO".</p>
+<p>grep "^INFO" logs.log</p>
+<p># Salida: INFO: Usuario jose ha iniciado sesion.</p>
+</blockquote>
+<ol start="3" type="1">
+<li><p>Buscar el final de línea usando el ancla $ (BRE):</p></li>
+</ol>
+<blockquote>
+<p>Busca la línea que termina con la palabra "potente.".</p>
+<p>grep "potente.$" documento.txt</p>
+<p># Salida: Linux es un sistema operativo potente.</p>
+</blockquote>
+<p>Las <strong>expresiones regulares (regex)</strong> son donde grep
+muestra su verdadero poder. Las opciones [] y ^ (como inicio de patrón
+dentro de []) son cruciales para definir conjuntos de caracteres.</p>
+<p><strong>Creación de Archivos de Prueba</strong></p>
+<p>Primero, crearemos un archivo llamado
+<strong>numeros_letras.txt</strong> para practicar con patrones de
+caracteres:</p>
+<p>echo "Texto de prueba A1" &gt; numeros_letras.txt</p>
+<p>echo "Texto de prueba B2" &gt;&gt; numeros_letras.txt</p>
+<p>echo "Texto de prueba C3" &gt;&gt; numeros_letras.txt</p>
+<p>echo "Texto de prueba D4" &gt;&gt; numeros_letras.txt</p>
+<p>echo "Linea sin numeros ni mayusculas" &gt;&gt;
+numeros_letras.txt</p>
+<p>echo "Palabra-clave" &gt;&gt; numeros_letras.txt</p>
+<p>echo "Palabra_clave" &gt;&gt; numeros_letras.txt</p>
+<p>echo "FIN" &gt;&gt; numeros_letras.txt</p>
+<p><strong>V. Opciones con Patrones de Caracteres ([ ] y ^ dentro de
+[])</strong></p>
+<p><strong>1. Corchetes [ ] (Coincidencia con Conjunto de
+Caracteres)</strong></p>
+<p>Los corchetes permiten especificar un <strong>conjunto de
+caracteres</strong> de los cuales solo uno debe coincidir en la posición
+indicada.</p>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 85%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Sintaxis</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>[abc]</td>
+<td>Coincide si el carácter en esa posición es <strong>a</strong>,
+<strong>b</strong> o <strong>c</strong>.</td>
+</tr>
+<tr>
+<td>[0-9]</td>
+<td>Coincide con <strong>cualquier dígito</strong> del 0 al 9.</td>
+</tr>
+<tr>
+<td>[A-Za-z]</td>
+<td>Coincide con <strong>cualquier letra</strong> (mayúscula o
+minúscula).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p><strong>Buscar líneas que contienen "B" o "D" al inicio de una
+palabra:</strong></p></li>
+</ol>
+<p>grep "B[2]\|D[4]" numeros_letras.txt</p>
+<p># Salida (usando grep -E para el OR |):</p>
+<p># Texto de prueba B2</p>
+<p># Texto de prueba D4</p>
+<p># Una forma más sencilla (coincidencia con B o D, seguido de 2 o
+4):</p>
+<p>grep " [BD][24]" numeros_letras.txt</p>
+<p># Salida:</p>
+<p># Texto de prueba B2</p>
+<p># Texto de prueba D4</p>
+<ol start="2" type="1">
+<li><p><strong>Buscar líneas que terminan con un dígito
+([0-9]):</strong></p></li>
+</ol>
+<p>grep "[0-9]$" numeros_letras.txt</p>
+<p># Salida:</p>
+<p># Texto de prueba A1</p>
+<p># Texto de prueba B2</p>
+<p># Texto de prueba C3</p>
+<p># Texto de prueba D4</p>
+<ol start="3" type="1">
+<li><p><strong>Buscar líneas que contienen una vocal minúscula
+([aeiou]):</strong></p></li>
+</ol>
+<p>grep "[aeiou]" numeros_letras.txt</p>
+<p># Salida (Todas las líneas tienen vocales, excepto quizás "FIN"):</p>
+<p># Texto de prueba A1</p>
+<p># Texto de prueba B2</p>
+<p># Texto de prueba C3</p>
+<p># Texto de prueba D4</p>
+<p># Linea sin numeros ni mayusculas</p>
+<p># Palabra-clave</p>
+<p># Palabra_clave</p>
+<p><strong>2. Símbolo de Negación [^] (No Coincidencia con Conjunto de
+Caracteres)</strong></p>
+<p>Cuando el símbolo de intercalación <strong>^</strong> se coloca
+<strong>inmediatamente después del corchete de apertura</strong> ([),
+invierte el significado, buscando cualquier carácter
+<strong>excepto</strong> los listados dentro del conjunto.</p>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 85%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Sintaxis</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>[^abc]</td>
+<td>Coincide con cualquier carácter <strong>que NO sea a, b o
+c</strong>.</td>
+</tr>
+<tr>
+<td>[^0-9]</td>
+<td>Coincide con <strong>cualquier carácter que NO sea un
+dígito</strong>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos</strong></p>
+<ol type="1">
+<li><p>Buscar líneas que NO contienen mayúsculas ([^A-Z]):</p></li>
+</ol>
+<p>Este patrón debe ir acompañado de otros, o solo buscará cualquier
+carácter que no sea una mayúscula. Usaremos -v como alternativa más
+limpia para este caso, o buscaremos una línea donde el primer carácter
+sea una letra minúscula:</p>
+<p><em>Opción A: Buscar líneas que contienen al menos un carácter que NO
+sea un número:</em></p>
+<p>grep "[^0-9]" numeros_letras.txt</p>
+<p># Salida: (Todas las líneas coinciden porque todas tienen letras,
+espacios, etc.)</p>
+<p># ... todas las líneas ...</p>
+<p><em>Opción B: Buscar líneas donde el último carácter NO es un
+dígito:</em></p>
+<p>grep "[^0-9]$" numeros_letras.txt</p>
+<p># Salida:</p>
+<p># Linea sin numeros ni mayusculas</p>
+<p># Palabra-clave</p>
+<p># Palabra_clave</p>
+<p># FIN</p>
+<ol start="2" type="1">
+<li><p>Buscar líneas que contienen caracteres especiales o puntuación,
+excluyendo letras y números:</p></li>
+</ol>
+<p>Busca un carácter que NO sea una letra (A-Za-z), un número (0-9) o un
+espacio ( ):</p>
+<p>grep "[^A-Za-z0-9 ]" numeros_letras.txt</p>
+<p># Salida:</p>
+<p># Palabra-clave</p>
+<p># Palabra_clave</p>
+<ol start="3" type="1">
+<li><p>Buscar la palabra "clave" si le precede una puntuación o
+símbolo:</p></li>
+</ol>
+<p>Busca la palabra "clave" precedida de un guion o un guion bajo,
+excluyendo el espacio.</p>
+<p>grep "[^ ]clave" numeros_letras.txt</p>
+<p># Salida:</p>
+<p># Palabra-clave</p>
+<p># Palabra_clave</p>
+<p><strong>VI. Opciones Útiles (Resumen de la guía
+anterior)</strong></p>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 88%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>-i</strong></td>
+<td>Ignora mayúsculas y minúsculas.</td>
+</tr>
+<tr>
+<td><strong>-v</strong></td>
+<td>Invierte la coincidencia (muestra líneas que NO coinciden).</td>
+</tr>
+<tr>
+<td><strong>-n</strong></td>
+<td>Muestra el número de línea.</td>
+</tr>
+<tr>
+<td><strong>-w</strong></td>
+<td>Coincidencia de <strong>palabra completa</strong>.</td>
+</tr>
+<tr>
+<td><strong>-E</strong></td>
+<td>Habilita las <strong>Expresiones Regulares Extendidas</strong> (para
+usar `</td>
+</tr>
+<tr>
+<td><strong>^patron</strong></td>
+<td>El patrón debe estar al <strong>inicio de la línea</strong>.</td>
+</tr>
+<tr>
+<td><strong>patron$</strong></td>
+<td>El patrón debe estar al <strong>final de la línea</strong>.</td>
+</tr>
+<tr>
+<td><strong>-A N</strong></td>
+<td>Muestra <strong>N líneas DESPUÉS</strong> de la coincidencia.</td>
+</tr>
+<tr>
+<td><strong>-C N</strong></td>
+<td>Muestra <strong>N líneas ALREDEDOR</strong> de la coincidencia.</td>
+</tr>
+</tbody>
+</table>
+<script src="nav.js"></script>
+</body>
+</html>

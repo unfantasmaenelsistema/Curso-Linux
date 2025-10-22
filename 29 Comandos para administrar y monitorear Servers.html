@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>29 Comandos para administrar y monitorear Servers</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>Comandos Linux para Administrar y Monitorear
+Servidores</strong></p>
+<p><strong>1. Información del Sistema</strong></p>
+<ul>
+<li><p><strong>Versión del SO (método 1):</strong></p></li>
+</ul>
+<p>cat /etc/*release</p>
+<ul>
+<li><p><strong>Versión del SO (método 2):</strong></p></li>
+</ul>
+<p>lsb_release -a</p>
+<ul>
+<li><p><strong>Arquitectura</strong> (32 o 64 bits):</p></li>
+</ul>
+<p>uname -m</p>
+<ul>
+<li><p><strong>Versión de Centos:</strong></p></li>
+</ul>
+<p>cat /etc/centos-release</p>
+<ul>
+<li><p><strong>Versión del Kernel:</strong></p></li>
+</ul>
+<p>uname -r</p>
+<p><strong>2. Historial de Comandos</strong></p>
+<ul>
+<li><p><strong>Listar todos</strong> los comandos:</p></li>
+</ul>
+<p>History</p>
+<ul>
+<li><p>Listar los <strong>últimos N</strong> comandos (ej. 20):</p></li>
+</ul>
+<p>history 20</p>
+<ul>
+<li><p><strong>Re-ejecutar</strong> un comando por su número (ej.
+77):</p></li>
+</ul>
+<p>!77</p>
+<ul>
+<li><p><strong>Borrar historial:</strong></p></li>
+</ul>
+<p>history -c</p>
+<ul>
+<li><p><strong>Archivo del historial</strong> por usuario:</p></li>
+</ul>
+<p>. _history</p>
+<p><strong>3. Gestión de Archivos y Directorios</strong></p>
+<p><strong>Rutas y Listado</strong></p>
+<ul>
+<li><p>Indicar la <strong>ruta actual</strong>:</p></li>
+</ul>
+<p>pwd</p>
+<ul>
+<li><p><strong>Listar archivos</strong> y sus tamaños:</p></li>
+</ul>
+<p>ls -sh</p>
+<ul>
+<li><p>Listar archivos y <strong>ordenar por fecha</strong> de
+modificación:</p></li>
+</ul>
+<p>ls -t</p>
+<ul>
+<li><p>Mostrar <strong>permisos</strong> de un archivo en formato
+numérico (ej. 777):</p></li>
+</ul>
+<p>stat -c %a nombre_archivo</p>
+<ul>
+<li><p><strong>Borrar una carpeta</strong> y todas sus
+subcarpetas:</p></li>
+</ul>
+<p>rm -rf nombre_carpeta</p>
+<p><strong>Búsqueda de Archivos</strong></p>
+<ul>
+<li><p>Buscar en <strong>todo el sistema</strong> por nombre:</p></li>
+</ul>
+<p>find / -name nombre_archivo</p>
+<ul>
+<li><p>Buscar en la <strong>carpeta actual</strong> por nombre:</p></li>
+</ul>
+<p>find -name nombre_archivo</p>
+<ul>
+<li><p>Buscar solo <strong>carpetas</strong>:</p></li>
+</ul>
+<p>find / -type d -name carpeta_que_busco*</p>
+<ul>
+<li><p>Buscar solo <strong>archivos</strong>:</p></li>
+</ul>
+<p>find / -type f -name archivo_que_busco*</p>
+<ul>
+<li><p>Buscar por <strong>permisos</strong> (ej. 777):</p></li>
+</ul>
+<p>find / -type d -perm 777</p>
+<ul>
+<li><p>Buscar archivos que estén <strong>vacíos</strong>:</p></li>
+</ul>
+<p>find . -type f -empty</p>
+<ul>
+<li><p>Buscar por <strong>tamaño</strong> (ej. 21KB o 5MB):</p></li>
+</ul>
+<p>find . -size 21k</p>
+<p>find . -size 5M</p>
+<ul>
+<li><p>Archivos <strong>modificados</strong> en las últimas
+48h:</p></li>
+</ul>
+<p>find . -tipe f -dtime 2</p>
+<ul>
+<li><p><strong>Localizar</strong> un binario, fuente o manual:</p></li>
+</ul>
+<p>whereis grep</p>
+<ul>
+<li><p>Instalar locate (si no es nativo)</p></li>
+</ul>
+<p>apt-get install mlocate</p>
+<ul>
+<li><p>Crear la <strong>base de datos</strong> de locate:</p></li>
+</ul>
+<p>Updatedb</p>
+<ul>
+<li><p>Buscar con locate:</p></li>
+</ul>
+<p>locate nombre_paquete</p>
+<p><strong>4. Gestión de Usuarios y Grupos</strong></p>
+<ul>
+<li><p><strong>Listar usuarios</strong> (Ubuntu):</p></li>
+</ul>
+<p>compgen -u</p>
+<ul>
+<li><p><strong>Listar grupos</strong>:</p></li>
+</ul>
+<p>compgen -g</p>
+<ul>
+<li><p><strong>Agregar grupo</strong>:</p></li>
+</ul>
+<p>group add nombre_grupo</p>
+<ul>
+<li><p><strong>Borrar grupo</strong>:</p></li>
+</ul>
+<p>group del nombre_grupo</p>
+<ul>
+<li><p><strong>Agregar usuario</strong>:</p></li>
+</ul>
+<p>Adduser</p>
+<ul>
+<li><p>Mostrar a <strong>qué grupos pertenece</strong> un
+usuario:</p></li>
+</ul>
+<p>groups nombre_user</p>
+<ul>
+<li><p><strong>Agregar usuario a un grupo</strong> (ej. sudo):</p></li>
+</ul>
+<p>usermod -aG nombre_grupo nombre_usuario</p>
+<p>usermod -aG sudo nombre_usuario</p>
+<ul>
+<li><p><strong>Borrar usuario</strong> y todos sus archivos:</p></li>
+</ul>
+<p>deluser --remove-home nomre_usuario</p>
+<ul>
+<li><p><strong>Cambiar contraseña</strong> del usuario actual:</p></li>
+</ul>
+<p>Passwd</p>
+<ul>
+<li><p><strong>Cambiar contraseña</strong> de un usuario
+específico:</p></li>
+</ul>
+<p>passwd nombre_user</p>
+<p><strong>5. Monitoreo de Recursos y Procesos</strong></p>
+<ul>
+<li><p><strong>Tiempo encendido</strong> del servidor:</p></li>
+</ul>
+<p>uptime</p>
+<ul>
+<li><p><strong>Espacio en disco</strong> (Formato legible):</p></li>
+</ul>
+<p>df -h</p>
+<ul>
+<li><p>Listar <strong>espacio ocupado</strong> por carpetas (Nivel
+1):</p></li>
+</ul>
+<p>du -h --max-depth=1 | sort -hr</p>
+<ul>
+<li><p><strong>Memoria RAM</strong> disponible:</p></li>
+</ul>
+<p>free -h</p>
+<ul>
+<li><p><strong>Verificación de procesos</strong> (interactivo):</p></li>
+</ul>
+<p>top</p>
+<ul>
+<li><p>Listar <strong>todos los procesos</strong>:</p></li>
+</ul>
+<p>ps -a</p>
+<ul>
+<li><p>Listar procesos (versión completa):</p></li>
+</ul>
+<p>ps -axF</p>
+<ul>
+<li><p><strong>Matar proceso</strong> por PID:</p></li>
+</ul>
+<p>kill -9 numero_proceso</p>
+<ul>
+<li><p><strong>Matar proceso</strong> por nombre:</p></li>
+</ul>
+<p>pkill nombre_proceso</p>
+<ul>
+<li><p><strong>Verificación de puertos</strong> y conexiones:</p></li>
+</ul>
+<p>netstat -atun</p>
+<ul>
+<li><p>Verificar <strong>qué proceso tiene tomado un
+puerto</strong>:</p></li>
+</ul>
+<p>netstat -tulpn</p>
+<ul>
+<li><p>Tiempos de respuesta (I/O):</p></li>
+</ul>
+<p>iostat</p>
+<p><strong>6. Logs del Sistema y Servicios</strong></p>
+<ul>
+<li><p>Mostrar <strong>log en tiempo real</strong>:</p></li>
+</ul>
+<p>tail -f</p>
+<ul>
+<li><p>Mostrar últimas N líneas de un log:</p></li>
+</ul>
+<p>tail -n ruta_archivo</p>
+<ul>
+<li><p><strong>Intentos de acceso</strong> como root (últimos
+10):</p></li>
+</ul>
+<p>grep root /var/log/auth.log | tail -10</p>
+<ul>
+<li><p>Estado del <strong>servicio de logs</strong> (rsyslog):</p></li>
+</ul>
+<p>service rsyslog status</p>
+<ul>
+<li><p>Logs de <strong>instalaciones</strong>:</p></li>
+</ul>
+<p>/var/log/apt/history.log</p>
+<ul>
+<li><p>Logs de <strong>login/autenticación</strong>:</p></li>
+</ul>
+<p>/var/log/auth.log</p>
+<ul>
+<li><p>Logs de <strong>Errores de Apache</strong>:</p></li>
+</ul>
+<p>cat /var/log/apache2/error.log</p>
+<ul>
+<li><p>Logs de <strong>Errores de Nginx</strong>:</p></li>
+</ul>
+<p>cat /var/log/nginx/error.log</p>
+<ul>
+<li><p>Logs de <strong>Errores de MySQL</strong>:</p></li>
+</ul>
+<p>cat /var/log/mysql/error.log</p>
+<p><strong>7. Gestión de Paquetes</strong></p>
+<ul>
+<li><p><strong>Ver paquetes instalados</strong>:</p></li>
+</ul>
+<p>dpkg -l</p>
+<ul>
+<li><p>Listar paquetes según su peso:</p></li>
+</ul>
+<p>dpkg-query --show --showformat='${Package;-50}\t${Installed-Size}\n'
+| sort -k 2 -n</p>
+<ul>
+<li><p><strong>Desinstalar paquete</strong>:</p></li>
+</ul>
+<p>apt-get remove nombre_paquete</p>
+<ul>
+<li><p><strong>Desinstalar y purgar</strong> configuración:</p></li>
+</ul>
+<p>apt-get purge nombre_paquete</p>
+<ul>
+<li><p><strong>Limpiar caché</strong> de paquetes:</p></li>
+</ul>
+<p>apt-get clean nombre_paquete</p>
+<p><strong>8. Configuración de Zona Horaria</strong></p>
+<ul>
+<li><p>Instalar paquete tzdata:</p></li>
+</ul>
+<p>apt-get install tzdata</p>
+<ul>
+<li><p>Listar <strong>zona horaria actual</strong>:</p></li>
+</ul>
+<p>timedatectl</p>
+<ul>
+<li><p>Listar todas las <strong>zonas horarias</strong>:</p></li>
+</ul>
+<p>timedatectl list-timezones</p>
+<ul>
+<li><p><strong>Setear zona horaria</strong> (ej. Buenos Aires):</p></li>
+</ul>
+<p>timedatectl set-timezone America/Argentina/Buenos_Aires</p>
+<p><strong>9. Montar Unidades de Discos</strong></p>
+<ul>
+<li><p>Listar unidades de discos:</p></li>
+</ul>
+<p>sudo fdisk -l</p>
+<ul>
+<li><p>Crear carpeta para montaje (ej. USB):</p></li>
+</ul>
+<p>sudo mkdir /media/usb</p>
+<ul>
+<li><p>Montar unidad (ej. /dev/sdb1):</p></li>
+</ul>
+<p>sudo mount /dev/sdb1 /media/usb</p>
+<ul>
+<li><p>Desmontar unidad:</p></li>
+</ul>
+<p>sudo umount /media/usb</p>
+<p><strong>10. Scripts y Docker</strong></p>
+<ul>
+<li><p>Dar <strong>permisos de ejecución</strong> a un script:</p></li>
+</ul>
+<p>chmod +x nombre_archivo.sh</p>
+<ul>
+<li><p><strong>Ejecutar script</strong>:</p></li>
+</ul>
+<p>./nomhre_script.sh</p>
+<ul>
+<li><p><strong>Ejecutar comando en Docker</strong> como root:</p></li>
+</ul>
+<p>docker exec -u 0 -i -t --privileged 204a5d5419b2 /bin/</p>
+<ul>
+<li><p><strong>Restablecer el escritorio</strong> de Ubuntu:</p></li>
+</ul>
+<p>dconf reset -f /</p>
+<ul>
+<li><p>Localizar dónde está instalado git:</p></li>
+</ul>
+<p>whereis git</p>
+<script src="nav.js"></script>
+</body>
+</html>

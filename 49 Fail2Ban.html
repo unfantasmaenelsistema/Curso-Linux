@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>49 Fail2Ban</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>Fail2Ban para bloquear intentos de fuerza bruta</strong></p>
+<p><strong>Objetivo</strong></p>
+<ul>
+<li><p>Instalar y configurar <strong>Fail2Ban</strong>.</p></li>
+<li><p>Detectar intentos de fuerza bruta en servicios como
+<strong>SSH</strong>.</p></li>
+<li><p>Bloquear automáticamente direcciones IP maliciosas mediante
+firewall.</p></li>
+</ul>
+<p><strong>1. Preparación</strong></p>
+<ul>
+<li><p>Sistema: Ubuntu/Debian (aunque también vale CentOS/RHEL con
+pequeñas diferencias).</p></li>
+<li><p>Instalar Fail2Ban:</p></li>
+</ul>
+<p>sudo apt update</p>
+<p>sudo apt install fail2ban -y</p>
+<p>Comprobar estado:</p>
+<p>sudo systemctl status fail2ban</p>
+<p><img src=".\\media\\49 Fail2Ban/media/image1.png"
+style="width:5.90556in;height:2.59375in" /></p>
+<p><strong>2. Archivos de configuración</strong></p>
+<p>Fail2Ban no se edita directamente en /etc/fail2ban/jail.conf (ese es
+el <em>template</em>).<br />
+Se usa /etc/fail2ban/jail.local para configuraciones personalizadas.</p>
+<p>Crea el archivo:</p>
+<p>sudo nano /etc/fail2ban/jail.local</p>
+<p>Ejemplo de configuración para <strong>SSH</strong>:</p>
+<p>[sshd]</p>
+<p>enabled = true</p>
+<p>port = ssh</p>
+<p>filter = sshd</p>
+<p>logpath = /var/log/auth.log</p>
+<p>maxretry = 3</p>
+<p>bantime = 600</p>
+<p>findtime = 600</p>
+<p>Explicación:</p>
+<ul>
+<li><p><strong>enabled</strong>: activa la protección.</p></li>
+<li><p><strong>maxretry</strong>: nº de intentos fallidos antes de
+bloquear.</p></li>
+<li><p><strong>findtime</strong>: ventana de tiempo (segundos) en la que
+cuentan los intentos.</p></li>
+<li><p><strong>bantime</strong>: tiempo de bloqueo en segundos (ej. 600
+= 10 minutos).</p></li>
+</ul>
+<p><img src=".\\media\\49 Fail2Ban/media/image2.png"
+style="width:5.90556in;height:2.41389in" /></p>
+<p><strong>3. Reiniciar Fail2Ban</strong></p>
+<p>sudo systemctl restart fail2ban</p>
+<p>sudo systemctl enable fail2ban</p>
+<p><img src=".\\media\\49 Fail2Ban/media/image3.png"
+style="width:5.90556in;height:0.90833in" /></p>
+<p>Comprobar estado de las “celdas” (jails):</p>
+<p>sudo fail2ban-client status</p>
+<p>Debe aparecer algo como:</p>
+<p>Status</p>
+<p>|- Number of jail: 1</p>
+<p>`- Jail list: sshd</p>
+<p><img src=".\\media\\49 Fail2Ban/media/image4.png"
+style="width:5.72917in;height:1.35417in" /></p>
+<p>Y para ver detalles:</p>
+<p>sudo fail2ban-client status sshd</p>
+<p><img src=".\\media\\49 Fail2Ban/media/image5.png"
+style="width:5.90556in;height:2.22431in" /></p>
+<p><strong>Pasos para habilitar SSH en Ubuntu:</strong></p>
+<ol type="1">
+<li><p><strong>Instalar el servidor SSH</strong> (si no lo
+tienes):</p></li>
+</ol>
+<blockquote>
+<p>sudo apt update</p>
+<p>sudo apt install openssh-server -y</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Verificar si el servicio está activo</strong>:</p></li>
+</ol>
+<blockquote>
+<p>systemctl status ssh</p>
+</blockquote>
+<ul>
+<li><p>Si aparece "inactive" o "dead", arráncalo con:</p></li>
+</ul>
+<blockquote>
+<p>sudo systemctl start ssh</p>
+</blockquote>
+<ul>
+<li><p>Para que arranque siempre al iniciar Ubuntu:</p></li>
+</ul>
+<blockquote>
+<p>sudo systemctl enable ssh</p>
+</blockquote>
+<ol start="3" type="1">
+<li><p><strong>Comprobar el puerto 22</strong>:</p></li>
+</ol>
+<blockquote>
+<p>sudo ss -tulpn | grep ssh</p>
+<p>Si está escuchando, deberías ver algo como 0.0.0.0:22.</p>
+</blockquote>
+<ol start="4" type="1">
+<li><p><strong>Firewall (UFW)</strong><br />
+Si tienes <strong>ufw</strong> activado en Ubuntu, abre el puerto
+22:</p></li>
+</ol>
+<blockquote>
+<p>sudo ufw allow ssh</p>
+<p>sudo ufw reload</p>
+<p><img src=".\\media\\49 Fail2Ban/media/image6.png"
+style="width:5.90556in;height:1.30903in" /></p>
+</blockquote>
+<ol start="5" type="1">
+<li><p><strong>Probar conexión desde otra máquina</strong>:</p></li>
+</ol>
+<blockquote>
+<p>ssh jose@192.168.1.41</p>
+</blockquote>
+<p><strong>4. Prueba de funcionamiento</strong></p>
+<p>Desde otra máquina o usando el mismo host (con cuidado):</p>
+<p>ssh usuario@tu_ip -p 22</p>
+<p>ssh <a href="mailto:jose@192.168.1.41">jose@192.168.1.41</a> -p
+22</p>
+<p>Introduce varias contraseñas incorrectas.</p>
+<p><img src=".\\media\\49 Fail2Ban/media/image7.png"
+style="width:5.86458in;height:3.125in" /></p>
+<p>Luego revisa si la IP fue bloqueada:</p>
+<p>sudo fail2ban-client status sshd</p>
+<p>Debería mostrar la IP bajo “Banned IP list”.</p>
+<p><img src=".\\media\\49 Fail2Ban/media/image8.png"
+style="width:5.90556in;height:2.04028in" /></p>
+<p>Para desbloquear manualmente una IP:</p>
+<p>sudo fail2ban-client set sshd unbanip 192.168.1.42</p>
+<p><img src=".\\media\\49 Fail2Ban/media/image9.png"
+style="width:5.90556in;height:1.99792in" /></p>
+<p><strong>5. Extensiones útiles</strong></p>
+<ul>
+<li><p><strong>Enviar notificaciones por correo</strong> cuando se
+bloquea una IP (útil en servidores de producción).</p></li>
+<li><p>Crear filtros personalizados para otros servicios (ejemplo:
+Apache, Nginx, Postfix, Dovecot).</p></li>
+<li><p>Ajustar bantime a -1 para bloquear
+<strong>permanentemente</strong>.</p></li>
+</ul>
+<p>Ejemplo de otra <em>jail</em> para proteger Apache:</p>
+<p>[apache-auth]</p>
+<p>enabled = true</p>
+<p>port = http,https</p>
+<p>logpath = /var/log/apache*/*error.log</p>
+<p>maxretry = 5</p>
+<p><strong>6. Verificación de logs</strong></p>
+<p>Logs de Fail2Ban:</p>
+<p>sudo tail -f /var/log/fail2ban.log</p>
+<p><img src=".\\media\\49 Fail2Ban/media/image10.png"
+style="width:5.90556in;height:1.15833in" /></p>
+<p><strong>Resumen:</strong></p>
+<ul>
+<li><p>Monitoreo de <strong>logs</strong>.</p></li>
+<li><p>Uso de <strong>expresiones regulares</strong> para detectar
+ataques.</p></li>
+<li><p>Gestión de <strong>firewall automático</strong> con
+Fail2Ban.</p></li>
+<li><p>Buenas prácticas de <strong>hardening de
+servidores</strong>.</p></li>
+</ul>
+<script src="nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>18 Comandos_Varios I</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>Comandos para Identificar Usuarios: who y w</strong></p>
+<p>Estos comandos te permiten saber quién está conectado al sistema.</p>
+<p><strong>1. who (Quién está conectado)</strong></p>
+<p>Muestra información básica sobre los usuarios actualmente
+conectados.</p>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 88%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>who</td>
+<td>Lista el nombre de usuario, la línea de terminal y la hora de
+conexión.</td>
+</tr>
+<tr>
+<td>who -r</td>
+<td>Muestra el <strong>nivel de ejecución</strong> (runlevel) del
+sistema.</td>
+</tr>
+<tr>
+<td>who -b</td>
+<td>Muestra la hora de la <strong>última vez que se arrancó</strong>
+(boot) el sistema.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos:</strong></p>
+<ol type="1">
+<li><p><strong>Ver quién está en el sistema:</strong></p></li>
+</ol>
+<blockquote>
+<p>who</p>
+<p>jose tty7 2025-10-11 09:00 (:0)</p>
+<p>otro_usr pts/1 2025-10-11 09:15 (192.168.1.10)</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Ver el nivel de ejecución actual:</strong></p></li>
+</ol>
+<blockquote>
+<p>who -r</p>
+<p>run-level 5 2025-10-11 09:00</p>
+</blockquote>
+<p>El comando <strong>who -r</strong> en sistemas Linux/Unix (como
+Ubuntu/Debian) se utiliza para reportar el <strong>nivel de ejecución
+(runlevel)</strong> actual del sistema.</p>
+<p>La salida suele ser una sola línea que indica cómo se inició el
+sistema, lo cual es fundamental para el diagnóstico del sistema y la
+administración de servicios.</p>
+<h2 id="significado-de-la-salida-de-who--r"><strong>Significado de la
+Salida de who -r</strong></h2>
+<p>La salida típicamente incluye lo siguiente (aunque el formato puede
+variar ligeramente entre distribuciones):</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 14%" />
+<col style="width: 59%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Campo</strong></th>
+<th><strong>Ejemplo Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>runlevel</strong></td>
+<td>runlevel</td>
+<td>La palabra clave que indica que la información se refiere al nivel
+de ejecución.</td>
+</tr>
+<tr>
+<td><strong>[nivel_anterior]</strong></td>
+<td>N</td>
+<td>El <strong>nivel de ejecución anterior</strong>. N significa
+<strong>Ninguno</strong> (el sistema acaba de arrancar) o el nivel desde
+el que se cambió (por ejemplo, 3 si se cambió desde el modo multiusuario
+sin interfaz gráfica).</td>
+</tr>
+<tr>
+<td><strong>[nivel_actual]</strong></td>
+<td>5 ó 3</td>
+<td>El <strong>nivel de ejecución actual</strong>. Este número es el más
+importante.</td>
+</tr>
+<tr>
+<td><strong>[fecha]</strong></td>
+<td>2025-10-17</td>
+<td>La fecha en que se inició este nivel de ejecución.</td>
+</tr>
+<tr>
+<td><strong>[hora]</strong></td>
+<td>09:47</td>
+<td>La hora a la que se inició este nivel de ejecución.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="section"></h3>
+<p>Aunque los sistemas modernos que usan <strong>systemd</strong> (como
+su VirtualBox con Ubuntu) han reemplazado los niveles de ejecución
+numéricos por <strong>"targets"</strong> (ej. graphical.target), el
+comando who -r aún proporciona los números tradicionales:</p>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 28%" />
+<col style="width: 62%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Nivel</strong></th>
+<th><strong>Nombre Tradicional</strong></th>
+<th><strong>Significado Típico</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0</strong></td>
+<td>Halt</td>
+<td>Apagado del sistema.</td>
+</tr>
+<tr>
+<td><strong>1</strong></td>
+<td>Single-User Mode</td>
+<td>Modo de usuario único (mantenimiento, no hay red, pocos
+servicios).</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>Multi-User Mode (sin GUI)</td>
+<td>Modo multiusuario, servicios de red activos, sin interfaz
+gráfica.</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>Multi-User Mode (sin GUI)</td>
+<td>Similar al nivel 2 o 4 (depende de la distro).</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>No Usado</td>
+<td>Reservado.</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td><strong>Multi-User Mode (con GUI)</strong></td>
+<td><strong>Modo gráfico multiusuario</strong>. Es el modo de escritorio
+normal.</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>Reboot</td>
+<td>Reinicio del sistema.</td>
+</tr>
+</tbody>
+</table>
+<p>Si tu VirtualBox ha arrancado con un escritorio gráfico (la interfaz
+de usuario normal), el nivel de ejecución que verás probablemente será
+<strong>5</strong>.</p>
+<p><strong>2. w (Quién está y qué están haciendo)</strong></p>
+<p>Proporciona la misma información que who, pero añade datos sobre la
+<strong>carga del sistema</strong> y el <strong>proceso actual</strong>
+que está ejecutando cada usuario.</p>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 88%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>w</td>
+<td>Muestra un resumen de la carga y qué procesos están activos.</td>
+</tr>
+<tr>
+<td>w -h</td>
+<td>Omite la cabecera (header) con la información de la carga del
+sistema.</td>
+</tr>
+<tr>
+<td>w jose</td>
+<td>Muestra información solo del usuario jose.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos:</strong></p>
+<ol type="1">
+<li><p><strong>Ver quién está y qué hace:</strong></p></li>
+</ol>
+<blockquote>
+<p>W</p>
+<p>09:43:05 up 43 min, 2 users, load average: 0.10, 0.15, 0.12</p>
+<p>USER TTY FROM LOGIN@ IDLE JCPU PCPU WHAT</p>
+<p>jose tty7 :0 09:00 43m00s 0.58s 0.15s /usr/libexec/gnome-terminal</p>
+<p>otro_usr pts/1 192.168.1.10 09:15 1m00s 0.05s 0.02s bash</p>
+<p><em>(Nota: La cabecera muestra la hora, tiempo de actividad (up),
+número de usuarios y la carga media (load average).)</em></p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Ver solo la actividad de jose (sin
+cabecera):</strong></p></li>
+</ol>
+<blockquote>
+<p>w -h jose</p>
+<p>jose tty7 :0 09:00 43m00s 0.58s 0.15s /usr/libexec/gnome-terminal</p>
+</blockquote>
+<p><strong>Comandos de Historial y Monitoreo: history y
+watch</strong></p>
+<p><strong>3. history (Historial de Comandos)</strong></p>
+<p>Muestra los comandos ejecutados previamente por el usuario actual. Es
+vital para auditar tareas y reutilizar comandos complejos.</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 82%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>history</td>
+<td>Muestra todo el historial numerado.</td>
+</tr>
+<tr>
+<td>history 10</td>
+<td>Muestra solo las últimas <strong>10</strong> líneas del
+historial.</td>
+</tr>
+<tr>
+<td>!123</td>
+<td>Ejecuta el comando número <strong>123</strong> del historial.</td>
+</tr>
+<tr>
+<td>!ls</td>
+<td>Ejecuta el <strong>último</strong> comando que comenzó con ls.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos:</strong></p>
+<ol type="1">
+<li><p><strong>Mostrar las últimas 5 acciones:</strong></p></li>
+</ol>
+<blockquote>
+<p>history 5</p>
+<p>996 who -r</p>
+<p>997 w -h jose</p>
+<p>998 cat /etc/hosts</p>
+<p>999 pwd</p>
+<p>1000 history 5</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Volver a ejecutar el comando con el número
+998:</strong></p></li>
+</ol>
+<blockquote>
+<p>!998</p>
+<p>cat /etc/hosts</p>
+<p>127.0.0.1 localhost</p>
+<p>127.0.1.1 Ubuntu2404</p>
+<p>...</p>
+</blockquote>
+<p><strong>4. watch (Ejecutar Comandos Repetidamente)</strong></p>
+<p>Ejecuta un comando de forma repetitiva y muestra la salida a pantalla
+completa, permitiendo monitorizar los cambios a lo largo del tiempo.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 74%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>watch &lt;comando&gt;</td>
+<td>Ejecuta el comando cada 2 segundos por defecto.</td>
+</tr>
+<tr>
+<td>watch -n 5 &lt;comando&gt;</td>
+<td>Ejecuta el comando cada <strong>5</strong> segundos.</td>
+</tr>
+<tr>
+<td>watch -d &lt;comando&gt;</td>
+<td><strong>Resalta los cambios</strong> (-d de <em>difference</em>)
+entre las actualizaciones.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos:</strong></p>
+<ol type="1">
+<li><p><strong>Monitorizar la actividad de los usuarios cada 2 segundos
+(presiona Ctrl+C para salir):</strong></p></li>
+</ol>
+<blockquote>
+<p>watch w</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Ver la carga del sistema cada 5 segundos y resaltar si
+cambia:</strong></p></li>
+</ol>
+<blockquote>
+<p>watch -n 5 -d "cat /proc/loadavg"</p>
+</blockquote>
+<p><strong>Comandos de Localización: whereis y which</strong></p>
+<p><strong>5. whereis (Localizar Binarios, Manuales y
+Fuente)</strong></p>
+<p>Busca un comando en directorios estándar del sistema para encontrar
+su <strong>binario</strong>, su <strong>código fuente</strong> y su
+<strong>página de manual</strong>.</p>
+<table>
+<colgroup>
+<col style="width: 39%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>whereis &lt;comando&gt;</td>
+<td>Busca binario, manual y fuente.</td>
+</tr>
+<tr>
+<td>whereis -b &lt;comando&gt;</td>
+<td>Busca solo el <strong>binario</strong>.</td>
+</tr>
+<tr>
+<td>whereis -m &lt;comando&gt;</td>
+<td>Busca solo la <strong>página de manual</strong>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos:</strong></p>
+<ol type="1">
+<li><p><strong>Encontrar todos los componentes del comando
+bash:</strong></p></li>
+</ol>
+<blockquote>
+<p>whereis bash</p>
+<p>bash: /usr/bin/bash /usr/share/man/man1/bash.1.gz</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Encontrar solo la página de manual de
+df:</strong></p></li>
+</ol>
+<blockquote>
+<p>whereis -m df</p>
+<p>df: /usr/share/man/man1/df.1.gz</p>
+</blockquote>
+<p><strong>6. which (Localizar el Ejecutable en el PATH)</strong></p>
+<p>Busca la <strong>ruta completa del archivo ejecutable</strong> que se
+usará cuando se escribe el comando, comprobando solo los directorios en
+la variable $PATH.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 74%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>which &lt;comando&gt;</td>
+<td>Muestra la ruta del primer ejecutable encontrado en el $PATH.</td>
+</tr>
+<tr>
+<td>which -a &lt;comando&gt;</td>
+<td>Muestra <strong>todas</strong> las rutas encontradas en el
+$PATH.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos:</strong></p>
+<ol type="1">
+<li><p><strong>Ver qué python3 se ejecuta por defecto:</strong></p></li>
+</ol>
+<blockquote>
+<p>which python3</p>
+<p>/usr/bin/python3</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Ver si hay múltiples ejecutables de cat en el
+PATH:</strong></p></li>
+</ol>
+<blockquote>
+<p>which -a cat</p>
+<p>/usr/bin/cat</p>
+<p>/bin/cat</p>
+<p><em>(Nota: Esto es común en sistemas que mantienen enlaces simbólicos
+o binarios en múltiples ubicaciones tradicionales).</em></p>
+</blockquote>
+<p><strong>Comandos de Shell: alias y unalias</strong></p>
+<p><strong>7. alias (Crear Atajos)</strong></p>
+<p>Permite crear un nombre más corto o una combinación de opciones para
+un comando, facilitando su uso.</p>
+<table>
+<colgroup>
+<col style="width: 39%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>alias</td>
+<td>Muestra todos los alias actualmente definidos.</td>
+</tr>
+<tr>
+<td>alias &lt;nombre&gt;='&lt;comando&gt;'</td>
+<td>Crea un nuevo alias temporal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos:</strong></p>
+<ol type="1">
+<li><p><strong>Crear un alias temporal para ver la información de la red
+de forma corta:</strong></p></li>
+</ol>
+<blockquote>
+<p>alias netinfo='ip a'</p>
+<p>netinfo</p>
+<p># ... Se ejecuta 'ip a'</p>
+<p><em>(Este alias solo durará hasta que se cierre la sesión de la
+terminal).</em></p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Crear un alias para el comando ls que siempre liste en
+formato largo y legible (como ll):</strong></p></li>
+</ol>
+<blockquote>
+<p>alias ll='ls -lh'</p>
+<p>ll</p>
+</blockquote>
+<p><strong>8. unalias (Eliminar Atajos)</strong></p>
+<p>Elimina un alias previamente definido.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 74%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>unalias &lt;nombre&gt;</td>
+<td>Elimina el alias especificado.</td>
+</tr>
+<tr>
+<td>unalias -a</td>
+<td>Elimina <strong>todos</strong> los alias definidos por el
+usuario.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico con jose:</strong></p>
+<ol type="1">
+<li><p><strong>Eliminar el alias netinfo creado
+anteriormente:</strong></p></li>
+</ol>
+<blockquote>
+<p>unalias netinfo</p>
+<p>netinfo</p>
+<p>bash: netinfo: no se encontró la orden</p>
+</blockquote>
+<p><strong>Comando de Programación: at</strong></p>
+<p><strong>9. at (Ejecutar Comandos en un Momento
+Específico)</strong></p>
+<p>Programa un comando para que se ejecute una <strong>sola vez</strong>
+en un momento futuro especificado.</p>
+<table>
+<colgroup>
+<col style="width: 43%" />
+<col style="width: 56%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>at &lt;hora&gt;</td>
+<td>Entra en modo de programación. Termina con Ctrl+D.</td>
+</tr>
+<tr>
+<td>at -l o atq</td>
+<td>Muestra la lista de trabajos en la cola (at queue).</td>
+</tr>
+<tr>
+<td>at -r &lt;job_number&gt; o atrm &lt;job_number&gt;</td>
+<td>Elimina el trabajo de la cola.</td>
+</tr>
+</tbody>
+</table>
+<p>sudo apt install at</p>
+<p>Asegúrate de que tu terminal acepta mensajes:</p>
+<p>mesg y</p>
+<p>El comando mesg y no te da ninguna salida porque, cuando se ejecuta
+correctamente, su única función es activar silenciosamente la recepción
+de mensajes en tu terminal.</p>
+<p>Si no te devuelve ningún error, puedes asumir que la configuración se
+ha aplicado correctamente y que tu terminal (pts/0 o la que estés
+usando) ahora está preparada para recibir mensajes del comando write
+(que es el que usa el comando at).</p>
+<p><strong>Ejemplos Prácticos:</strong></p>
+<ol type="1">
+<li><p><strong>Programar un mensaje para dentro de 2
+minutos:</strong></p></li>
+</ol>
+<blockquote>
+<p>at now + 2 minutes</p>
+<p>warning: commands will be executed using /bin/sh</p>
+<p>at&gt; echo "¡ÉXITO! Esto se fue al mail"</p>
+<p>at&gt; &lt;EOT&gt;</p>
+<p>at&gt; &lt;Ctrl+D&gt;</p>
+<p>job 1 at Sat Oct 11 10:48:00 2025</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Listar el trabajo programado:</strong></p></li>
+</ol>
+<blockquote>
+<p>atq</p>
+<p>1 Sat Oct 11 10:48:00 2025 a jose</p>
+<p><em>(El número 1 es el ID del trabajo).</em></p>
+</blockquote>
+<ol start="3" type="1">
+<li><p><strong>Eliminar el trabajo con ID 1:</strong></p></li>
+</ol>
+<blockquote>
+<p>atrm 1</p>
+</blockquote>
+<p>sudo apt install mailutils</p>
+<p>Después de que se ejecute, comprueba tu correo de sistema con el
+comando mail:</p>
+<p>mail</p>
+<p><img src=".\\media\\18 Comandos_Varios I/media/image1.png"
+style="width:5.90556in;height:0.78472in" /></p>
+<p>Para leer el mensaje, simplemente escribe el número de mensaje que
+quieres ver y presiona <strong>Enter</strong>.</p>
+<p><img src=".\\media\\18 Comandos_Varios I/media/image2.png"
+style="width:5.90556in;height:2.81319in" /></p>
+<p>sh: 54: Syntax error: newline unexpected</p>
+<h2 id="salida-estándar-stdout">1. Salida Estándar (stdout)</h2>
+<p>¡ÉXITO! Esto se fue al mail</p>
+<ul>
+<li><p><strong>Significado:</strong> Esta es la salida de tu comando
+echo. Muestra que la primera parte de tu <em>job</em> <strong>sí se
+ejecutó correctamente</strong>. Esto confirma que el servicio at
+funciona y que la tarea se ejecutó a la hora programada.</p></li>
+</ul>
+<h2 id="salida-de-error-estándar-stderr">2. Salida de Error Estándar
+(stderr)</h2>
+<p>sh: 54: Syntax error: newline unexpected</p>
+<ul>
+<li><p><strong>Significado:</strong> Este es el <strong>error de
+sintaxis</strong> que te causó que no vieras el mensaje en la terminal
+en tu primer intento.</p></li>
+<li><p><strong>Contexto:</strong> Cuando ejecutaste el comando at por
+primera vez, intentaste redirigir la salida a un directorio:</p></li>
+</ul>
+<blockquote>
+<p>at&gt; echo "..." &gt; /dev/pts/</p>
+<p>El <em>shell</em> (/bin/sh) que usa at ejecutó la línea. Dado que
+/dev/pts/ es un directorio, el <em>shell</em> no pudo redirigir la
+salida y generó un error de sintaxis al intentar interpretar el comando.
+Este error, al igual que la salida de echo, fue capturado por at y
+enviado a tu correo.</p>
+</blockquote>
+<p><strong>Conclusión del correo:</strong></p>
+<ol type="1">
+<li><p><strong>El <em>job</em> se ejecutó.</strong></p></li>
+<li><p><strong>El echo funcionó</strong> (como viste en la primera
+línea).</p></li>
+<li><p><strong>La redirección falló</strong> debido a un error de
+sintaxis relacionado con intentar escribir en un directorio (/dev/pts/)
+o, en el caso de tu primer intento, con un comando incompleto o mal
+formado.</p></li>
+</ol>
+<h3 id="para-salir-del-programa-mail">Para salir del programa mail:</h3>
+<p>Escribe <strong>q</strong> en el <em>prompt</em> ? y presiona
+<strong>Enter</strong> para volver a la terminal.</p>
+<p>? q</p>
+<p><strong>Nota:</strong></p>
+<p>at&gt; echo "¡EL MENSAJE DE AT LLEGÓ A TIEMPO, JOSE!" | write
+jose</p>
+<p>No suele funcionar porque el comando write es muy sensible y a menudo
+falla cuando se ejecuta desde un servicio en segundo plano como atd, ya
+que le cuesta determinar cuál de las sesiones activas (tty o pts)
+pertenece al usuario jose.</p>
+<p>at&gt; echo "¡PRUEBA CON WALL EXITOSA!" | wall</p>
+<p>El comando wall (write all) es mucho más robusto para enviar mensajes
+a todas las terminales activas y no requiere que el servicio de correo
+esté instalado ni se ve afectado por las restricciones de write.</p>
+<p>Aun así, el mensaje no aparece en tu terminal a la hora programada,
+porque el demonio atd (el servicio que ejecuta las tareas) tiene una
+configuración de seguridad que le impide enviar mensajes a tu terminal
+actual, aunque esté activo.</p>
+<p>Si quieres que aparezca directamente en tu terminal (y esta
+permanezca abierta):</p>
+<ol type="1">
+<li><p>Ejecuta el comando <strong>tty</strong> para obtener el nombre
+exacto de tu terminal:</p></li>
+</ol>
+<blockquote>
+<p>tty</p>
+<p># Salida típica: /dev/pts/0 o /dev/tty1</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p>Usa esa ruta exacta en el comando at:</p></li>
+</ol>
+<blockquote>
+<p>at now + 2 minutes</p>
+<p>at&gt; echo "¡ÉXITO! MENSAJE MOSTRADO" &gt; /dev/pts/0</p>
+<p>at&gt; &lt;EOT&gt;</p>
+</blockquote>
+<p><strong>Comandos de Diagnóstico Avanzado</strong></p>
+<p><strong>1. strace (Rastreo de Llamadas al Sistema)</strong></p>
+<p>El comando strace intercepta y registra las llamadas al sistema
+(syscalls) que un programa hace al <em>kernel</em> de Linux y las
+señales que recibe. Es fundamental para depurar y entender cómo se
+comporta un programa.</p>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 71%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>strace &lt;comando&gt;</td>
+<td>Inicia el rastreo del programa especificado.</td>
+</tr>
+<tr>
+<td>strace -p &lt;PID&gt;</td>
+<td><strong>Adjunta</strong> strace a un proceso que ya se está
+ejecutando (por su ID de proceso - PID).</td>
+</tr>
+<tr>
+<td>strace -o &lt;archivo&gt; &lt;comando&gt;</td>
+<td>Guarda toda la salida del rastreo en un archivo en lugar de
+mostrarla en la pantalla.</td>
+</tr>
+<tr>
+<td>strace -c &lt;comando&gt;</td>
+<td><strong>Cuenta</strong> el tiempo, número de llamadas y errores para
+cada llamada al sistema.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos:</strong></p>
+<ol type="1">
+<li><p><strong>Rastrear las llamadas que hace el comando ls al
+<em>kernel</em>:</strong></p></li>
+</ol>
+<p>strace ls -l /tmp</p>
+<p># ... Verás una larga lista de llamadas (openat, read, stat, write,
+close, etc.)</p>
+<p># ... y al final, la salida normal de 'ls -l /tmp'</p>
+<ol start="2" type="1">
+<li><p><strong>Contar las llamadas al sistema al ejecutar un comando
+simple (más útil para análisis):</strong></p></li>
+</ol>
+<p>strace -c date</p>
+<p>Sun Oct 12 10:00:00 AM CEST 2025</p>
+<p>% time seconds usecs/call calls errors syscall</p>
+<p>------ ----------- ----------- --------- ---------
+----------------</p>
+<p>90.00 0.000090 3 30 fstat</p>
+<p>...</p>
+<p>------ ----------- ----------- --------- ---------
+----------------</p>
+<p>100.00 0.000100 - 150 4 total</p>
+<p><em>Aquí verás un resumen tabular del rendimiento.</em></p>
+<p><strong>2. lsof (Listar Archivos Abiertos)</strong></p>
+<p>El comando lsof lista todos los archivos que están siendo utilizados
+por procesos activos. En Linux, un "archivo" puede ser un archivo
+regular, un <em>socket</em> de red, un directorio, una librería
+compartida o un <em>pipe</em>.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 74%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lsof</td>
+<td>Lista <strong>todos</strong> los archivos abiertos en el sistema
+(requiere sudo a menudo).</td>
+</tr>
+<tr>
+<td>lsof -i</td>
+<td>Muestra todos los <strong>sockets de red</strong> (conexiones de
+Internet) abiertos.</td>
+</tr>
+<tr>
+<td>lsof -u &lt;usuario&gt;</td>
+<td>Muestra los archivos abiertos <strong>por un usuario
+específico</strong> (e.g., lsof -u jose).</td>
+</tr>
+<tr>
+<td>lsof +D &lt;directorio&gt;</td>
+<td>Lista todos los archivos abiertos <strong>dentro de un
+directorio</strong> (y sus subdirectorios).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos:</strong></p>
+<ol type="1">
+<li><p><strong>Ver qué archivos y <em>sockets</em> está utilizando el
+usuario jose:</strong></p></li>
+</ol>
+<p>lsof -u jose | less</p>
+<p># Puedes ver todos los binarios, librerías y puertos que jose tiene
+abiertos. Es posible que necesites sudo y que durante la ejecución no
+veas que te pide la contraseña; hay que ponerla…</p>
+<ol start="2" type="1">
+<li><p><strong>Ver qué procesos están usando el puerto 22
+(SSH):</strong></p></li>
+</ol>
+<p>sudo lsof -i :22</p>
+<p>COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME</p>
+<p>sshd 1234 root 3u IPv4 12345 0t0 TCP *:ssh (LISTEN)</p>
+<p>sudo lsof -i :22</p>
+<p>sudo lsof -i :23</p>
+<p>sudo lsof -i :80</p>
+<p>Si el comando sudo lsof -i :22 no devuelve ninguna salida, significa
+que no hay ningún programa (demonio) escuchando activamente conexiones
+entrantes en el puerto 22 en este momento.</p>
+<p><strong>Comandos de Manipulación de Texto y Flujo de
+Datos</strong></p>
+<p><strong>3. tee (Redirección Doble)</strong></p>
+<p>El comando tee lee la entrada estándar (stdin) y la escribe
+simultáneamente a la salida estándar (stdout) <strong>y</strong> a uno o
+más archivos. Esto te permite ver la salida de un comando mientras la
+guardas.</p>
+<table>
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt;comando&gt; | tee &lt;archivo&gt;</td>
+<td>Escribe la salida del comando al archivo, pero también la muestra en
+pantalla.</td>
+</tr>
+<tr>
+<td>&lt;comando&gt; | tee -a &lt;archivo&gt;</td>
+<td>Añade (-a de <em>append</em>) la salida al final del archivo
+existente.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos:</strong></p>
+<ol type="1">
+<li><p><strong>Ver la lista de directorios y guardarla en un archivo al
+mismo tiempo:</strong></p></li>
+</ol>
+<p>ls -l /etc | tee lista_etc.txt</p>
+<p># La salida se muestra en la terminal Y se guarda en
+'lista_etc.txt'.</p>
+<ol start="2" type="1">
+<li><p><strong>Añadir nueva información (la fecha) a un <em>log</em>
+existente sin sobreescribirlo:</strong></p></li>
+</ol>
+<p>echo "--- Fin de la Sesión ---" | tee -a lista_etc.txt</p>
+<p><strong>4. col (Filtro de <em>Pipes</em>)</strong></p>
+<p>El comando col filtra caracteres de retroceso y espacios en blanco de
+la entrada. Su uso más común es para procesar la salida de comandos que
+están diseñados para terminales antiguas (como man) que usan caracteres
+especiales de control.</p>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 78%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt;comando&gt; | col -b</td>
+<td>Elimina los caracteres de retroceso y los espacios en blanco (-b de
+<em>binary</em>), dejando solo texto.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico:</strong></p>
+<ol type="1">
+<li><p><strong>Limpiar la salida de la página man del comando ls antes
+de guardarla:</strong></p></li>
+</ol>
+<p>man ls | col -b &gt; manual_ls_limpio.txt</p>
+<p># Esto elimina los caracteres de formato para que
+'manual_ls_limpio.txt' sea texto plano limpio y fácil de leer o
+imprimir.</p>
+<p><strong>5. fmt (Reformatear Texto)</strong></p>
+<p>El comando fmt es un formateador de texto que se utiliza para ajustar
+el ancho de línea de un archivo o entrada. Es útil para hacer que los
+archivos de texto (como archivos README o emails largos) sean más
+legibles.</p>
+<table>
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fmt &lt;archivo&gt;</td>
+<td>Reformatea el archivo de entrada (ancho de 75 caracteres por
+defecto).</td>
+</tr>
+<tr>
+<td>fmt -w &lt;número&gt; &lt;archivo&gt;</td>
+<td>Establece el ancho máximo de la línea en &lt;número&gt; (e.g., -w
+50).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico:</strong></p>
+<ol type="1">
+<li><p><strong>Crear un texto de ejemplo:</strong></p></li>
+</ol>
+<p>echo "Esta es una frase muy larga que no respeta ningún ancho de
+línea y se extiende hasta donde le da la gana a jose." &gt;
+largo.txt</p>
+<ol start="2" type="1">
+<li><p><strong>Reformatear el archivo para que tenga un máximo de 40
+caracteres por línea:</strong></p></li>
+</ol>
+<p>fmt -w 40 largo.txt</p>
+<p>Esta es una frase muy larga que</p>
+<p>no respeta ningún ancho de línea</p>
+<p>y se extiende hasta donde le da</p>
+<p>la gana a jose.</p>
+<p><strong>Comandos de Terminal y Redes</strong></p>
+<p><strong>6. tput (Manipulación de la Terminal)</strong></p>
+<p>El comando tput se utiliza para interactuar con la base de datos de
+capacidades de la terminal (terminfo). Permite mover el cursor, cambiar
+colores, borrar la pantalla, etc., lo que es crucial para
+<em>scripts</em> de <em>shell</em> interactivos.</p>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 69%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tput clear</td>
+<td>Borra la pantalla de la terminal.</td>
+</tr>
+<tr>
+<td>tput cup &lt;fila&gt; &lt;columna&gt;</td>
+<td>Mueve el cursor a la posición especificada.</td>
+</tr>
+<tr>
+<td>tput bold</td>
+<td>Activa el modo de texto en negrita.</td>
+</tr>
+<tr>
+<td>tput setaf &lt;num&gt;</td>
+<td>Establece el color de primer plano (e.g., setaf 1 para rojo).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico (en un <em>script</em> simple o en la línea
+de comandos):</strong></p>
+<ol type="1">
+<li><p><strong>Borrar la pantalla y colocar un mensaje en negrita en el
+centro:</strong></p></li>
+</ol>
+<p>tput clear; tput cup 10 30; tput bold; echo "¡ATENCIÓN JOSE!"</p>
+<p><strong>7. nc (netcat - El Cuchillo Suizo de las Redes)</strong></p>
+<p>netcat (nc) es una utilidad que puede leer y escribir datos a través
+de conexiones de red utilizando los protocolos TCP o UDP. Es una
+herramienta esencial para pruebas, diagnósticos de red y transferencia
+simple de datos.</p>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 65%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>nc -l -p &lt;puerto&gt;</td>
+<td>Inicia nc en modo escucha (-l) en un puerto específico.</td>
+</tr>
+<tr>
+<td>nc &lt;host&gt; &lt;puerto&gt;</td>
+<td>Se conecta a un puerto de un host remoto.</td>
+</tr>
+<tr>
+<td>nc -z &lt;host&gt; &lt;puerto-rango&gt;</td>
+<td>Escanea puertos de forma simple (-z de <em>zero-I/O</em>).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos:</strong></p>
+<ol type="1">
+<li><p><strong>Probar si el puerto 80 (HTTP) está abierto en el servidor
+de Google (Escaneo básico de puertos):</strong></p></li>
+</ol>
+<p>nc -zv google.com 80</p>
+<p>Connection to google.com 80 port [tcp/http] succeeded!</p>
+<ol start="2" type="1">
+<li><p><strong>Crear un "Chat" o una conexión simple para transferir
+texto (requiere dos terminales):</strong></p>
+<ul>
+<li><p><strong>Terminal 1 (Escucha):</strong></p></li>
+</ul></li>
+</ol>
+<p>nc -l -p 8888</p>
+<ul>
+<li><p><strong>Terminal 2 (Conecta):</strong></p></li>
+</ul>
+<p>nc localhost 8888</p>
+<p>Hola, ¿me oyes?</p>
+<p>El texto de la Terminal 2 aparecerá en la Terminal 1, y
+viceversa.</p>
+<p><strong>Comandos de Archivos y Versiones: diff y patch</strong></p>
+<p><strong>1. diff (Mostrar Diferencias)</strong></p>
+<p>El comando diff compara dos archivos de texto línea por línea y
+muestra las diferencias. Es fundamental para el control de versiones y
+la auditoría de configuraciones.</p>
+<table>
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>diff &lt;archivo1&gt; &lt;archivo2&gt;</td>
+<td>Muestra las diferencias en formato estándar.</td>
+</tr>
+<tr>
+<td>diff -u &lt;archivo1&gt; &lt;archivo2&gt;</td>
+<td>Muestra las diferencias en <strong>formato unificado</strong> (más
+fácil de leer y usar con patch).</td>
+</tr>
+<tr>
+<td>diff -r &lt;dir1&gt; &lt;dir2&gt;</td>
+<td>Compara <strong>directorios</strong> recursivamente.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos:</strong></p>
+<ol type="1">
+<li><p><strong>Crear dos archivos con una pequeña
+diferencia:</strong></p></li>
+</ol>
+<p>echo "Linea 1 de codigo" &gt; file_v1.txt</p>
+<p>cat file_v1.txt</p>
+<p>echo "Linea 2 de codigo modificado" &gt; file_v2.txt</p>
+<p>cat file_v2.txt</p>
+<p>echo "Linea 3 de codigo" &gt;&gt; file_v1.txt</p>
+<p>diff file_v1.txt file_v2.txt</p>
+<ol start="2" type="1">
+<li><p><strong>Generar un archivo de diferencias (patch) usando el
+formato unificado (-u):</strong></p></li>
+</ol>
+<p>diff -u file_v1.txt file_v2.txt &gt; mi_cambio.patch</p>
+<p>cat mi_cambio.patch</p>
+<p>--- file_v1.txt 2025-10-12 10:00:00.000000000 +0200</p>
+<p>+++ file_v2.txt 2025-10-12 10:01:00.000000000 +0200</p>
+<p>@@ -1,3 +1,3 @@</p>
+<p>Linea 1 de codigo</p>
+<p>-Linea 2 de codigo</p>
+<p>+Linea 2 de codigo modificado</p>
+<p>Linea 3 de codigo</p>
+<p><strong>2. patch (Aplicar Cambios)</strong></p>
+<p>El comando patch aplica las diferencias generadas por diff
+(típicamente en formato unificado) a un archivo, revirtiéndolo o
+actualizándolo.</p>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 65%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>patch &lt;archivo&gt; &lt; patchfile</td>
+<td>Aplica el parche al archivo original.</td>
+</tr>
+<tr>
+<td>patch -R &lt;archivo&gt; &lt; patchfile</td>
+<td><strong>Revierte</strong> (-R de <em>reverse</em>) los cambios
+aplicados por el parche.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos:</strong></p>
+<ol type="1">
+<li><p><strong>Aplicar el parche mi_cambio.patch a file_v1.txt para
+convertirlo en file_v2.txt:</strong></p></li>
+</ol>
+<p># 1. Recreamos file_v1.txt con su contenido original:</p>
+<p>echo "Linea 1 de codigo" &gt; file_v1.txt</p>
+<p>echo "Linea 3 de codigo" &gt;&gt; file_v1.txt</p>
+<p># 2. Generamos el parche mi_cambio.patch a partir de la diferencia
+entre v1 y v2:</p>
+<p>diff -u file_v1.txt file_v2.txt &gt; mi_cambio.patch</p>
+<p># 3. Aplicamos el parche a file_v1.txt:</p>
+<p>patch file_v1.txt &lt; mi_cambio.patch</p>
+<p>Resultado: patching file file_v1.txt</p>
+<p># 4. Verificamos el contenido de file_v1.txt:</p>
+<p>cat file_v1.txt</p>
+<p>Salida Esperada de cat</p>
+<p>Linea 1 de codigo</p>
+<p>Linea 2 de codigo modificado</p>
+<p>Linea 3 de codigo</p>
+<ol start="2" type="1">
+<li><p><strong>Revertir el cambio (devolver file_v1.txt a su estado
+original):</strong></p></li>
+</ol>
+<p>patch -R file_v1.txt &lt; mi_cambio.patch</p>
+<p>Resultado: patching file file_v1.txt</p>
+<p>Verificamos el contenido de file_v1.txt:</p>
+<p>cat file_v1.txt</p>
+<p><strong>Comandos de Diagnóstico de Hardware</strong></p>
+<p><strong>3. lscpu (Información de la CPU)</strong></p>
+<p>Muestra información detallada sobre la arquitectura de la CPU.</p>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 85%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lscpu</td>
+<td>Muestra toda la información disponible.</td>
+</tr>
+<tr>
+<td>lscpu -e</td>
+<td>Muestra la información de la CPU en <strong>formato
+extendido/tabular</strong> (útil para sistemas
+multi-CPU/multi-núcleo).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico:</strong></p>
+<ol type="1">
+<li><p><strong>Ver un resumen de la arquitectura de la
+CPU:</strong></p></li>
+</ol>
+<p>lscpu</p>
+<p>Architecture: x86_64</p>
+<p>CPU(s): 8</p>
+<p>Thread(s) per core: 2</p>
+<p>Core(s) per socket: 4</p>
+<p>Socket(s): 1</p>
+<p>Vendor ID: GenuineIntel</p>
+<p>...</p>
+<p><strong>4. lspci (Información de Dispositivos PCI)</strong></p>
+<p>Muestra información sobre los dispositivos PCI (Peripheral Component
+Interconnect), que incluyen tarjetas gráficas, adaptadores de red,
+controladores USB, etc.</p>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 84%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lspci</td>
+<td>Lista todos los dispositivos PCI de forma breve.</td>
+</tr>
+<tr>
+<td>lspci -nn</td>
+<td>Muestra los identificadores de <strong>vendor y device</strong> en
+formato numérico (útil para buscar <em>drivers</em>).</td>
+</tr>
+<tr>
+<td>lspci -k</td>
+<td>Muestra el <strong>módulo del <em>kernel</em></strong> que está
+siendo usado por cada dispositivo.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico:</strong></p>
+<ol type="1">
+<li><p><strong>Listar todos los dispositivos PCI, incluyendo el
+<em>driver</em> activo:</strong></p></li>
+</ol>
+<p>lspci -k</p>
+<p>01:00.0 VGA compatible controller: NVIDIA Corporation Device 1f08
+(rev a1)</p>
+<p>Subsystem: Micro-Star International Co., Ltd. Device 3792</p>
+<p>Kernel driver in use: nvidia</p>
+<p>Kernel modules: nvidiafb, nouveau, nvidia_drm, nvidia</p>
+<p>...</p>
+<p><strong>Comandos de Gestión de Almacenamiento</strong></p>
+<p><strong>5. df (Disk Free)</strong></p>
+<p>Muestra información sobre la utilización del espacio en disco de los
+sistemas de archivos montados.</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 83%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>df</td>
+<td>Muestra el uso del disco en bloques de 1K.</td>
+</tr>
+<tr>
+<td>df -h</td>
+<td>Muestra el uso del disco en <strong>formato legible por
+humanos</strong> (-h, e.g., MB, GB).</td>
+</tr>
+<tr>
+<td>df -T</td>
+<td>Incluye la <strong>columna de tipo</strong> de sistema de archivos
+(e.g., ext4, xfs).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico:</strong></p>
+<ol type="1">
+<li><p><strong>Ver el espacio libre en todos los discos en formato
+legible:</strong></p></li>
+</ol>
+<p>df -hT</p>
+<p>Filesystem Type Size Used Avail Use% Mounted on</p>
+<p>/dev/sda2 ext4 98G 15G 78G 16% /</p>
+<p>tmpfs tmpfs 3.9G 0 3.9G 0% /dev/shm</p>
+<p>/dev/sda1 vfat 511M 6.1M 505M 2% /boot/efi</p>
+<p><strong>6. du (Disk Usage)</strong></p>
+<p>Estima el espacio utilizado por archivos y directorios de forma
+recursiva.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 74%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>du</td>
+<td>Muestra el uso del disco para el directorio actual en bloques.</td>
+</tr>
+<tr>
+<td>du -h</td>
+<td>Muestra el uso del disco en <strong>formato legible por
+humanos</strong>.</td>
+</tr>
+<tr>
+<td>du -sh &lt;directorio&gt;</td>
+<td>Muestra el <strong>total sumado</strong> (-s de <em>summarize</em>)
+del directorio en formato legible.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico:</strong></p>
+<ol type="1">
+<li><p><strong>Ver cuánto espacio está ocupando el directorio de
+Descargas:</strong></p></li>
+</ol>
+<p>du -sh ~/Descargas</p>
+<p>4.2G /home/jose/Descargas</p>
+<ol start="2" type="1">
+<li><p><strong>Ver el tamaño de cada subdirectorio dentro de /var/log
+(para diagnóstico):</strong></p></li>
+</ol>
+<p>sudo du -h /var/log | sort -h</p>
+<p>...</p>
+<p>4.0K /var/log/apt</p>
+<p>12K /var/log/cups</p>
+<p>8.1M /var/log/journal</p>
+<p>50M /var/log</p>
+<p><strong>Comandos de Procesos y Transferencia</strong></p>
+<p><strong>7. nohup (No Hang Up)</strong></p>
+<p>Ejecuta un comando de modo que no reciba la señal HUP
+(<em>hangup</em>) cuando el usuario se desconecta o cierra la terminal.
+El proceso continúa ejecutándose en segundo plano.</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 79%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Sintaxis</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>nohup &lt;comando&gt; &amp;</td>
+<td>Ejecuta el comando en segundo plano (&amp;) e ignora la señal HUP.
+La salida se redirige al archivo nohup.out</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico:</strong></p>
+<ol type="1">
+<li><p><strong>Iniciar un <em>script</em> largo que crea un <em>log</em>
+y desconectarse inmediatamente sin detenerlo:</strong></p></li>
+</ol>
+<p>nohup ./mi_script_largo.sh &amp;</p>
+<p>[1] 12345</p>
+<p>nohup: ignoring input and appending output to 'nohup.out'</p>
+<p># Ahora el usuario puede cerrar la sesión de SSH o la terminal, y el
+script seguirá ejecutándose.</p>
+<p><strong>8. rsync (Sincronización Remota)</strong></p>
+<p>Una utilidad increíblemente versátil para copiar y sincronizar
+archivos local y remotamente. Solo transfiere las diferencias,
+minimizando el ancho de banda.</p>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rsync -av &lt;origen&gt; &lt;destino&gt;</td>
+<td>Copia archivos de forma <strong>a</strong>rchivada (preservando
+permisos, etc.) y <strong>v</strong>erbosa (muestra progreso).</td>
+</tr>
+<tr>
+<td>rsync -avz &lt;origen&gt; &lt;destino&gt;</td>
+<td>Añade <strong>compresión</strong> (-z) durante la transferencia
+(útil para redes lentas).</td>
+</tr>
+<tr>
+<td>rsync --delete</td>
+<td>Borra archivos en el <strong>destino</strong> que ya no existen en
+el origen (sincronización estricta).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Prácticos:</strong></p>
+<ol type="1">
+<li><p><strong>Sincronizar el directorio de documentos de jose con una
+copia de seguridad en un disco externo (localmente):</strong></p></li>
+</ol>
+<p>rsync -av ~/Documentos/ /mnt/backup_drive/documentos_bkp/</p>
+<ol start="2" type="1">
+<li><p><strong>Sincronizar archivos a un servidor remoto a través de SSH
+(el servidor es servidor01):</strong></p></li>
+</ol>
+<p>jose@Ubuntu2404:~$ rsync -avz --progress ~/logs/
+jose@servidor01:/var/backups/</p>
+<p>rsync -avz --progress ~/logs/ jose@servidor01:/var/backups/</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 22%" />
+<col style="width: 51%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Parte del Comando</strong></th>
+<th><strong>Significado</strong></th>
+<th><strong>Función</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rsync</td>
+<td>Comando principal</td>
+<td>Utilidad de sincronización eficiente.</td>
+</tr>
+<tr>
+<td><strong>-a</strong></td>
+<td>Archive mode</td>
+<td>Combina varias opciones esenciales: preserva permisos, propietario,
+grupo, <em>timestamps</em>, y recursividad. <strong>Es crucial para
+backups.</strong></td>
+</tr>
+<tr>
+<td><strong>-v</strong></td>
+<td>Verbose</td>
+<td>Muestra una lista de archivos que se están transfiriendo para que
+sepas qué está sucediendo.</td>
+</tr>
+<tr>
+<td><strong>-z</strong></td>
+<td>Compress</td>
+<td>Comprime los datos durante la transferencia SSH, lo que acelera el
+proceso, especialmente con archivos grandes o conexiones lentas.</td>
+</tr>
+<tr>
+<td><strong>--progress</strong></td>
+<td>Progress</td>
+<td>Muestra el progreso de cada archivo individualmente, dando una
+indicación visual de la velocidad y el tiempo restante.</td>
+</tr>
+<tr>
+<td><strong>~/logs/</strong></td>
+<td>Origen (Source)</td>
+<td>La ruta a la carpeta local que se va a enviar. <strong>La barra
+diagonal final (/) es importante</strong>; significa que se sincroniza
+el <em>contenido</em> de logs/, no la carpeta logs en sí.</td>
+</tr>
+<tr>
+<td><strong>jose@servidor01:</strong></td>
+<td>Conexión SSH</td>
+<td>Especifica la conexión al servidor remoto (servidor01) usando el
+usuario jose.</td>
+</tr>
+<tr>
+<td><strong>/var/backups/</strong></td>
+<td>Destino (Destination)</td>
+<td>El directorio en el servidor remoto donde se guardará el
+<em>contenido</em> de la carpeta logs/.</td>
+</tr>
+</tbody>
+</table>
+<p>Solo debes asegurar que:</p>
+<ol type="1">
+<li><p>El servidor servidor01 sea accesible por nombre o IP.</p></li>
+<li><p>El servicio SSH (sshd) esté activo en servidor01 (normalmente en
+el puerto 22, como hablamos antes).</p></li>
+<li><p>El usuario jose tenga permisos de escritura en el directorio
+remoto /var/backups/.</p></li>
+</ol>
+<p><strong>Comandos de Multiplexación de Terminal</strong></p>
+<p><strong>screen y tmux (Multiplexores de Terminal)</strong></p>
+<p>Ambos son <strong>multiplexores de terminal</strong> que permiten
+crear múltiples sesiones de terminal persistentes. Puedes desconectarte
+(detachar) de una sesión y volver a conectarte (reatachar) más tarde,
+manteniendo los programas en ejecución. Son esenciales para el trabajo
+en servidores.</p>
+<table>
+<colgroup>
+<col style="width: 41%" />
+<col style="width: 58%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>screen</td>
+<td>Inicia una nueva sesión de <em>screen</em>.</td>
+</tr>
+<tr>
+<td>screen -ls</td>
+<td>Lista las sesiones de <em>screen</em> abiertas.</td>
+</tr>
+<tr>
+<td>screen -r &lt;pid&gt;</td>
+<td>Reataquea la sesión especificada.</td>
+</tr>
+<tr>
+<td>tmux</td>
+<td>Inicia una nueva sesión de <em>tmux</em>.</td>
+</tr>
+<tr>
+<td>tmux ls</td>
+<td>Lista las sesiones de <em>tmux</em> abiertas.</td>
+</tr>
+<tr>
+<td>tmux attach-session -t &lt;nombre&gt;</td>
+<td>Reataquea la sesión especificada por nombre.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos (usando screen como ejemplo):</strong></p>
+<p>sudo apt install screen</p>
+<ol type="1">
+<li><p><strong>Iniciar una sesión de screen y ejecutar un comando
+largo:</strong></p></li>
+</ol>
+<p>screen</p>
+<p># (Ahora estás en la nueva sesión de screen)</p>
+<p>ping google.com</p>
+<ol start="2" type="1">
+<li><p><strong>Desconectarse (Detachar) de la sesión (sin detener el
+ping):</strong></p>
+<ul>
+<li><p>Presiona <strong>Ctrl+A</strong> y luego suelta y presiona la
+tecla <strong>D</strong>.</p></li>
+<li><p>Verás: [detached from 12345.pts-0.Ubuntu2404]</p></li>
+</ul></li>
+<li><p><strong>Volver a la sesión para ver cómo sigue el
+ping:</strong></p></li>
+</ol>
+<p>screen -r</p>
+<p># El ping sigue ejecutándose donde lo dejaste.</p>
+<p>Es muy común que los usuarios de terminal tengan problemas la primera
+vez que intentan desconectarse (detachar) de una sesión de screen, ya
+que la secuencia de teclas es específica y no produce una salida
+inmediata visible.</p>
+<p>Debes usar la <strong>tecla de comando</strong> (Ctrl+A) seguida de
+la tecla de acción (D).</p>
+<ol type="1">
+<li><p><strong>Inicia screen:</strong></p></li>
+</ol>
+<blockquote>
+<p>screen</p>
+<p>La pantalla se limpiará y verás un <em>prompt</em> normal, pero ahora
+estás <em>dentro</em> de una sesión de screen.</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Ejecuta el Comando Largo:</strong></p></li>
+</ol>
+<blockquote>
+<p>Ejecuta el comando que quieres que se siga ejecutando en segundo
+plano:</p>
+<p>ping google.com</p>
+<p>Verás que el ping comienza a ejecutarse, mostrando una línea de
+respuesta cada segundo.</p>
+</blockquote>
+<h3 id="desconectarse-detachar-de-la-sesión"><strong>Desconectarse
+(Detachar) de la Sesión</strong></h3>
+<p>Para que el comando ping siga ejecutándose en el entorno de screen
+mientras tú vuelves a tu terminal principal, debes presionar la
+secuencia de teclas de comando:</p>
+<ol type="1">
+<li><p><strong>Presiona y mantén</strong> la tecla
+<strong>Ctrl</strong>.</p></li>
+<li><p>Mientras mantienes Ctrl, presiona la tecla
+<strong>A</strong>.</p></li>
+<li><p><strong>Suelta</strong> ambas teclas (Ctrl y A).</p></li>
+<li><p>Inmediatamente, presiona la tecla <strong>D</strong> (de
+<em>Detach</em>).</p></li>
+</ol>
+<h4 id="resultado-esperado"><strong>Resultado Esperado</strong></h4>
+<p>Si lo haces correctamente, <strong>dejarás de ver el ping</strong> y
+volverás al <em>prompt</em> de tu terminal principal</p>
+<p>Verás un mensaje de confirmación similar a este:</p>
+<p>[detached from 12345.pts-0.Ubuntu2404]</p>
+<p>Esto confirma que la sesión con el ping sigue activa en el sistema,
+pero desconectada de tu terminal.</p>
+<h3 id="volver-a-conectar-reattach-a-la-sesión"><strong>Volver a
+Conectar (Reattach) a la Sesión</strong></h3>
+<p>Si deseas ver el estado actual del ping, puedes volver a conectarte a
+la sesión que dejaste en segundo plano.</p>
+<ol type="1">
+<li><p><strong>Lista las sesiones activas</strong> (opcional, pero útil
+si tienes varias):</p></li>
+</ol>
+<blockquote>
+<p>screen -ls</p>
+<p>Verás algo como There is a screen on: 12345.pts-0.Ubuntu2404
+(Detached).</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Vuelve a la sesión:</strong></p></li>
+</ol>
+<blockquote>
+<p>screen -r</p>
+<p>Si solo tienes una sesión desconectada, screen -r se conectará
+automáticamente. Si tienes varias, tendrás que especificar el ID de la
+sesión (screen -r 12345).</p>
+</blockquote>
+<h4 id="resultado-esperado-1"><strong>Resultado Esperado</strong></h4>
+<p>La pantalla se actualizará y verás el ping google.com ejecutándose
+exactamente donde lo dejaste, con los nuevos paquetes que se enviaron
+mientras estabas desconectado.</p>
+<script src="nav.js"></script>
+</body>
+</html>

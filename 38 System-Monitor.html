@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>38 System-Monitor</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>System-Monitor</strong></p>
+<p>El <em>script</em> <strong>System-Monitor</strong> es una herramienta
+<strong>Bash</strong> diseñada para sistemas Linux/Unix que proporciona
+una monitorización en <strong>tiempo real</strong> del uso de la
+<strong>CPU</strong>, <strong>memoria</strong> y <strong>disco</strong>.
+El <em>script</em> se actualiza automáticamente cada pocos segundos y
+ofrece varias opciones de configuración.</p>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 75%" />
+</colgroup>
+<thead>
+<tr>
+<th>Característica</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Función Principal</strong></td>
+<td>Monitoriza y muestra el uso de recursos principales del sistema
+(CPU, RAM, Disco) en tiempo real.</td>
+</tr>
+<tr>
+<td><strong>Tecnología</strong></td>
+<td>Es un <em>script</em> de <em>Shell</em> (Bash) que utiliza comandos
+nativos de Linux.</td>
+</tr>
+<tr>
+<td><strong>Actualización</strong></td>
+<td>El <em>script</em> se refresca por defecto cada 5 segundos.</td>
+</tr>
+<tr>
+<td><strong>Ventajas</strong></td>
+<td>Fácil de usar, configurable (intervalo, puntos de montaje de disco)
+y cuenta con un instalador/desinstalador simple.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Instalación Paso a Paso</strong></p>
+<p>El proceso es muy sencillo ya que el repositorio incluye un
+<em>script</em> de instalación (install.sh).</p>
+<p><strong>Paso 1: Clonar el Repositorio</strong></p>
+<p>Abre tu terminal y descarga el código fuente:</p>
+<p>git clone https://github.com/elliotsecops/System-Monitor.git</p>
+<p>cd System-Monitor</p>
+<p><strong>Paso 2: Dar Permiso de Ejecución</strong></p>
+<p>Es necesario otorgar permiso de ejecución al <em>script</em>
+principal y al <em>script</em> de instalación:</p>
+<p>chmod u+x system_monitor.sh</p>
+<p>chmod u+x install.sh</p>
+<p><img src=".\\media\\38 System-Monitor/media/image1.png"
+style="width:5.90556in;height:2.09722in" /></p>
+<p><strong>Paso 3: Instalar el Script</strong></p>
+<p>Ejecuta el <em>script</em> de instalación. Este paso moverá el
+archivo ejecutable a una ubicación accesible en tu sistema
+(probablemente a /usr/local/bin) para que puedas llamarlo directamente
+desde cualquier directorio.</p>
+<p>./install.sh</p>
+<p>Una vez completada la instalación, ya no es necesario estar en el
+directorio System-Monitor para ejecutar la herramienta.</p>
+<p><img src=".\\media\\38 System-Monitor/media/image2.png"
+style="width:5.90556in;height:0.81111in" /></p>
+<p><strong>Ejecución y Uso</strong></p>
+<p><strong>Uso Básico</strong></p>
+<p>Para ejecutar el monitor con la configuración predeterminada
+(actualización cada 5 segundos y monitoreo del disco raíz), simplemente
+escribe el nombre del <em>script</em>:</p>
+<p>system_monitor</p>
+<p><strong>Opciones de la Línea de Comandos</strong></p>
+<p>Puedes usar las siguientes banderas para configurar el comportamiento
+del monitor:</p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 27%" />
+<col style="width: 48%" />
+</colgroup>
+<thead>
+<tr>
+<th>Opción</th>
+<th>Comando de Ejemplo</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Establecer Intervalo</strong></td>
+<td>system_monitor -i 10</td>
+<td>Configura el intervalo de actualización a 10 segundos.</td>
+</tr>
+<tr>
+<td><strong>Añadir Discos</strong></td>
+<td>system_monitor -d /mnt/data</td>
+<td>Añade puntos de montaje de disco para monitorizar (puedes usar -d
+múltiples veces).</td>
+</tr>
+<tr>
+<td><strong>Cargar Configuración</strong></td>
+<td>system_monitor -c config.sh</td>
+<td>Carga las configuraciones predeterminadas desde un archivo
+externo.</td>
+</tr>
+<tr>
+<td><strong>Ayuda</strong></td>
+<td>system_monitor -h</td>
+<td>Muestra el mensaje de ayuda.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Detener el Monitoreo</strong></p>
+<p>Para detener el <em>script</em> de monitorización y volver al
+<em>prompt</em> de tu terminal, simplemente presiona:</p>
+<p>Ctrl+C</p>
+<p><strong>Desinstalación</strong></p>
+<p>Si deseas eliminar el <em>script</em> del sistema, puedes usar el
+<em>script</em> de desinstalación incluido:</p>
+<p>Bash</p>
+<p>./uninstall.sh</p>
+<script src="nav.js"></script>
+</body>
+</html>

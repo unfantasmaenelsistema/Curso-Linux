@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>08 Cubic</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>Cubic (Custom Ubuntu ISO Creator)</strong></p>
+<p><a
+href="https://github.com/PJ-Singh-001/Cubic">https://github.com/PJ-Singh-001/Cubic</a></p>
+<p><strong>Método Recomendado: Usando Cubic (Gráfico y
+Fácil)</strong></p>
+<p><strong>Cubic</strong> es una utilidad gráfica diseñada
+específicamente para crear imágenes de disco (ISO) personalizadas de
+Ubuntu y sus derivados. Es la opción más sencilla para
+principiantes.</p>
+<p><strong>Pasos para usar Cubic</strong></p>
+<ol type="1">
+<li><p>Instalar Cubic:</p></li>
+</ol>
+<blockquote>
+<p>Cubic no está en los repositorios predeterminados de Ubuntu, por lo
+que debes añadir su PPA e instalarlo:</p>
+<p>sudo apt install -y software-properties-common</p>
+<p>sudo add-apt-repository ppa:cubic-wizard/release</p>
+<p>sudo apt update</p>
+<p>sudo apt install cubic</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Iniciar el Proyecto en Cubic:</strong></p>
+<ul>
+<li><p>Abre Cubic y selecciona un directorio de proyecto donde se
+guardarán los archivos temporales.</p></li>
+<li><p>Selecciona la <strong>ISO base</strong> de Ubuntu que deseas
+personalizar (por ejemplo, la ISO de Ubuntu 24.04).</p></li>
+<li><p>Cubic extraerá el sistema de archivos de la ISO base.</p></li>
+</ul></li>
+<li><p>Personalizar el Sistema de Archivos (El Corazón de tu
+Distro):</p></li>
+</ol>
+<blockquote>
+<p>Una vez extraído, Cubic te abrirá un entorno de terminal dentro del
+sistema de archivos de la futura ISO. Aquí es donde realizas tus
+cambios.</p>
+</blockquote>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 75%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Tarea</strong></th>
+<th><strong>Comandos/Acciones Típicas</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Instalar Software</strong></td>
+<td>apt install nginx -y</td>
+</tr>
+<tr>
+<td><strong>Eliminar Software</strong></td>
+<td>apt purge paquetes-que-no-quiero -y seguido de apt autoremove
+-y</td>
+</tr>
+<tr>
+<td><strong>Añadir Archivos</strong></td>
+<td>Mover archivos de configuración personalizados (e.g.,
+<em>wallpaper</em>, .bashrc personalizado, etc.) al directorio
+/etc/skel/ para que se apliquen a los nuevos usuarios.</td>
+</tr>
+<tr>
+<td><strong>Configuración</strong></td>
+<td>Cambiar ajustes del sistema, añadir <em>scripts</em> de inicio o
+cambiar la apariencia (temas, iconos).</td>
+</tr>
+<tr>
+<td><strong>Limpieza</strong></td>
+<td>Limpiar la caché de APT para reducir el tamaño de la ISO: apt
+clean</td>
+</tr>
+</tbody>
+</table>
+<ol start="4" type="1">
+<li><p><strong>Generar la ISO Personalizada:</strong></p>
+<ul>
+<li><p>Una vez que has terminado los cambios en la terminal, cierra la
+terminal dentro de Cubic.</p></li>
+<li><p>Cubic te pedirá que definas un <strong>nuevo kernel</strong> si
+instalaste uno, y te permitirá añadir <strong>paquetes extra</strong>
+para la instalación.</p></li>
+<li><p>Finalmente, Cubic empaquetará todo en una nueva imagen
+<strong>.iso</strong> y la guardará en tu directorio de
+proyecto.</p></li>
+</ul></li>
+</ol>
+<p><strong>Método Avanzado: Usando live-build (Manual y
+Flexible)</strong></p>
+<p>Si quieres un control total, el kit de herramientas
+<strong>live-build</strong> (originalmente de Debian, pero funciona bien
+en Ubuntu) te permite construir la ISO completamente desde archivos de
+configuración.</p>
+<p><strong>Concepto y Proceso</strong></p>
+<ol type="1">
+<li><p><strong>Instalar live-build:</strong></p></li>
+</ol>
+<blockquote>
+<p>sudo apt install live-build</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p>Configurar el Entorno:</p></li>
+</ol>
+<blockquote>
+<p>Creas una carpeta de proyecto e inicias la configuración para definir
+el entorno:</p>
+<p>lb config</p>
+<p># Opcional: lb config --distribution focal --architecture amd64</p>
+</blockquote>
+<ol start="3" type="1">
+<li><p>Personalización:</p></li>
+</ol>
+<blockquote>
+<p>Aquí es donde defines lo que quieres en tu sistema a través de varios
+archivos de configuración:</p>
+</blockquote>
+<ul>
+<li><p><strong>Paquetes:</strong> Editas el archivo
+config/package-lists/mis-paquetes.list.chroot para listar el software
+que deseas instalar (uno por línea).</p></li>
+<li><p><strong>Archivos personalizados:</strong> Colocas tus scripts,
+archivos de configuración o fondos de pantalla en la carpeta
+config/includes.chroot/ para que se copien al sistema final.</p></li>
+</ul>
+<ol start="4" type="1">
+<li><p>Compilación:</p></li>
+</ol>
+<blockquote>
+<p>El comando final toma toda la configuración y construye la ISO:</p>
+<p>sudo lb build</p>
+</blockquote>
+<p>Este método requiere un conocimiento más profundo de la estructura de
+directorios de Linux y es más utilizado por desarrolladores que
+necesitan automatizar la construcción de versiones.</p>
+<p><strong>Consideraciones Clave</strong></p>
+<ul>
+<li><p><strong>Licencia y Marca:</strong> Si planeas distribuir tu
+distro, asegúrate de comprender los términos de la marca Ubuntu, que
+pueden requerir que uses un nombre y logotipo diferentes si haces
+cambios significativos.</p></li>
+<li><p><strong>Limpieza de Caché:</strong> Siempre ejecuta apt clean
+dentro del entorno chroot (en Cubic) o asegúrate de que esté configurado
+en live-build. Si no lo haces, la ISO resultante será mucho más grande
+debido a los paquetes descargados que quedan en la caché.</p></li>
+<li><p><strong>Pruebas:</strong> Antes de grabarla o instalarla, prueba
+tu ISO en una máquina virtual (como VirtualBox o GNOME Boxes) para
+asegurarte de que todo funcione correctamente.</p></li>
+</ul>
+<p><strong>1. Ubuntu para Seguridad Informática y Auditoría (Basada en
+Ubuntu Server/Desktop)</strong></p>
+<p>En lugar de usar la pesada Kali Linux, puedes construir tu propia
+distribución ligera de <strong>Pentesting/Seguridad</strong> basada en
+una instalación mínima de Ubuntu, seleccionando solo las herramientas
+que realmente necesitas.</p>
+<table>
+<colgroup>
+<col style="width: 32%" />
+<col style="width: 34%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Ámbito</strong></th>
+<th><strong>Personalización Clave</strong></th>
+<th><strong>Ventaja</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Seguridad/Pentesting</strong></td>
+<td>Instalar solo herramientas esenciales como <strong>Nmap</strong>,
+<strong>Wireshark</strong>, <strong>Metasploit</strong>,
+<strong>Aircrack-ng</strong>, y <strong>Hydra</strong>. Eliminar todo el
+<em>bloatware</em> de Ubuntu Desktop.</td>
+<td>Creas una distribución <strong>más rápida, ligera</strong> y
+<strong>más sigilosa</strong> (menos servicios corriendo por defecto)
+que las distros de seguridad tradicionales.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cómo usar Cubic:</strong></p>
+<ol type="1">
+<li><p>Comienza con una ISO de <strong>Ubuntu Desktop Minimal</strong> o
+<strong>Ubuntu Server</strong>.</p></li>
+<li><p>En la terminal de Cubic, instala las herramientas de seguridad
+que elijas.</p></li>
+</ol>
+<p><strong>2. Ubuntu para Desarrollo Web y Contenedores (Basada en
+Ubuntu Desktop)</strong></p>
+<p>Crea un entorno preconfigurado para desarrolladores, eliminando la
+fase de <em>setup</em> inicial de cada máquina nueva.</p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 41%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Ámbito</strong></th>
+<th><strong>Personalización Clave</strong></th>
+<th><strong>Ventaja</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Desarrollo Web/DevOps</strong></td>
+<td>Preinstalar <strong>Git</strong>, <strong>Docker</strong>,
+<strong>Docker Compose</strong>, <strong>Node.js (vía NVM)</strong>,
+<strong>Python3 (pip)</strong>, y un editor de código (como <strong>VS
+Code</strong>). Configurar un archivo .bashrc con <em>aliases</em>
+útiles.</td>
+<td>La distro está <strong>lista para codificar y desplegar</strong> al
+instante, con todas las dependencias y herramientas de contenedores
+preinstaladas y configuradas para el primer uso.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cómo usar Cubic:</strong></p>
+<ol type="1">
+<li><p>Comienza con una ISO de <strong>Ubuntu Desktop</strong> (la
+versión estándar).</p></li>
+<li><p>Usa la terminal de Cubic para ejecutar los comandos de
+instalación de Docker, Node.js y el resto de software, ¡y limpia la
+caché de APT antes de generar la ISO!</p></li>
+</ol>
+<p><strong>1. Preparación y Requisitos</strong></p>
+<ol type="1">
+<li><p><strong>Descarga la ISO Base:</strong> Obtén la imagen
+<strong>.iso oficial de Ubuntu Desktop 24.04</strong> (o la versión que
+prefieras).</p></li>
+<li><p><strong>Instala Cubic:</strong> Asegúrate de tener Cubic
+instalado en tu sistema anfitrión:</p></li>
+</ol>
+<blockquote>
+<p>sudo apt install -y software-properties-common</p>
+<p>sudo add-apt-repository ppa:cubic-wizard/release</p>
+<p>sudo apt update</p>
+<p>sudo apt install cubic</p>
+</blockquote>
+<p><strong>2. Configuración Inicial en Cubic</strong></p>
+<ol type="1">
+<li><p><strong>Abre Cubic:</strong> Inicia la aplicación.</p></li>
+<li><p><strong>Selecciona la ISO:</strong> Sigue los pasos para elegir
+el archivo .iso de Ubuntu Desktop 24.04 que descargaste.</p></li>
+<li><p><strong>Define el Entorno:</strong> Cubic te pedirá que definas
+un <strong>directorio de proyecto</strong> (donde guardará los archivos
+temporales) y el <strong>nombre</strong> de la nueva ISO (p. ej.,
+Ubuntu-Security-24.04).</p></li>
+<li><p><strong>Extracción:</strong> Espera a que Cubic extraiga el
+sistema de archivos de la ISO base.</p></li>
+</ol>
+<p><strong>3. Instalación de Herramientas de Seguridad y Docker (El Paso
+Clave)</strong></p>
+<p>Cubic te presentará una terminal que te da acceso al sistema de
+archivos raíz de la futura distro. Aquí debes instalar todo el
+software.</p>
+<p><strong>A. Instalar Docker y Docker Compose</strong></p>
+<p>Docker es esencial para correr herramientas de seguridad sin afectar
+el sistema base.</p>
+<p># 1. Instalar paquetes de pre-requisito para Docker</p>
+<p>apt install -y ca-certificates curl gnupg</p>
+<p># 2. Agregar la clave GPG oficial de Docker</p>
+<p>install -m 0755 -d /etc/apt/keyrings</p>
+<p>curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg
+--dearmor -o /etc/apt/keyrings/docker.gpg</p>
+<p>chmod a+r /etc/apt/keyrings/docker.gpg</p>
+<p># 3. Agregar el repositorio de Docker a APT</p>
+<p>echo \</p>
+<p>"deb [arch=\"$(dpkg --print-architecture)\"
+signed-by=/etc/apt/keyrings/docker.gpg]
+https://download.docker.com/linux/ubuntu \</p>
+<p>\"$(. /etc/os-release &amp;&amp; echo "$VERSION_CODENAME")\" stable"
+| tee /etc/apt/sources.list.d/docker.list &gt; /dev/null</p>
+<p># 4. Actualizar las listas de paquetes</p>
+<p>apt update</p>
+<p># 5. Instalar Docker Engine, CLI y Docker Compose</p>
+<p>apt install -y docker-ce docker-ce-cli containerd.io
+docker-buildx-plugin docker-compose-plugin</p>
+<p>Opcional pero recomendado: Añadir un usuario temporal al grupo docker
+para evitar usar sudo</p>
+<p><strong>Nota</strong>: Este usuario deberá crearse/modificarse en el
+paso de "Configuración de Usuario" si es necesario.</p>
+<p>Por ahora, solo nos aseguramos de que los demonios estén
+instalados.</p>
+<p><strong>B. Instalar Herramientas de Auditoría
+Principales</strong></p>
+<p>Instalaremos las herramientas más comunes de seguridad y
+auditoría:</p>
+<p># Actualizar por si acaso (aunque ya lo hicimos, mejor prevenir)</p>
+<p>apt update</p>
+<p># 1. Paquetes básicos de red y análisis</p>
+<p>apt install -y nmap net-tools dnsutils tcpdump wireshark tshark</p>
+<p># 2. Herramientas de password cracking y fuerza bruta</p>
+<p>apt install -y hydra john hashcat</p>
+<p># 3. Herramientas de explotación y escaneo de vulnerabilidades</p>
+<p>apt install -y metasploit-framework sqlmap whatweb nikto
+searchsploit</p>
+<p># 4. Herramientas de red inalámbrica</p>
+<p>apt install -y aircrack-ng</p>
+<p># 5. Herramientas de soporte para desarrollo (útiles para
+scripts)</p>
+<p>apt install -y python3-pip git vim</p>
+<p><strong>C. Personalizaciones de la Shell (Opcional)</strong></p>
+<p>Puedes mejorar la <em>shell</em> para el trabajo de seguridad (p.
+ej., instalar <strong>Zsh</strong> y <strong>Oh My Zsh</strong>), pero
+esto es más avanzado y debe hacerse asegurando que los archivos de
+configuración se copien correctamente al directorio del usuario
+(/etc/skel/).</p>
+<p>Puedes personalizar prácticamente todos los elementos visuales de tu
+sistema a nivel de imagen y aspecto dentro del entorno de Cubic (o
+cualquier método de creación de ISO), ya que estás modificando el
+sistema de archivos raíz.</p>
+<p><strong>Elementos de Imagen y Aspecto a Personalizar</strong></p>
+<p>La personalización se centra principalmente en los archivos que
+definen la interfaz de usuario, los temas y los fondos de pantalla.</p>
+<p><strong>1. Temas e Iconos Globales</strong></p>
+<p>Estos definen el diseño de las ventanas, botones, menús y
+carpetas.</p>
+<ul>
+<li><p><strong>Temas GTK:</strong> Cambia el aspecto de las aplicaciones
+GTK (la mayoría de las aplicaciones de Ubuntu).</p></li>
+<li><p><strong>Temas de Shell (GNOME):</strong> Modifica la apariencia
+del panel superior, el menú de actividades y las
+notificaciones.</p></li>
+<li><p><strong>Paquetes de Iconos:</strong> Cambia la apariencia de los
+iconos del sistema, el lanzador y las carpetas.</p></li>
+</ul>
+<p><strong>Dónde se modifica:</strong> Instalas los paquetes de temas e
+iconos con apt install y luego configuras los valores predeterminados
+usando herramientas de línea de comandos como gsettings para establecer
+los temas por defecto en la instalación.</p>
+<p><strong>2. Pantallas de Inicio y Carga</strong></p>
+<p>Estas son cruciales ya que son las primeras impresiones que tiene el
+usuario.</p>
+<ul>
+<li><p><strong>Fondo de Pantalla del Escritorio:</strong> Reemplazar el
+archivo de fondo de pantalla predeterminado de Ubuntu.</p></li>
+<li><p><strong>Fondo de la Pantalla de Bloqueo/Inicio de Sesión
+(GDM):</strong> Modificar el fondo que aparece antes de que el usuario
+inicie sesión.</p></li>
+<li><p><strong>Pantalla de Arranque (Plymouth):</strong> Cambiar la
+animación o el logo que aparece mientras el sistema se carga, justo
+después del BIOS/UEFI. Esto requiere editar archivos de configuración de
+Plymouth.</p></li>
+</ul>
+<p><strong>Dónde se modifica:</strong> Los fondos de escritorio se
+suelen colocar en rutas como /usr/share/backgrounds/. La configuración
+de GDM y Plymouth implica modificar archivos dentro de /etc/.</p>
+<p><strong>3. Configuraciones del Dock y Aplicaciones por
+Defecto</strong></p>
+<p>Puedes definir qué verá el usuario en el lanzador al iniciar sesión
+por primera vez.</p>
+<ul>
+<li><p><strong>Aplicaciones del Dock/Lanzador:</strong> Añadir o
+eliminar iconos del Dock de GNOME por defecto (p. ej., puedes añadir
+Docker y VS Code).</p></li>
+<li><p><strong>Fuentes del Sistema:</strong> Cambiar el tipo de letra
+predeterminado para el sistema operativo.</p></li>
+<li><p><strong>Esquema de Colores:</strong> Configurar las paletas de
+colores por defecto en la terminal u otras aplicaciones.</p></li>
+</ul>
+<p><strong>Dónde se modifica:</strong> Estas configuraciones se
+controlan principalmente a través de la carpeta de <strong>esqueleto del
+usuario (/etc/skel/)</strong> y los valores predeterminados de
+<strong>gsettings</strong>. Cualquier archivo que copies a /etc/skel/
+(como un archivo .bashrc o .config/) se copiará automáticamente al
+directorio principal del primer usuario creado.</p>
+<p><strong>Resumen de la Intervención en Cubic</strong></p>
+<p>En la terminal de Cubic, la personalización visual se resume en:</p>
+<ol type="1">
+<li><p><strong>Instalar:</strong> Usar apt install para añadir temas,
+iconos o fuentes.</p></li>
+<li><p><strong>Configurar:</strong> Usar gsettings o comandos
+específicos para establecer esos temas como predeterminados.</p></li>
+<li><p><strong>Copiar:</strong> Mover tus propios archivos (logos,
+fondos) a las rutas correctas (/usr/share/backgrounds, etc.).</p></li>
+<li><p><strong>Limpiar:</strong> Ejecutar apt clean al final.</p></li>
+</ol>
+<p><strong>4. Limpieza y Finalización</strong></p>
+<p>Una vez que hayas terminado la instalación y configuración en la
+terminal de Cubic:</p>
+<ol type="1">
+<li><p>Limpiar la Caché de APT:</p></li>
+</ol>
+<blockquote>
+<p>¡ESENCIAL! Esto elimina los paquetes descargados para reducir el
+tamaño final de la ISO.</p>
+<p>apt clean</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Salir del Entorno:</strong> Escribe exit para cerrar la
+terminal y volver a la interfaz de Cubic.</p></li>
+<li><p><strong>Kernel y Paquetes Adicionales:</strong> Cubic te
+preguntará si has instalado un nuevo kernel (si no hiciste cambios de
+kernel, simplemente continúa).</p></li>
+<li><p><strong>Generar la ISO:</strong> Presiona el botón de
+<strong>"Generar"</strong> o <strong>"Build"</strong>. Cubic empaquetará
+todo en tu nueva ISO personalizada de seguridad informática.</p></li>
+</ol>
+<p><strong>5. Pruebas</strong></p>
+<p>Usa una máquina virtual (VirtualBox o VMWare) para arrancar la nueva
+ISO. Una vez dentro, comprueba que:</p>
+<ul>
+<li><p>El sistema arranca correctamente.</p></li>
+<li><p>Puedes abrir la terminal y ejecutar comandos como nmap
+--version.</p></li>
+<li><p>Docker está instalado (aunque el usuario que inicie sesión deberá
+añadirse al grupo docker la primera vez, o puedes automatizar este
+paso).</p></li>
+</ul>
+<script src="nav.js"></script>
+</body>
+</html>

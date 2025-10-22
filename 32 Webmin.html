@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>32 Webmin</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>Webadmin</strong></p>
+<h1 id="introducción">INTRODUCCIÓN</h1>
+<p>Webmin es un panel de control de administración basado en web para
+sistemas operativos tipo Unix, como Linux (Ubuntu, Debian, Kali,
+etc.).</p>
+<p>Su función principal es <strong>simplificar la gestión remota del
+sistema</strong> al traducir los complejos comandos de la línea de
+comandos de Linux a una interfaz gráfica de usuario (GUI) fácil de
+usar.</p>
+<p><strong>¿Qué es Webmin?</strong></p>
+<p>Webmin actúa como una <strong>interfaz gráfica</strong> para los
+archivos de configuración estándar de Linux. En lugar de editar
+manualmente archivos como /etc/fstab o /etc/apache2/apache2.conf, Webmin
+proporciona formularios y botones que manipulan esos archivos por
+ti.</p>
+<p>Es un conjunto de más de 100 módulos interconectados, cada uno
+dedicado a configurar un aspecto diferente del sistema.</p>
+<p><strong>¿Para qué Sirve Webmin?</strong></p>
+<p>Webmin sirve como una solución de administración integral para
+cualquier persona que necesite controlar un servidor sin depender
+exclusivamente de la terminal SSH.</p>
+<p>Sus principales utilidades se agrupan en las siguientes áreas:</p>
+<p><strong>1. Administración del Sistema Base</strong></p>
+<ul>
+<li><p><strong>Gestión de Usuarios:</strong> Crear, modificar y eliminar
+usuarios y grupos, y cambiar contraseñas.</p></li>
+<li><p><strong>Procesos y Servicios:</strong> Iniciar, detener o
+deshabilitar servicios del sistema (como SSH, Apache, etc.) y gestionar
+procesos activos.</p></li>
+<li><p><strong>Archivos y Tareas:</strong> Configurar tareas programadas
+(cron jobs), ver <em>logs</em> del sistema y rotar archivos de registro
+grandes (logrotate).</p></li>
+</ul>
+<p><strong>2. Red y Seguridad</strong></p>
+<ul>
+<li><p><strong>Firewall:</strong> Configurar las reglas de filtrado de
+paquetes (iptables/ip6tables) para abrir o cerrar puertos y asegurar el
+servidor.</p></li>
+<li><p><strong>Configuración de Red:</strong> Administrar direcciones
+IP, <em>gateways</em> y servidores DNS para las interfaces de
+red.</p></li>
+<li><p><strong>Control de Acceso:</strong> Gestionar la seguridad a
+nivel de servicio mediante <strong>TCP Wrappers</strong>.</p></li>
+</ul>
+<p><strong>3. Almacenamiento y Hardware</strong></p>
+<ul>
+<li><p><strong>Discos:</strong> Crear, formatear y gestionar particiones
+en discos locales (similar a fdisk).</p></li>
+<li><p><strong>Sistemas de Archivos:</strong> Montar y desmontar discos
+y sistemas de archivos remotos.</p></li>
+<li><p><strong>Tiempo del Sistema:</strong> Sincronizar la hora del
+servidor mediante NTP.</p></li>
+</ul>
+<p><strong>4. Administración de Aplicaciones (Módulos de
+Terceros)</strong></p>
+<ul>
+<li><p>Webmin se extiende para gestionar servicios comunes de servidor
+como <strong>Apache</strong> (servidor web), <strong>BIND</strong>
+(DNS), <strong>MySQL/MariaDB</strong> (bases de datos),
+<strong>Samba/NFS</strong> (compartición de archivos) y
+<strong>PostgreSQL</strong>.</p></li>
+</ul>
+<p><strong>5. Administración de Clústeres (Cluster)</strong></p>
+<ul>
+<li><p>Permite a un administrador <strong>ejecutar comandos, copiar
+archivos o instalar <em>software</em></strong> en múltiples servidores
+Webmin al mismo tiempo, facilitando la administración de granjas de
+servidores.</p></li>
+</ul>
+<p><strong>PROCESO DE INSTALACIÓN:</strong></p>
+<p>La forma más sencilla y mejor de conseguir <a
+href="https://webmin.com/about/"><strong>Webmin</strong></a> es usar
+automáticamente <a
+href="https://github.com/webmin/webmin/blob/master/webmin-setup-repo.sh"><strong>webmin-setup-repo.sh</strong></a>
+script para configurar repositorios en sus sistemas derivados <strong>de
+RHEL</strong> o <strong>Debian</strong>. Se puede hacer en dos sencillos
+pasos:</p>
+<p>sudo apt install curl</p>
+<p>curl -o webmin-setup-repo.sh
+https://raw.githubusercontent.com/webmin/webmin/master/webmin-setup-repo.sh</p>
+<p>sudo sh webmin-setup-repo.sh</p>
+<p>Este script configurará automáticamente el repositorio e instalará
+las claves GPG en tu sistema y proporcionará <strong>webmin</strong>
+para la instalación y actualizaciones fáciles en el futuro. Los sistemas
+compatibles y probados son <strong>Red Hat Enterprise Linux</strong>,
+<strong>Alma</strong>, <strong>Rocky</strong>, <strong>Oracle</strong>,
+<strong>CentOS Stream</strong>, <strong>Fedora</strong> o
+<strong>Debian</strong>, <strong>Ubuntu</strong>,
+<strong>Kali</strong>.</p>
+<p><img src=".\\media\\32 Webmin/media/image1.png"
+style="width:6.0698in;height:1.86986in" /></p>
+<p><strong>Instalar</strong></p>
+<p>Si el repositorio Webmin se ha configurado utilizando el script
+<strong>webmin-setup-repo.sh</strong> como se describió anteriormente,
+Webmin se puede instalar tan fácilmente como:</p>
+<p><strong>RHEL y derivados</strong></p>
+<p>sudo dnf install webmin</p>
+<p><strong>Debian y derivados</strong></p>
+<p>sudo apt-get install webmin --install-recommends</p>
+<p><strong>Acceso</strong></p>
+<p>Después de la instalación exitosa de Webmin, puede acceder a su
+interfaz ingresando https://&lt;Your-Server-IP&gt;:10000En su navegador.
+Compruebe que la configuración de su firewall permite el acceso a través
+del puerto 10000.</p>
+<p><img src=".\\media\\32 Webmin/media/image2.png"
+style="width:4.77622in;height:2.35167in" /></p>
+<p><strong>¿Qué credenciales usar?</strong></p>
+<p>Generalmente, Webmin utiliza las credenciales de un usuario existente
+en tu sistema Linux con permisos suficientes para administrar el
+servidor. Tienes dos opciones principales:</p>
+<ol type="1">
+<li><p><strong>Usuario root:</strong></p>
+<ul>
+<li><p><strong>Usuario:</strong> root</p></li>
+<li><p><strong>Contraseña:</strong> La contraseña que tengas configurada
+para el usuario root de tu sistema Linux.</p></li>
+</ul></li>
+<li><p><strong>Tu usuario de sudo:</strong></p>
+<ul>
+<li><p><strong>Usuario:</strong> El nombre de usuario que utilizas para
+iniciar sesión en tu terminal y ejecutar comandos con sudo (en mi caso,
+es feval o el usuario que usaste durante la instalación).</p></li>
+<li><p><strong>Contraseña:</strong> La contraseña de ese
+usuario.</p></li>
+</ul></li>
+</ol>
+<p><strong>Recomendación de seguridad:</strong> Es mejor evitar iniciar
+sesión directamente con root siempre que sea posible. Si tu usuario
+habitual de Linux tiene permisos sudo, intenta iniciar sesión con
+<strong>ese usuario y su contraseña</strong>.</p>
+<h3 id="uso-del-web-min">USO DEL WEB MIN</h3>
+<p><strong>Pantalla de inicio o dashboard de Webmin</strong></p>
+<p>El dashboard de Webmin es la pantalla principal que vemos al acceder
+al panel. Desde esta pantalla, obtenemos una visión general de tu
+servidor, incluyendo el estado de la CPU, el uso de memoria y disco, y
+otra información relevante del sistema.</p>
+<p>Además, desde el dashboard tenemos acceso a varias herramientas para
+configurar diferentes aspectos del servidor y gestionar usuarios. Esta
+interfaz es el punto de partida para administrar de manera sencilla y
+eficiente el servidor desde un navegador web.</p>
+<p><img src=".\\media\\32 Webmin/media/image3.png"
+style="width:5.91528in;height:2.59306in" /></p>
+<p><strong>Cómo cambiar el idioma de Webmin</strong></p>
+<p>Podemos cambiar el idioma de Webmin fácilmente una vez que hayamos
+accedido por primera vez. Si preferimos usar otro idioma en lugar del
+inglés, solo necesitamos ir a la sección Webmin → Change Language and
+Theme, seleccionar la opción Personal choice, elegir el idioma que
+queramos y luego hacer clic en el botón Make Changes (4)</p>
+<p><img src=".\\media\\32 Webmin/media/image4.png"
+style="width:5.91528in;height:1.14653in" /></p>
+<p><strong>Resultado:</strong></p>
+<p>Una vez que hayamos cambiado el idioma, la interfaz de Webmin se
+mostrará en español, permitiendo una experiencia más cómoda en el idioma
+seleccionado:</p>
+<p><img src=".\\media\\32 Webmin/media/image5.png"
+style="width:5.91528in;height:2.01597in" /></p>
+<p><strong>Categorías de Webmin</strong></p>
+<p>Webmin organiza sus funciones en distintas categorías, facilitando la
+administración del sistema:</p>
+<p>Webmin: Opciones relacionadas con el panel, como copias de seguridad,
+registro de operaciones, control de actualizaciones, gestión de usuarios
+y autenticación de doble factor.</p>
+<p>Servidores: Gestión de servicios clave como Apache, DNS, SAMBA, SSH y
+Sendmail.</p>
+<p>Otros: Utilidades diarias como consola SSH, proxy HTTP, gestor de
+archivos, protección de directorios, estado de servicios y
+subida/descarga de archivos.</p>
+<p>Red: Opciones de red como monitoreo de ancho de banda, firewall,
+configuración de red y túneles SSH.</p>
+<p>Hardware: Revisión de dispositivos conectados, como impresoras y
+USB.</p>
+<p>Cluster: Gestión de múltiples servidores Webmin en grupo, aunque
+menos potente que la automatización por línea de comandos.</p>
+<p>Un-used Modules: Módulos no instalados, que dependen de plugins.
+Explicaremos más adelante cómo instalarlos.</p>
+<p>Reajusta Modules: Necesario tras instalar módulos para que se
+muestren correctamente bajo la categoría Servidores.</p>
+<p>En la pestaña Sistema de Webmin, podemos acceder a varias opciones
+útiles, como las que se muestran en la imagen:</p>
+<p><img src=".\\media\\32 Webmin/media/image6.png"
+style="width:1.45394in;height:2.46489in" /></p>
+<ul>
+<li><p>Actualizaciones de paquetes de software</p></li>
+<li><p>Cambio de Contraseñas</p></li>
+<li><p>Cuotas de Disco</p></li>
+<li><p>Programas tipo MIME</p></li>
+<li><p>Sistemas de Archivo de Disco y Red</p></li>
+<li><p>Usuarios y Grupos</p></li>
+<li><p>Copia de Seguridad de Sistema de Archivos</p></li>
+<li><p>Procesos en curso</p></li>
+<li><p>Tareas Planificadas (Cron), entre otras.</p></li>
+</ul>
+<p><strong>FUNCIONES AVANZADAS (PRUEBA DEL SISTEMA)</strong></p>
+<p>En este caso, vamos a probar algunas funcionalidades clave:</p>
+<p>Actualización del sistema: Usaremos la opción de Actualizaciones de
+paquetes de software para asegurarnos de que todos los paquetes del
+sistema estén actualizados.</p>
+<p><img src=".\\media\\32 Webmin/media/image7.png"
+style="width:5.91528in;height:1.8in" /></p>
+<p>Al pulsar el botón <strong>"Subir Versión Ahora"</strong> en el
+módulo "Paquetes de Software" de Webmin<strong>, actualizarás los
+paquetes de <em>software</em></strong> instalados en tu sistema
+operativo (Ubuntu/Debian/Kali).</p>
+<p>Sin embargo, es importante entender el <strong>alcance</strong> de
+esa acción según las opciones que tenemos seleccionadas:</p>
+<p><strong>El Significado de la Acción</strong></p>
+<p>El botón ejecuta el comando de actualización del gestor de paquetes
+<strong>APT</strong> (Advanced Package Tool), que es el sistema que usa
+tu distribución Linux.</p>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 25%" />
+<col style="width: 47%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Seleccionada</strong></th>
+<th><strong>Comando APT Equivalente</strong></th>
+<th><strong>Significado</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Resincronizar lista de paquetes:</strong>
+<strong>Sí</strong></td>
+<td>sudo apt update</td>
+<td>Sincroniza las listas de paquetes disponibles desde los
+repositorios. Esto debe estar en "Sí" para que las actualizaciones
+funcionen correctamente.</td>
+</tr>
+<tr>
+<td><strong>Modo de aumento de versión:</strong></td>
+<td></td>
+<td>Define el tipo de actualización que se ejecutará.</td>
+</tr>
+<tr>
+<td>1. Aumento de versión de distribución</td>
+<td>sudo apt full-upgrade o dist-upgrade</td>
+<td>Actualiza los paquetes e <strong>instala/elimina paquetes</strong>
+si es necesario para resolver dependencias, permitiendo saltos
+importantes de versión (ej. de Ubuntu 22.04 a 24.04).</td>
+</tr>
+<tr>
+<td>2. <strong>Aumento de versión normal</strong> (Seleccionado por
+defecto en la imagen)</td>
+<td>sudo apt upgrade</td>
+<td>Actualiza todos los paquetes instalados a sus últimas versiones
+disponibles, pero <strong>no instala nuevos paquetes</strong> ni elimina
+los existentes. Es el modo de actualización <strong>más seguro</strong>
+para el mantenimiento regular del sistema.</td>
+</tr>
+<tr>
+<td>3. No aumentar versión</td>
+<td>(Sin equivalente directo de actualización)</td>
+<td>Simplemente actualiza las listas sin aplicar ninguna
+actualización.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>Si dejas las opciones como aparecen en la imagen
+(<strong>"Aumento de versión normal"</strong>), actualizarás todos los
+paquetes a sus versiones más recientes, pero <strong>manteniendo la
+versión principal</strong> del sistema operativo. Esto es una
+<strong>actualización regular y segura del
+<em>software</em></strong>.</p></li>
+<li><p>Si seleccionas <strong>"Aumento de versión de
+distribución"</strong>, esto tiene un potencial más amplio y podría
+actualizar el <strong>sistema operativo completo</strong> (si existe una
+nueva versión disponible), lo que es una acción mucho más
+significativa.</p></li>
+</ul>
+<p><img src=".\\media\\32 Webmin/media/image8.png"
+style="width:5.91528in;height:1.27222in" /></p>
+<p><strong>Módulos del Menú "System" de Webmin</strong></p>
+<p><strong>1. Bootup and Shutdown (Inicio y Apagado)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Gestiona los <strong>servicios que se
+inician automáticamente</strong> al arrancar el sistema y permite
+configurar el apagado o reinicio.</p></li>
+<li><p><strong>Acción clave:</strong> <strong>Habilitar o deshabilitar
+un servicio.</strong> Puedes detener, iniciar o desactivar
+permanentemente servicios como Apache, MySQL o SSH.</p></li>
+<li><p><strong>Pasos:</strong></p>
+<ol type="1">
+<li><p>Haz clic en el módulo.</p></li>
+<li><p>Busca un servicio conocido (ej. ssh o apache2).</p></li>
+<li><p>Haz clic en el servicio y luego pulsa <strong>"Disable at boot
+time"</strong> (Deshabilitar al inicio) o <strong>"Start
+Service"</strong> (Iniciar Servicio).</p></li>
+</ol></li>
+</ul>
+<p><img src=".\\media\\32 Webmin/media/image9.png"
+style="width:5.91528in;height:2.05278in" /></p>
+<p><strong>2. Change Passwords (Cambiar Contraseñas)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Permite <strong>cambiar las
+contraseñas</strong> de cualquier usuario del sistema.</p></li>
+<li><p><strong>Acción clave:</strong> Cambiar la contraseña del usuario
+root o de cualquier usuario estándar.</p></li>
+<li><p><strong>Pasos:</strong></p>
+<ol type="1">
+<li><p>Haz clic en el módulo.</p></li>
+<li><p>Selecciona un usuario (ej. root o tu usuario feval).</p></li>
+<li><p>Introduce una nueva contraseña (no es necesario guardarla
+realmente, solo preparar la vista).</p></li>
+</ol></li>
+</ul>
+<p><img src=".\\media\\32 Webmin/media/image10.png"
+style="width:5.91528in;height:1.82847in" /></p>
+<p><img src=".\\media\\32 Webmin/media/image11.png"
+style="width:5.91528in;height:1.43681in" /></p>
+<p><strong>3. Disk and Network Filesystems (Sistemas de Archivos de
+Disco y Red)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Permite <strong>montar, desmontar y
+gestionar particiones</strong> de disco local, así como sistemas de
+archivos remotos (NFS, Samba/CIFS) mediante la edición del archivo
+/etc/fstab.</p></li>
+<li><p><strong>Acción clave:</strong> Añadir un nuevo punto de montaje o
+ver el espacio libre en las particiones existentes.</p></li>
+<li><p><strong>Pasos:</strong></p>
+<ol type="1">
+<li><p>Haz clic en el módulo.</p></li>
+</ol></li>
+</ul>
+<p><img src=".\\media\\32 Webmin/media/image12.png"
+style="width:5.91528in;height:1.11667in" /></p>
+<p><strong>4. Filesystem Backup (Copia de Seguridad del Sistema de
+Archivos)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Configura y ejecuta <strong>copias de
+seguridad</strong> del sistema de archivos mediante el comando dump y el
+archivo de control /etc/dumpdates.</p></li>
+<li><p><strong>Acción clave:</strong> Crear una nueva tarea de
+<em>backup</em> para una partición específica.</p></li>
+<li><p><strong>Pasos:</strong></p>
+<ol type="1">
+<li><p>Haz clic en el módulo.</p></li>
+<li><p>Haz clic en <strong>"Add a new backup of directory"</strong>
+(Añadir nueva copia de seguridad).</p></li>
+</ol></li>
+</ul>
+<p><img src=".\\media\\32 Webmin/media/image13.png"
+style="width:5.91528in;height:1.08819in" /></p>
+<p><strong>5. Log File Rotation (Rotación de Archivos de
+Registro)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Gestiona la rotación de los archivos de
+registro del sistema (logs) a través del archivo de configuración
+<strong>logrotate</strong>. Esto previene que los archivos de
+<em>log</em> crezcan indefinidamente y llenen el disco.</p></li>
+<li><p><strong>Acción clave:</strong> Añadir o modificar la rotación de
+un archivo de <em>log</em> personalizado.</p></li>
+<li><p><strong>Pasos:</strong></p>
+<ol type="1">
+<li><p>Haz clic en el módulo.</p></li>
+</ol></li>
+</ul>
+<p><img src=".\\media\\32 Webmin/media/image14.png"
+style="width:5.91528in;height:2.30208in" /></p>
+<p><strong>6. MIME Type Programs (Programas de Tipos MIME)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Define qué programas se utilizan para
+abrir o manejar <strong>tipos de archivos específicos</strong> (MIME
+types). Esto es similar a cómo un sistema operativo asocia un .pdf con
+un lector de PDF.</p></li>
+<li><p><strong>Acción clave:</strong> Añadir una nueva asociación de
+tipo MIME para una extensión de archivo.</p></li>
+<li><p><strong>Pasos:</strong></p>
+<ol type="1">
+<li><p>Haz clic en el módulo.</p></li>
+</ol></li>
+</ul>
+<p><img src=".\\media\\32 Webmin/media/image15.png"
+style="width:5.91528in;height:1.13125in" /></p>
+<p><strong>7. PAM Authentication (Autenticación PAM)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Configura los módulos de
+<strong>Autenticación Conectable (PAM)</strong>, que controlan cómo los
+usuarios se autentican en diferentes servicios (como login, ssh, sudo).
+Es una configuración avanzada de seguridad.</p></li>
+<li><p><strong>Acción clave:</strong> Revisar la configuración de
+autenticación para el servicio sshd o login.</p></li>
+<li><p><strong>Pasos:</strong></p>
+<ol type="1">
+<li><p>Haz clic en el módulo.</p></li>
+<li><p>Selecciona un servicio (ej. sshd).</p></li>
+</ol></li>
+</ul>
+<p><img src=".\\media\\32 Webmin/media/image16.png"
+style="width:5.91528in;height:2.13681in" /></p>
+<p><strong>8. Running Processes (Procesos en Ejecución)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Permite ver, buscar y gestionar
+<strong>procesos activos</strong> en el sistema (similar al comando top
+o ps). Puedes enviar señales a los procesos (ej. kill, nicer).</p></li>
+<li><p><strong>Acción clave:</strong> Enviar una señal para terminar un
+proceso.</p></li>
+<li><p><strong>Pasos:</strong></p>
+<ol type="1">
+<li><p>Haz clic en el módulo.</p></li>
+<li><p>Busca un proceso conocido (ej. webmin o bash).</p></li>
+<li><p>Selecciona el proceso y haz clic en <strong>"Kill"</strong>
+(Matar) o <strong>"Signal"</strong> (Señal).</p></li>
+</ol></li>
+</ul>
+<p><img src=".\\media\\32 Webmin/media/image17.png"
+style="width:5.91528in;height:2.54306in" /></p>
+<p><strong>9. Scheduled Cron Jobs (Trabajos Cron
+Programados)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Administra las <strong>tareas
+programadas</strong> (<em>cron jobs</em>) que se ejecutan
+automáticamente a intervalos regulares (diarios, por hora, etc.) para
+cualquier usuario.</p></li>
+<li><p><strong>Acción clave:</strong> Añadir un nuevo trabajo Cron (ej.
+ejecutar un script de <em>backup</em> a medianoche).</p></li>
+<li><p><strong>Pasos:</strong></p>
+<ol type="1">
+<li><p>Haz clic en el módulo.</p></li>
+<li><p>Haz clic en <strong>"Create a new scheduled cron job"</strong>
+(Crear un nuevo trabajo cron programado).</p></li>
+</ol></li>
+</ul>
+<p><img src=".\\media\\32 Webmin/media/image18.png"
+style="width:5.91528in;height:2.93403in" /></p>
+<p><strong>10. Software Package Updates (Actualizaciones de Paquetes de
+Software)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Muestra los paquetes que tienen
+<strong>actualizaciones disponibles</strong> en los repositorios
+APT.</p></li>
+<li><p><strong>Acción clave:</strong> Marcar paquetes para actualizar o
+ignorar.</p></li>
+<li><p><strong>Pasos:</strong></p>
+<ol type="1">
+<li><p>Haz clic en el módulo.</p></li>
+</ol></li>
+</ul>
+<p><img src=".\\media\\32 Webmin/media/image19.png"
+style="width:5.91528in;height:2.06667in" /></p>
+<p><img src=".\\media\\32 Webmin/media/image20.png"
+style="width:5.91528in;height:2.94514in" /></p>
+<p><strong>11. Software Packages (Paquetes de Software)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Permite <strong>instalar, eliminar o
+buscar</strong> paquetes de <em>software</em> en el sistema (utilizando
+APT). Es donde estuviste anteriormente para configurar los
+repositorios.</p></li>
+<li><p><strong>Acción clave:</strong> Buscar e instalar un paquete nuevo
+(ej. nginx).</p></li>
+<li><p><strong>Pasos:</strong></p>
+<ol type="1">
+<li><p>Haz clic en <strong>"Install a new package"</strong> (Instalar un
+nuevo paquete).</p></li>
+<li><p>Escribe el nombre de un paquete (ej. nginx).</p></li>
+</ol></li>
+</ul>
+<p><img src=".\\media\\32 Webmin/media/image21.png"
+style="width:5.91528in;height:1.90625in" /></p>
+<p><strong>12. System Documentation (Documentación del
+Sistema)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Proporciona acceso a las
+<strong>páginas man</strong> (manuales) y páginas <strong>info</strong>
+del sistema Linux.</p></li>
+<li><p><strong>Acción clave:</strong> Buscar la página de manual para un
+comando (ej. ls o apt).</p></li>
+<li><p><strong>Pasos:</strong></p>
+<ol type="1">
+<li><p>Haz clic en el módulo.</p></li>
+<li><p>Escribe un comando conocido (ej. tcpdump).</p></li>
+</ol></li>
+</ul>
+<p><img src=".\\media\\32 Webmin/media/image22.png"
+style="width:5.91528in;height:2.53056in" /></p>
+<p><strong>13. System Logs (Registros del Sistema)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Muestra y permite buscar en los
+<strong>archivos de <em>log</em> del sistema</strong> (como syslog,
+auth.log, etc.).</p></li>
+<li><p><strong>Acción clave:</strong> Ver el contenido del registro de
+autenticación.</p></li>
+<li><p><strong>Pasos:</strong></p>
+<ol type="1">
+<li><p>Haz clic en el módulo.</p></li>
+<li><p>Haz clic en <strong>"View"</strong> (Ver) al lado del archivo
+auth.log (o syslog).</p></li>
+</ol></li>
+</ul>
+<p><img src=".\\media\\32 Webmin/media/image23.png"
+style="width:5.91528in;height:2.21736in" /></p>
+<p><img src=".\\media\\32 Webmin/media/image24.png"
+style="width:5.91528in;height:2.86806in" /></p>
+<p><strong>14. Users and Groups (Usuarios y Grupos)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> La interfaz central para <strong>crear,
+editar o eliminar usuarios y grupos</strong> del sistema.</p></li>
+<li><p><strong>Acción clave:</strong> Crear un nuevo usuario.</p></li>
+<li><p><strong>Pasos:</strong></p>
+<ol type="1">
+<li><p>Haz clic en el módulo.</p></li>
+<li><p>Haz clic en <strong>"Create a new user"</strong> (Crear un nuevo
+usuario).</p></li>
+</ol></li>
+</ul>
+<p><img src=".\\media\\32 Webmin/media/image25.png"
+style="width:5.91528in;height:1.66458in" /></p>
+<p><img src=".\\media\\32 Webmin/media/image26.png"
+style="width:5.91528in;height:1.71528in" /></p>
+<p><strong>Servers</strong></p>
+<p><strong>Servidor Web Apache</strong></p>
+<p><img src=".\\media\\32 Webmin/media/image27.png"
+style="width:5.91528in;height:1.06389in" /></p>
+<p><strong>Agente de Correo Postfix</strong></p>
+<p><img src=".\\media\\32 Webmin/media/image28.png"
+style="width:5.91528in;height:2.03958in" /></p>
+<p><strong> Leer correo de usuario</strong></p>
+<p><img src=".\\media\\32 Webmin/media/image29.png"
+style="width:5.91528in;height:1.96597in" /></p>
+<p><strong>Tools</strong></p>
+<p><img src=".\\media\\32 Webmin/media/image30.png"
+style="width:2.12518in;height:2.46688in" /></p>
+<p>El menú <strong>Tools (Herramientas)</strong> de Webmin ofrece una
+serie de utilidades para interactuar con el sistema de maneras que
+complementan la administración básica, permitiendo desde la ejecución de
+comandos hasta la gestión de archivos y el diagnóstico del servidor.</p>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 35%" />
+<col style="width: 41%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;"><strong>Módulo</strong></th>
+<th style="text-align: left;"><strong>Función Principal</strong></th>
+<th style="text-align: left;"><strong>Uso Práctico</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Command Shell</strong></td>
+<td style="text-align: left;">Permite ejecutar <strong>comandos de
+<em>shell</em></strong> únicos o secuencias de comandos directamente
+desde la interfaz web.</td>
+<td style="text-align: left;">Ideal para tareas rápidas de diagnóstico o
+automatización que no requieren una sesión interactiva continua. El
+resultado del comando se muestra inmediatamente en la página.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Custom Commands</strong></td>
+<td style="text-align: left;">Permite crear y guardar tus
+<strong>propios comandos de <em>shell</em> personalizados</strong>.</td>
+<td style="text-align: left;">Útil para tareas repetitivas. Por ejemplo,
+puedes crear un botón que ejecute siempre el <em>script</em> de
+<em>backup</em> o reinicie un servicio específico sin tener que escribir
+el comando cada vez.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>File Manager</strong></td>
+<td style="text-align: left;">Proporciona una interfaz gráfica para
+<strong>navegar, editar, subir, descargar y manipular archivos y
+directorios</strong> en el servidor.</td>
+<td style="text-align: left;">Esencial para gestionar archivos de
+configuración, mover logs o examinar el contenido de los directorios sin
+usar la línea de comandos.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>HTTP Tunnel</strong></td>
+<td style="text-align: left;">Permite configurar y acceder a un
+<strong>túnel HTTP a través de la red local</strong> del servidor.</td>
+<td style="text-align: left;">Se utiliza para acceder a servicios
+internos de la red que normalmente no están expuestos a Internet,
+enrutando el tráfico a través de Webmin.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Perl Modules</strong></td>
+<td style="text-align: left;">Gestiona los <strong>módulos del lenguaje
+de programación Perl</strong> instalados en el sistema.</td>
+<td style="text-align: left;">Es crucial para mantener Webmin y otras
+aplicaciones basadas en Perl actualizadas, permitiendo instalar,
+actualizar o eliminar módulos desde CPAN.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>PHP Configuration</strong></td>
+<td style="text-align: left;">Permite gestionar y modificar la
+<strong>configuración del lenguaje PHP</strong> (el archivo
+php.ini).</td>
+<td style="text-align: left;">Fundamental para ajustar límites de
+memoria, tiempos de ejecución, manejo de sesiones y otras directivas que
+afectan a las aplicaciones web basadas en PHP (como WordPress o
+Nextcloud).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Protected Web
+Directories</strong></td>
+<td style="text-align: left;">Configura la <strong>protección de
+acceso</strong> a directorios específicos de un servidor web
+(generalmente Apache o Nginx) mediante <strong>autenticación básica
+HTTP</strong>.</td>
+<td style="text-align: left;">Se usa para restringir el acceso a ciertas
+carpetas del sitio web, requiriendo un nombre de usuario y contraseña
+antes de que un visitante pueda ver el contenido.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>System and Server
+Status</strong></td>
+<td style="text-align: left;">Muestra el <strong>estado general y el
+rendimiento</strong> del sistema y los servicios.</td>
+<td style="text-align: left;">Proporciona una visión en tiempo real del
+uso de la CPU, la memoria, la carga del sistema y el estado de los
+servicios clave.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Terminal</strong></td>
+<td style="text-align: left;">Proporciona una <strong>terminal
+<em>shell</em> interactiva</strong> dentro del navegador web.</td>
+<td style="text-align: left;">Permite una interacción completa con el
+sistema operativo (como si estuvieras conectado por SSH), ideal para
+ejecutar comandos que requieren sesiones continuas, como editores de
+texto (vim, nano) o programas interactivos.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Upload and Download</strong></td>
+<td style="text-align: left;">Facilita la <strong>subida de archivos
+desde tu máquina local</strong> al servidor o la <strong>descarga de
+archivos del servidor</strong> a tu máquina.</td>
+<td style="text-align: left;">Útil para mover archivos grandes o
+binarios que son difíciles de copiar a través de la función de gestión
+de archivos o un simple scp.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Networking</strong></p>
+<p><img src=".\\media\\32 Webmin/media/image31.png"
+style="width:2.06685in;height:1.8835in" /></p>
+<p>El menú <strong>Networking (Red)</strong> de Webmin contiene los
+módulos necesarios para configurar y asegurar las comunicaciones de red
+del servidor, incluyendo <em>firewalls</em>, interfaces y servicios.</p>
+<p><strong>Módulos del Menú "Networking" de Webmin</strong></p>
+<p><strong>Bandwidth Monitoring (Monitorización de Ancho de
+Banda)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Permite <strong>rastrear y medir la
+cantidad de datos</strong> (ancho de banda) que fluye a través de las
+interfaces de red del servidor.</p></li>
+<li><p><strong>Uso Práctico:</strong> Diagnosticar cuellos de botella,
+identificar aplicaciones que consumen mucho ancho de banda y generar
+informes de tráfico.</p></li>
+</ul>
+<p><strong>Linux Firewall</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Gestiona las reglas del
+<em>firewall</em> principal del sistema para el protocolo
+<strong>IPv4</strong> (usando la herramienta subyacente
+<strong>iptables</strong>).</p></li>
+<li><p><strong>Uso Práctico:</strong> <strong>Controla el tráfico de
+red</strong> permitiendo o bloqueando conexiones entrantes, salientes y
+de reenvío, basándose en IPs, puertos y protocolos.</p></li>
+</ul>
+<p><strong>Linux IPv6 Firewall</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Gestiona las reglas del
+<em>firewall</em> para el protocolo <strong>IPv6</strong> (usando la
+herramienta subyacente <strong>ip6tables</strong>).</p></li>
+<li><p><strong>Uso Práctico:</strong> Similar al <em>firewall</em> IPv4,
+pero se aplica específicamente al tráfico IPv6, esencial para entornos
+que ya usan este protocolo.</p></li>
+</ul>
+<p><strong>Network Configuration (Configuración de Red)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Permite <strong>configurar las
+interfaces de red</strong> del servidor.</p></li>
+<li><p><strong>Uso Práctico:</strong> Define direcciones IP (estáticas o
+DHCP), máscaras de red, <em>gateways</em> (puertas de enlace) y
+<strong>servidores DNS</strong> para cada una de las tarjetas de red
+(eth0, enp0s3, etc.).</p></li>
+<li></li>
+</ul>
+<p><strong>NIS Client and Server (Cliente y Servidor NIS)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Gestiona la configuración del
+<strong>Network Information Service (NIS)</strong>, un sistema de
+directorio antiguo para distribuir información de configuración de red
+(como usuarios y contraseñas) a través de una red local.</p></li>
+<li><p><strong>Uso Práctico:</strong> Permite que un servidor actúe como
+cliente o servidor NIS, aunque esta tecnología ha sido ampliamente
+reemplazada por LDAP.</p></li>
+</ul>
+<p><strong>PPTP VPN Client (Cliente VPN PPTP)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Permite <strong>configurar y gestionar
+conexiones de cliente VPN</strong> utilizando el protocolo
+<strong>PPTP</strong> (Point-to-Point Tunneling Protocol).</p></li>
+<li><p><strong>Uso Práctico:</strong> Establece una conexión saliente
+desde tu servidor a una red privada remota (VPN) para acceder a recursos
+internos de esa red.</p></li>
+</ul>
+<p><strong>TCP Wrappers</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Proporciona un <strong>sistema de
+seguridad adicional</strong> que controla el acceso a determinados
+servicios de red a nivel de host.</p></li>
+<li><p><strong>Uso Práctico:</strong> Gestiona los archivos de
+configuración <strong>/etc/hosts.allow</strong> y
+<strong>/etc/hosts.deny</strong> para permitir o denegar el acceso a
+servicios (como SSH, FTP, etc.) basándose en la dirección IP de origen.
+Actúa como una capa de control anterior al <em>firewall</em>
+principal.</p></li>
+</ul>
+<p><strong>Hardware</strong></p>
+<p><img src=".\\media\\32 Webmin/media/image32.png"
+style="width:2.09185in;height:0.95008in" /></p>
+<p>El menú <strong>Hardware</strong> en Webmin se centra en la
+administración y configuración de los componentes físicos (o
+virtualizados) directamente conectados al servidor, aunque en sistemas
+modernos Linux, muchas de estas configuraciones se manejan a nivel de
+<em>software</em>.</p>
+<p><strong>Módulos del Menú "Hardware" de Webmin</strong></p>
+<p><strong>Partitions on Local Disks (Particiones en Discos
+Locales)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Permite <strong>ver, crear, editar o
+eliminar particiones</strong> en los discos duros locales del servidor
+(similar a herramientas como fdisk o gdisk).</p></li>
+<li><p><strong>Uso Práctico:</strong> <strong>Inicializar un disco
+nuevo</strong>, cambiar el tamaño de una partición existente o
+establecer el tipo de sistema de archivos para una partición. Es una
+herramienta potente para la gestión del almacenamiento.</p></li>
+</ul>
+<p><strong>Printer Administration (Administración de
+Impresoras)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Gestiona el sistema de impresión del
+servidor, generalmente utilizando <strong>CUPS</strong> (Common Unix
+Printing System).</p></li>
+<li><p><strong>Uso Práctico:</strong> Permite <strong>añadir nuevas
+impresoras</strong> (locales o de red), configurar las colas de
+impresión, gestionar los <em>drivers</em> y ver los trabajos de
+impresión pendientes.</p></li>
+</ul>
+<p><strong>System Time (Hora del Sistema)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Permite <strong>configurar la hora, la
+fecha y la zona horaria</strong> del servidor, además de gestionar la
+sincronización horaria mediante protocolos como <strong>NTP</strong>
+(Network Time Protocol).</p></li>
+<li><p><strong>Uso Práctico:</strong> Asegurar que la hora del servidor
+es precisa, lo cual es fundamental para la seguridad, los <em>logs</em>
+del sistema y las aplicaciones que dependen de la precisión
+temporal.</p></li>
+</ul>
+<p><strong>Cluster</strong></p>
+<p><img src=".\\media\\32 Webmin/media/image33.png"
+style="width:2.11685in;height:2.01684in" /></p>
+<p>El menú <strong>Cluster</strong> en Webmin está diseñado para
+administrar <strong>múltiples servidores Webmin de forma
+centralizada</strong> como si fueran un solo grupo o <em>cluster</em>.
+Esto te permite aplicar la misma acción (como cambiar una contraseña o
+instalar un paquete) en todos los servidores a la vez.</p>
+<p><strong>Módulos del Menú "Cluster" de Webmin</strong></p>
+<p><strong>Cluster Change Passwords (Cambio de Contraseñas del
+Clúster)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Permite <strong>cambiar las
+contraseñas</strong> para el mismo usuario en todos los servidores
+miembros del <em>cluster</em> de forma simultánea.</p></li>
+<li><p><strong>Uso Práctico:</strong> Sincronizar las credenciales de un
+usuario específico (ej. un usuario administrativo) a través de todos los
+servidores.</p></li>
+</ul>
+<p><strong>Cluster Copy Files (Copia de Archivos del
+Clúster)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Permite <strong>copiar un
+archivo</strong> desde el servidor maestro (donde estás usando Webmin)
+<strong>a una ubicación idéntica</strong> en todos los servidores del
+<em>cluster</em>.</p></li>
+<li><p><strong>Uso Práctico:</strong> Distribuir archivos de
+configuración comunes (como un archivo hosts actualizado o un
+<em>script</em> de mantenimiento) a todo el grupo de
+servidores.</p></li>
+</ul>
+<p><strong>Cluster Cron Jobs (Trabajos Cron del Clúster)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Administra y <strong>programa trabajos
+Cron</strong> (tareas automáticas) para que se ejecuten en todos o en
+una selección de los servidores del <em>cluster</em>.</p></li>
+<li><p><strong>Uso Práctico:</strong> Programar el mismo <em>script</em>
+de limpieza de <em>logs</em> o de reinicio de servicios para que se
+ejecute a la misma hora en todos los servidores.</p></li>
+</ul>
+<p><strong>Cluster Shell Commands (Comandos de Shell del
+Clúster)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Permite <strong>ejecutar un comando de
+<em>shell</em> único</strong> en todos los servidores del
+<em>cluster</em> al mismo tiempo.</p></li>
+<li><p><strong>Uso Práctico:</strong> Una herramienta de ejecución
+remota masiva. Por ejemplo, puedes ejecutar uname -a para obtener
+información del kernel de todos los servidores de una sola vez.</p></li>
+</ul>
+<p><strong>Cluster Software Packages (Paquetes de Software del
+Clúster)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Permite <strong>instalar, actualizar o
+eliminar paquetes de <em>software</em></strong> (a través de APT en tu
+caso) en todos los servidores del <em>cluster</em> de forma
+centralizada.</p></li>
+<li><p><strong>Uso Práctico:</strong> Asegura que todos los servidores
+tengan instalada la misma versión de una aplicación crítica, como Nginx
+o PHP.</p></li>
+</ul>
+<p><strong>Cluster Usermin Servers (Servidores Usermin del
+Clúster)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Módulo dedicado a <strong>gestionar y
+configurar la interfaz Usermin</strong> (la interfaz de usuario final de
+Webmin) en los servidores del <em>cluster</em>.</p></li>
+<li><p><strong>Uso Práctico:</strong> Permite aplicar configuraciones de
+seguridad o personalizar la interfaz de Usermin para todos los
+servidores remotos.</p></li>
+</ul>
+<p><strong>Cluster Users and Groups (Usuarios y Grupos del
+Clúster)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> Permite <strong>crear, modificar o
+eliminar usuarios y grupos</strong> en todos los servidores del
+<em>cluster</em> de forma sincronizada.</p></li>
+<li><p><strong>Uso Práctico:</strong> El principal módulo para la
+<strong>gestión de identidad centralizada</strong>, asegurando que todos
+los usuarios existan en todos los servidores con los mismos IDs de
+usuario (UIDs).</p></li>
+</ul>
+<p><strong>Cluster Webmin Servers (Servidores Webmin del
+Clúster)</strong></p>
+<ul>
+<li><p><strong>Función:</strong> El <strong>módulo de configuración
+principal</strong> para agregar, editar, eliminar o ver el estado de los
+servidores que forman parte del <em>cluster</em>.</p></li>
+<li><p><strong>Uso Práctico:</strong> Define el listado de servidores
+remotos a los que se aplicarán todas las acciones listadas
+anteriormente. Debes configurar los servidores aquí antes de poder usar
+los otros módulos del <em>cluster</em>.</p></li>
+</ul>
+<p><strong>Un-used modules</strong></p>
+<p><img src=".\\media\\32 Webmin/media/image34.png"
+style="width:2.06685in;height:5.95885in" /></p>
+<p>Los módulos bajo <strong>Un-used Modules (Módulos No
+Utilizados)</strong> son herramientas de administración que Webmin tiene
+la capacidad de gestionar, pero que <strong>no están instaladas,
+configuradas o activadas</strong> actualmente en tu sistema operativo
+base.</p>
+<p>Webmin separa estos módulos para mantener el menú principal limpio.
+Si instalas el <em>software</em> relacionado (por ejemplo, instalas el
+servidor <strong>MySQL</strong>) y Webmin lo detecta, ese módulo se
+moverá automáticamente a su categoría principal (como "Servers" o
+"Hardware").</p>
+<p>Algunos de los módulos más comunes:</p>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 37%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;"><strong>Módulo</strong></th>
+<th style="text-align: left;"><strong>Función (Si se
+Instala)</strong></th>
+<th style="text-align: left;"><strong>Uso Común</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Bacula Backup System</strong></td>
+<td style="text-align: left;">Gestiona el sistema de copia de seguridad
+en red Bacula.</td>
+<td style="text-align: left;">Soluciones profesionales de
+<em>backup</em> a nivel empresarial.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>BIND DNS Server</strong></td>
+<td style="text-align: left;">Configura el servidor de nombres de
+dominio (DNS) BIND.</td>
+<td style="text-align: left;">Alojar tu propio servicio de resolución de
+nombres y zonas DNS.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>DHCP Server</strong></td>
+<td style="text-align: left;">Administra un servidor DHCP.</td>
+<td style="text-align: left;">Asignar direcciones IP automáticas a
+clientes en la red local.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Dovecot IMAP/POP3
+Server</strong></td>
+<td style="text-align: left;">Configura el servidor de correo IMAP/POP3
+Dovecot.</td>
+<td style="text-align: left;">Permitir que los clientes de correo (como
+Thunderbird) accedan a los buzones del servidor.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Fail2Ban Intrusion
+Detector</strong></td>
+<td style="text-align: left;">Configura Fail2Ban, un <em>software</em>
+que bloquea IPs que intentan repetidamente iniciar sesión sin
+éxito.</td>
+<td style="text-align: left;"><strong>Seguridad esencial</strong> para
+proteger servicios como SSH contra ataques de fuerza bruta.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>FirewallD</strong></td>
+<td style="text-align: left;">Gestiona el <em>firewall</em> dinámico y
+basado en zonas firewalld (común en distribuciones basadas en Red
+Hat).</td>
+<td style="text-align: left;">Controlar el tráfico de red de forma más
+flexible que con iptables simple.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>IPsec VPN
+Configuration</strong></td>
+<td style="text-align: left;">Configura redes privadas virtuales (VPN)
+seguras utilizando el protocolo IPsec.</td>
+<td style="text-align: left;">Conectar redes privadas de forma segura a
+través de Internet.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>iSCSI Client, Server, Target,
+TGTd</strong></td>
+<td style="text-align: left;">Gestiona el protocolo iSCSI, que permite
+compartir dispositivos de almacenamiento a través de una red IP.</td>
+<td style="text-align: left;">Montar un almacenamiento de red como si
+fuera un disco local (SAN/NAS).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Kerberos5</strong></td>
+<td style="text-align: left;">Configura el sistema de autenticación de
+red Kerberos.</td>
+<td style="text-align: left;">Autenticación robusta y centralizada para
+grandes redes.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>LDAP Client, Server, Users and
+Groups</strong></td>
+<td style="text-align: left;">Gestiona el protocolo
+<strong>LDAP</strong> (Lightweight Directory Access Protocol).</td>
+<td style="text-align: left;">Servicios de directorio centralizados,
+como autenticar usuarios para múltiples servicios desde un único
+punto.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Linux RAID</strong></td>
+<td style="text-align: left;">Configura y gestiona arreglos
+<strong>RAID</strong> (Redundant Array of Independent Disks) a nivel de
+<em>software</em>.</td>
+<td style="text-align: left;">Combinar múltiples discos duros para
+mejorar el rendimiento o la redundancia de datos.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Logical Volume
+Management</strong></td>
+<td style="text-align: left;">Gestiona volúmenes lógicos (LVM).</td>
+<td style="text-align: left;">Permite redimensionar particiones de disco
+sin reiniciar el sistema ni perder datos.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>MySQL Database
+Server</strong></td>
+<td style="text-align: left;">Administra el popular servidor de bases de
+datos MySQL/MariaDB.</td>
+<td style="text-align: left;">Configurar bases de datos, usuarios y
+realizar copias de seguridad de datos de aplicaciones web.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>NFS Exports</strong></td>
+<td style="text-align: left;">Configura el <strong>Network File System
+(NFS)</strong>.</td>
+<td style="text-align: left;">Compartir directorios del servidor con
+otros clientes Linux en la red.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Refresh Modules</strong></p>
+<p>El módulo <strong>Refresh Modules (Actualizar Módulos)</strong> en
+Webmin tiene una función muy sencilla pero crucial para mantener la
+interfaz de administración al día.</p>
+<p>Su única función es <strong>re-escanear el sistema operativo para
+detectar cualquier cambio en la configuración o instalación de
+<em>software</em></strong>.</p>
+<p><strong>¿Qué hace exactamente?</strong></p>
+<ol type="1">
+<li><p><strong>Vuelve a escanear</strong> el sistema de archivos del
+servidor.</p></li>
+<li><p><strong>Verifica la existencia</strong> de <em>software</em>
+cuyos módulos administra Webmin (por ejemplo, si acabas de instalar el
+servidor MySQL, BIND o Fail2Ban).</p></li>
+<li><p><strong>Mueve los módulos</strong> de la categoría "Un-used
+Modules" (Módulos No Utilizados) a la categoría apropiada (ej.
+"Servers") si detecta que el <em>software</em> ya está instalado y listo
+para ser configurado.</p></li>
+<li><p>También se utiliza para <strong>solucionar problemas</strong> si
+Webmin parece lento o tiene información desactualizada sobre los módulos
+disponibles.</p></li>
+</ol>
+<p><strong>En resumen:</strong> Si instalas un nuevo servicio en tu
+terminal (usando apt install) y esperas verlo en Webmin, pero no
+aparece, lo primero que debes hacer es pulsar el módulo <strong>Refresh
+Modules</strong> para forzar la actualización del menú.</p>
+<script src="nav.js"></script>
+</body>
+</html>

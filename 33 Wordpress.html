@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>33 Wordpress</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>Instalación de WordPress en Ubuntu 24.04</strong></p>
+<p>La instalación utiliza el <em>stack</em> <strong>LAMP</strong>
+(Linux, Apache, MySQL y PHP) en un entorno local, ideal para desarrollo
+y pruebas.</p>
+<p><strong>Paso 1: Actualizar el Sistema</strong></p>
+<p>Es crucial asegurar que todos los paquetes estén actualizados para
+garantizar la estabilidad y seguridad.</p>
+<table>
+<colgroup>
+<col style="width: 38%" />
+<col style="width: 61%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;"><strong>Comando</strong></th>
+<th style="text-align: center;"><strong>Función</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">sudo apt update</td>
+<td style="text-align: center;">Actualiza la lista de paquetes
+disponibles</td>
+</tr>
+<tr>
+<td style="text-align: center;">sudo apt upgrade -y</td>
+<td style="text-align: center;">Instala las actualizaciones
+pendientes</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Paso 2: Instalar Apache (Servidor Web)</strong></p>
+<p>Apache es el servidor que se encargará de mostrar tu sitio web.</p>
+<ol type="1">
+<li><p><strong>Instalar Apache:</strong></p></li>
+</ol>
+<blockquote>
+<p>sudo apt install apache2 -y</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Verificar la instalación:</strong></p></li>
+</ol>
+<blockquote>
+<p>Accede a http://localhost/ en tu navegador. Deberías ver la página de
+bienvenida de Apache</p>
+</blockquote>
+<p><strong>Paso 3: Instalar MySQL (Base de Datos)</strong></p>
+<p>MySQL se utiliza para almacenar todo el contenido de WordPress.</p>
+<ol type="1">
+<li><p><strong>Instalar MySQL:</strong></p></li>
+</ol>
+<blockquote>
+<p>sudo apt install mysql-server -y</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Ejecutar el script de seguridad:</strong> Se recomienda
+ejecutar este <em>script</em> para mejorar la seguridad de MySQL y
+establecer opciones básicas.</p></li>
+</ol>
+<blockquote>
+<p>sudo mysql_secure_installation</p>
+<p>Sigue las instrucciones en pantalla para establecer la
+<strong>contraseña del usuario root</strong> y otras opciones de
+seguridad.</p>
+</blockquote>
+<p><img src=".\\media\\33 Wordpress/media/image1.png"
+style="width:5.90556in;height:2.19167in" /></p>
+<p><img src=".\\media\\33 Wordpress/media/image2.png"
+style="width:5.90556in;height:1.43542in" /></p>
+<p>12345678</p>
+<p>Remove anonymous users? (Press y|Y for Yes, any other key for No) :
+<strong>y</strong></p>
+<p>Disallow root login remotely? (Press y|Y for Yes, any other key for
+No) : <strong>n</strong></p>
+<p>Con esa respuesta le has indicado a la configuración de SQL que
+<strong>no quieres deshabilitar el inicio de sesión remoto para el
+usuario root</strong>.</p>
+<p>Al presionar <strong>n</strong>, le indicas al sistema de gestión de
+bases de datos que <strong>permitirá</strong> que el usuario root se
+conecte a la base de datos <strong>desde cualquier dirección IP</strong>
+de la red, no solo desde la máquina local (localhost).</p>
+<p><strong>Implicaciones de Seguridad</strong></p>
+<p>La configuración por defecto y la <strong>recomendación de
+seguridad</strong> es siempre responder <strong>y (Sí)</strong> a esta
+pregunta.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 74%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Configuración</strong></th>
+<th><strong>Implicación de Seguridad</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>n</strong> (Permitir root remoto)</td>
+<td><strong>Riesgo ALTO.</strong> Si alguien adivina o descifra la
+contraseña de root, puede acceder a toda la base de datos desde
+cualquier lugar de la red, sin necesidad de acceder primero al
+servidor.</td>
+</tr>
+<tr>
+<td><strong>y</strong> (Deshabilitar root remoto)</td>
+<td><strong>Riesgo BAJO.</strong> El usuario root solo puede conectarse
+desde el servidor (localhost). Para acceder como root, el atacante
+necesitaría primero obtener acceso al servidor mismo, lo que añade una
+capa de defensa.</td>
+</tr>
+</tbody>
+</table>
+<p>Si estás en un entorno de máquina virtual aislada y necesitas acceder
+como root desde otra máquina virtual o desde tu máquina anfitriona, esta
+opción te lo permite. Sin embargo, en un entorno de producción, esta
+configuración es peligrosa.</p>
+<p><strong>Paso 4: Crear la Base de Datos y el Usuario de
+WordPress</strong></p>
+<p>Debes crear una base de datos específica y un usuario dedicado para
+WordPress.</p>
+<ol type="1">
+<li><p><strong>Acceder al <em>shell</em> de MySQL:</strong></p></li>
+</ol>
+<blockquote>
+<p>sudo mysql</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Ejecutar los comandos SQL</strong> (reemplaza 12345678
+con una contraseña fuerte):</p></li>
+</ol>
+<p>SQL</p>
+<p>CREATE DATABASE wordpress DEFAULT CHARACTER SET utf8 COLLATE
+utf8_unicode_ci;</p>
+<p>CREATE USER 'wordpressuser'@'localhost' IDENTIFIED BY '12345678';</p>
+<p>GRANT ALL PRIVILEGES ON wordpress.* TO
+'wordpressuser'@'localhost';</p>
+<p>FLUSH PRIVILEGES;</p>
+<p>EXIT;</p>
+<p><em>Estos comandos crean la base de datos wordpress y el usuario
+wordpressuser, otorgándole todos los privilegios sobre esa base de
+datos</em>.</p>
+<p><strong>Paso 5: Instalar PHP y Extensiones Necesarias</strong></p>
+<p>PHP es el lenguaje de programación que utiliza WordPress, y requiere
+extensiones específicas para manejar diversas funcionalidades (como
+imágenes y datos XML).</p>
+<ol type="1">
+<li><p><strong>Instalar PHP y extensiones:</strong></p></li>
+</ol>
+<p>sudo apt install php libapache2-mod-php php-mysql php-curl php-gd
+php-mbstring php-xml php-xmlrpc php-soap php-intl php-zip -y</p>
+<p><strong>Paso 6: Configurar Apache para WordPress</strong></p>
+<p>Necesitas configurar Apache para que sepa dónde encontrar y cómo
+servir el sitio de WordPress.</p>
+<ol type="1">
+<li><p><strong>Crear el archivo de configuración del
+sitio:</strong></p></li>
+</ol>
+<blockquote>
+<p>sudo nano /etc/apache2/sites-available/wordpress.conf</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Añadir la configuración</strong> (copia y pega):</p></li>
+</ol>
+<blockquote>
+<p>&lt;VirtualHost *:80&gt;</p>
+<p>ServerAdmin webmaster@localhost</p>
+<p>DocumentRoot /var/www/wordpress</p>
+<p>&lt;Directory /var/www/wordpress/&gt;</p>
+<p>AllowOverride All</p>
+<p>Require all granted</p>
+<p>&lt;/Directory&gt;</p>
+<p>ErrorLog ${APACHE_LOG_DIR}/error.log</p>
+<p>CustomLog ${APACHE_LOG_DIR}/access.log combined</p>
+<p>&lt;/VirtualHost&gt;</p>
+</blockquote>
+<p><em>Esta configuración establece /var/www/wordpress como el
+directorio raíz y permite el uso de archivos .htaccess (gracias a
+AllowOverride All) para las configuraciones de WordPress, como las URLs
+amigables</em>.</p>
+<ol start="3" type="1">
+<li><p><strong>Guardar y cerrar</strong> el archivo (en nano: Ctrl+O,
+Enter, Ctrl+X).</p></li>
+<li><p><strong>Habilitar el sitio y el módulo rewrite</strong>
+(necesario para las URLs amigables):</p></li>
+</ol>
+<blockquote>
+<p>sudo a2ensite wordpress.conf</p>
+<p>sudo a2enmod rewrite</p>
+<p><img src=".\\media\\33 Wordpress/media/image3.png"
+style="width:5.90556in;height:1.76181in" /></p>
+</blockquote>
+<ol start="5" type="1">
+<li><p><strong>Recargar Apache</strong> para aplicar los
+cambios:</p></li>
+</ol>
+<blockquote>
+<p>sudo systemctl reload apache2</p>
+</blockquote>
+<p>La diferencia principal entre <strong>systemctl restart
+apache2</strong> y <strong>systemctl reload apache2</strong> es el
+método que usan para aplicar los cambios en la configuración de Apache y
+el impacto que tienen sobre las conexiones activas:</p>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 39%" />
+<col style="width: 36%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Característica</strong></th>
+<th><strong>systemctl reload apache2 (Recargar)</strong></th>
+<th><strong>systemctl restart apache2 (Reiniciar)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mecanismo</strong></td>
+<td>Envía una señal al proceso principal de Apache para que relea su
+archivo de configuración.</td>
+<td>Detiene completamente el servicio y luego lo vuelve a iniciar.</td>
+</tr>
+<tr>
+<td><strong>Tiempo de Inactividad</strong></td>
+<td><strong>Casi nulo (0 segundos).</strong> Las conexiones activas
+terminan sus tareas con el proceso antiguo.</td>
+<td><strong>Breve interrupción.</strong> Hay un momento de inactividad
+mientras el servicio se detiene y se inicia.</td>
+</tr>
+<tr>
+<td><strong>Impacto en Conexiones</strong></td>
+<td><strong>Mantiene las conexiones activas.</strong> Las conexiones se
+sirven hasta que terminan, luego se usan los nuevos
+<em>workers</em>.</td>
+<td><strong>Corta todas las conexiones activas.</strong> Las peticiones
+en curso se pierden.</td>
+</tr>
+<tr>
+<td><strong>Cuándo usarlo</strong></td>
+<td>Para <strong>cambios menores</strong> en la configuración (ej.
+agregar un Virtual Host, cambiar una directiva de registro).</td>
+<td>Para <strong>cambios mayores</strong> (ej. cambiar puertos, cambiar
+módulos, errores críticos) o cuando una recarga falla.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>systemctl reload apache2 (Recargar)</strong></p>
+<p>Esta es la forma <strong>preferida y más segura</strong> de aplicar
+cambios en la configuración en un entorno de producción, ya que minimiza
+el impacto en los usuarios finales.</p>
+<p>Simplemente le dice a Apache que:</p>
+<ol type="1">
+<li><p>Cargue la nueva configuración.</p></li>
+<li><p>Inicie nuevos procesos <em>worker</em> con esa
+configuración.</p></li>
+<li><p>Permita que los procesos <em>worker</em> antiguos terminen de
+servir sus peticiones pendientes antes de cerrarse.</p></li>
+</ol>
+<p><strong>systemctl restart apache2 (Reiniciar)</strong></p>
+<p>Esto es más drástico. Es necesario cuando la configuración es tan
+crítica (como cambiar un módulo, un puerto principal o la configuración
+SSL/TLS) que <strong>Apache necesita una detención completa</strong>
+para aplicar los cambios de manera segura. Si una recarga falla o los
+cambios no se aplican, un reinicio forzado suele ser la solución.</p>
+<p><strong>Paso 7: Descargar y Configurar WordPress</strong></p>
+<p>Descarga los archivos de WordPress y configúralos para que se
+conecten a la base de datos.</p>
+<ol type="1">
+<li><p><strong>Descargar y extraer:</strong></p></li>
+</ol>
+<blockquote>
+<p>wget https://wordpress.org/latest.tar.gz</p>
+<p>tar -xvzf latest.tar.gz</p>
+<p>sudo mv wordpress /var/www/</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Asignar permisos:</strong> Esto permite a Apache
+(www-data) acceder y modificar los archivos.</p></li>
+</ol>
+<blockquote>
+<p>sudo chown -R www-data:www-data /var/www/wordpress</p>
+</blockquote>
+<ol start="3" type="1">
+<li><p><strong>Configurar la base de datos:</strong></p></li>
+</ol>
+<blockquote>
+<p>cd /var/www/wordpress</p>
+<p>sudo cp wp-config-sample.php wp-config.php</p>
+<p>sudo nano wp-config.php</p>
+</blockquote>
+<ol start="4" type="1">
+<li><p><strong>Editar el archivo wp-config.php</strong> y reemplazar los
+valores de la base de datos con los que creaste en el Paso 4.</p></li>
+</ol>
+<p>El bloque modificado completo en tu wp-config.php debe quedar
+<strong>exactamente</strong> así:</p>
+<p>define( 'DB_NAME', 'wordpress' );</p>
+<p>define( 'DB_USER', 'wordpressuser' );</p>
+<p>define( 'DB_PASSWORD', '12345678' );</p>
+<p>define( 'DB_HOST', 'localhost' );</p>
+<p>define( 'DB_CHARSET', 'utf8' );</p>
+<p>define( 'DB_COLLATE', '' );</p>
+<p><img src=".\\media\\33 Wordpress/media/image4.png"
+style="width:5.52459in;height:2.92601in" /></p>
+<ol start="5" type="1">
+<li><p><strong>Guardar y cerrar</strong> el archivo.</p></li>
+</ol>
+<p><img src=".\\media\\33 Wordpress/media/image5.png"
+style="width:5.90556in;height:2.89653in" /></p>
+<p>Si recargamos localhost en el navegador seguiremos viendo la página
+de Apache.</p>
+<p>La razón por la que sigues viendo la página por defecto de Apache
+("It works!") es que tu servidor está cargando la configuración
+predeterminada (000-default.conf) antes que la de WordPress, ya que
+ambas están escuchando en el puerto 80.</p>
+<p>Para que WordPress se muestre al acceder a http://localhost/, debemos
+<strong>deshabilitar el sitio web predeterminado</strong> de Apache.</p>
+<p><strong>Solución: Deshabilitar el Sitio por Defecto</strong></p>
+<p><strong>1. Deshabilitar el sitio predeterminado</strong></p>
+<p>Utiliza la herramienta a2dissite para deshabilitar el archivo de
+configuración por defecto (000-default.conf).</p>
+<p>sudo a2dissite 000-default.conf</p>
+<p><strong>2. Verificar que WordPress esté habilitado (Solo si es
+necesario)</strong></p>
+<p>Puedes confirmarlo con a2ensite:</p>
+<p>sudo a2ensite wordpress.conf</p>
+<p><em>(Si ya está habilitado, te dirá: "Site wordpress already
+enabled").</em></p>
+<p><strong>3. Recargar el Servicio Apache</strong></p>
+<p>Ahora, con el sitio predeterminado deshabilitado y el sitio de
+WordPress habilitado, recarga el servicio para que los cambios surtan
+efecto.</p>
+<p>sudo systemctl reload apache2</p>
+<p><strong>Verificación Final</strong></p>
+<p>Después de ejecutar estos comandos, vuelve a tu navegador y accede a
+la dirección:</p>
+<p><a
+href="https://www.google.com/search?q=http://localhost/"><u>http://localhost/</u></a></p>
+<p><strong>Deberías ver la pantalla de bienvenida y el asistente de
+instalación de WordPress</strong> solicitándote que selecciones el
+idioma. Si es así, ¡la configuración de Apache estará completa!</p>
+<p><img src=".\\media\\33 Wordpress/media/image6.png"
+style="width:5.90556in;height:4.29931in" /></p>
+<p><strong>Paso 8: Completar la Instalación a Través del
+Navegador</strong></p>
+<p>El último paso es el asistente de configuración web de WordPress.</p>
+<ol type="1">
+<li><p>Accede a http://localhost/ en tu navegador.</p></li>
+</ol>
+<blockquote>
+<p><strong>¿Qué sigue?</strong></p>
+</blockquote>
+<ul>
+<li><p>Ahora que tienes WordPress instalado localmente, puedes comenzar
+a:</p></li>
+<li><p>Explorar la interfaz de administración
+(http://localhost/wp-admin/).</p></li>
+<li><p>Instalar temas y plugins para personalizar y mejorar tu
+sitio.</p></li>
+<li><p>Crear contenido como páginas y entradas de blog.</p></li>
+</ul>
+<ol start="2" type="1">
+<li><p>Deberías ver la pantalla de instalación de WordPress.</p></li>
+<li><p>Sigue las instrucciones en pantalla para <strong>elegir el
+idioma</strong>, <strong>el nombre del sitio</strong> y
+<strong>establecer el nombre de usuario y contraseña del
+administrador</strong>.</p></li>
+</ol>
+<p>¡Con esto, tu instalación local de WordPress en Ubuntu 24.04 estará
+completa!</p>
+<p>Título del sitio: diversionconbanderas</p>
+<p>Nombre de usuario: sheldon</p>
+<p>Contraseña: penny</p>
+<p>Tu correo electrónico: <a
+href="mailto:sheldon@diversionconbanderas.local">sheldon@diversionconbanderas.local</a></p>
+<p><img src=".\\media\\33 Wordpress/media/image7.png"
+style="width:5.90556in;height:4.35139in" /></p>
+<p><img src=".\\media\\33 Wordpress/media/image8.png"
+style="width:5.90556in;height:2.55833in" /></p>
+<p><img src=".\\media\\33 Wordpress/media/image9.png"
+style="width:3.93805in;height:2.94833in" /></p>
+<p><img src=".\\media\\33 Wordpress/media/image10.png"
+style="width:5.90556in;height:1.60694in" /></p>
+<script src="nav.js"></script>
+</body>
+</html>

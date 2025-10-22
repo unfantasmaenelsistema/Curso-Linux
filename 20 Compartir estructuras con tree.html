@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>20 Compartir estructuras con tree</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>Compartir estructuras con tree</strong></p>
+<p>Cuando trabajamos en proyectos colaborativos, una de las tareas más
+básicas (y a la vez más olvidadas), es documentar la estructura de
+carpetas y archivos.</p>
+<p>En equipos DevOps, aulas técnicas o repositorios de onboarding, poder
+mostrar la arquitectura de un proyecto con un solo comando mejora la
+productividad, la comunicación y el mantenimiento.</p>
+<p>En Linux (Ubuntu), la herramienta clave para esto es
+<strong>tree</strong>.</p>
+<h1 id="verifica-si-tienes-tree">Verifica si tienes tree </h1>
+<p>Antes de instalar nada, conviene comprobar si ya lo tienes en tu
+sistema:</p>
+<p>which tree</p>
+<p>Si devuelve una ruta, ya está instalado. Si no, sigue al paso
+siguiente.</p>
+<h1 id="instala-tree">Instala tree </h1>
+<p>El comando tree no siempre viene por defecto en Ubuntu.</p>
+<p>Para instalarlo:</p>
+<p>sudo apt update</p>
+<p>sudo apt install -y tree</p>
+<p>tree --version</p>
+<p>De esta forma, te aseguras de tener la herramienta lista y
+comprobada</p>
+<h1 id="genera-la-estructura">Genera la estructura </h1>
+<p>Una vez dentro de la raíz de tu proyecto, puedes generar el archivo
+con la estructura de carpetas y ficheros con el siguiente comando:</p>
+<p>tree -a -I
+".git|node_modules|vendor|.venv|venv|dist|build|.idea|.vscode|.DS_Store|__pycache__|
+coverage|.next|.turbo|.parcel-cache" &gt; ESTRUCTURA.txt</p>
+<p>Este comando ignora carpetas “ruidosas” que no aportan nada a la
+documentación. Para comprobar que el archivo se ha creado:</p>
+<p>ls -lh ESTRUCTURA.txt</p>
+<p>head -n 40 ESTRUCTURA.txt</p>
+<h1 id="variantes-útiles">Variantes útiles </h1>
+<p>Dependiendo de lo que quieras mostrar, puedes ajustar el comando:</p>
+<ol type="a">
+<li><p><strong>Solo carpetas (más compacto):</strong></p></li>
+</ol>
+<p>tree -d -a -I
+".git|node_modules|vendor|.venv|venv|dist|build|.idea|.vscode|.DS_Store|__pycache__|
+coverage|.next|.turbo|.parcel-cache" &gt; ESTRUCTURA.txt</p>
+<ol start="2" type="a">
+<li><p><strong>Limitar profundidad (ej. 3 niveles):</strong></p></li>
+</ol>
+<p>tree -a -L 3 -I
+".git|node_modules|vendor|.venv|venv|dist|build|.idea|.vscode|.DS_Store|__pycache__|
+coverage|.next|.turbo|.parcel-cache" &gt; ESTRUCTURA.txt</p>
+<ol start="3" type="a">
+<li><p><strong>Guardar con fecha incluida:</strong></p></li>
+</ol>
+<p>tree -a -I
+".git|node_modules|vendor|.venv|venv|dist|build|.idea|.vscode|.DS_Store|__pycache__|
+coverage|.next|.turbo|.parcel-cache" &gt; ESTRUCTURA-$(date +%F).txt</p>
+<p>Esto último es útil si subes varias versiones del mismo proyecto.</p>
+<h1 id="alias-rápido-bash-o-zsh">Alias rápido (bash o zsh) </h1>
+<p>Si lo usas a menudo, puedes crear un atajo para no escribir el
+comando completo cada vez: En ~/.bashrc o ~/.zshrc, añade al final esta
+línea:</p>
+<p>alias estructura='tree -a -I
+".git|node_modules|vendor|.venv|venv|dist|build|.idea|.vscode|.DS_Store|__pycache__|coverage|.next|.turbo|.parcel-cache"
+&gt; ESTRUCTURA.txt &amp;&amp; ls -lh ESTRUCTURA.txt &amp;&amp; head -n
+40 ESTRUCTURA.txt'</p>
+<p>Recarga la configuración:</p>
+<p>source ~/.bashc</p>
+<p>O</p>
+<p>source ~/.zshrc</p>
+<p>Ahora ya puedes usar tu alias.</p>
+<p>Y luego basta con escribir en tu terminal:</p>
+<p>estructura</p>
+<p>Eso ejecutará automáticamente el comando completo y te generará el
+archivo <strong>ESTRUCTURA.txt</strong> con la información que
+necesitas.</p>
+<h1 id="script-global-opcional">Script global opcional </h1>
+<p>Si quieres que tu equipo tenga un comando único y accesible en todo
+el sistema, puedes crear un script llamado estructura dentro de
+/usr/local/bin/. Así funcionará igual que cualquier otro comando de
+Linux.</p>
+<p><strong>Creación del Script</strong></p>
+<h2 id="paso-1-crear-el-script-e-insertar-el-contenido">Paso 1: Crear el
+script e insertar el contenido</h2>
+<p>Copia y pega este bloque completo en tu terminal y presiona
+Enter:</p>
+<p>sudo tee /usr/local/bin/estructura &gt;/dev/null &lt;&lt;'SH'</p>
+<p>#!/usr/bin/env bash</p>
+<p>set -euo pipefail</p>
+<p>OUT="ESTRUCTURA.txt"</p>
+<p>IGNORE=".git|node_modules|vendor|.venv|venv|dist|build|.idea|.vscode|.DS_Store|__pycache__|coverage|.next|.turbo|.parcel-cache"</p>
+<p>tree -a -I "$IGNORE" &gt; "$OUT"</p>
+<p>ls -lh "$OUT"</p>
+<p>head -n 40 "$OUT"</p>
+<p>SH</p>
+<p>La terminal te pedirá tu contraseña de usuario (sudo) para poder
+escribir en la carpeta protegida (/usr/local/bin/).</p>
+<h2 id="paso-2-darle-permisos-de-ejecución-crucial">Paso 2: Darle
+permisos de ejecución (¡Crucial!)</h2>
+<p>Una vez creado el archivo, debes hacerlo ejecutable. Ejecuta este
+segundo comando:</p>
+<p>sudo chmod +x /usr/local/bin/estructura</p>
+<p><strong>Con esto, el script estructura estará listo para usarse como
+un comando de sistema.</strong></p>
+<p>A partir de ahora ya puedes usar tu script desde cualquier
+proyecto.</p>
+<p>En la terminal, escribiendo simplemente:</p>
+<p>estructura</p>
+<h1 id="plan-b-sin-tree">Plan B (sin tree) </h1>
+<p>Si no puedes instalar tree, tienes una alternativa con find:</p>
+<p>find . -not -path "*/.git/*" -not -path "*/node_modules/*" -maxdepth
+4 &gt; ESTRUCTURA.txt</p>
+<p>No es tan visual, pero cumple la misma función.</p>
+<p><img
+src=".\\media\\20 Compartir estructuras con tree/media/image1.PNG"
+style="width:5.90556in;height:1.43403in" /></p>
+<p>El mensaje que ves no es un error que impida la ejecución del
+comando, sino una <strong>advertencia (warning)</strong> del programa
+find sobre el <strong>orden de los argumentos</strong>.</p>
+<p>find te está diciendo que, aunque tu comando funciona, es una
+<strong>mala práctica</strong> especificar la opción global
+<strong>-maxdepth después</strong> de otras "pruebas" (como -not
+-path).</p>
+<p><strong>find: atención: ha especificado la opción global -maxdepth
+después de un argumento -not, pero las opciones globales no son
+posicionales... Por favor especifique las opciones globales antes que
+cualquier otro argumento.</strong></p>
+<h3 id="la-solución-correcta-mejor-práctica"><strong>La Solución
+Correcta (Mejor Práctica)</strong></h3>
+<p>Aunque el comando se ejecutó y probablemente creó el archivo
+ESTRUCTURA.txt (porque la advertencia indica que -maxdepth afecta tanto
+a las pruebas anteriores como a las posteriores), la manera correcta y
+recomendada de escribirlo es colocando la opción <strong>global</strong>
+-maxdepth justo <strong>después</strong> del directorio de inicio
+(.).</p>
+<p>find . -maxdepth 4 -not -path "*/.git/*" -not -path
+"*/node_modules/*" &gt; ESTRUCTURA.txt</p>
+<h4 id="resumen-del-cambio">Resumen del Cambio:</h4>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Versión Original (Advertencia)</strong></th>
+<th><strong>Versión Corregida (Recomendada)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>find . -not -path ... -maxdepth 4 &gt; ESTRUCTURA.txt</td>
+<td>find . -maxdepth 4 -not -path ... &gt; ESTRUCTURA.txt</td>
+</tr>
+</tbody>
+</table>
+<p>Al mover -maxdepth 4 al inicio, evitas la advertencia y aseguras que
+find aplique esa restricción de profundidad desde el principio de su
+lógica de búsqueda.</p>
+<h1 id="problemas-comunes">Problemas comunes </h1>
+<ul>
+<li><p><strong>tree</strong>: <strong>command not found</strong> →
+instala con sudo apt install -y tree.</p></li>
+<li><p><strong>Alias no funciona</strong> → revisa ~/.bashrc o ~/.zshrc
+y ejecuta source.</p></li>
+<li><p><strong>Permiso denegado en /usr/local/bin</strong> → asegúrate
+de usar sudo.</p></li>
+<li><p><strong>Archivo vacío</strong> → comprueba que estás en la raíz
+de los proyectos (pwd, ls -la).</p></li>
+</ul>
+<script src="nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>42 tshark</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>Tshark</strong></p>
+<p><strong>Tshark</strong> es la herramienta de línea de comandos
+asociada a Wireshark y es excelente para auditar y analizar tráfico de
+red.</p>
+<p>Aquí tiene una guía completa con ejercicios comunes, incluyendo los
+comandos para generar los archivos de ejemplo con
+<strong>tcpdump</strong> (la herramienta estándar para capturar paquetes
+en Linux) para que pueda probar cada ejercicio.</p>
+<p><strong>Guía de Ejercicios de Tshark</strong></p>
+<p>Para realizar estos ejercicios, necesitará <strong>tshark</strong>
+(instalado con sudo apt install tshark) y <strong>tcpdump</strong>
+(generalmente ya instalado).</p>
+<p><strong>Preparación: Crear un Archivo de Captura Base</strong></p>
+<p>Antes de cualquier ejercicio, cree un archivo de captura
+(sample.pcap) que contenga una mezcla de tráfico HTTP, DNS y SSH.</p>
+<ol type="1">
+<li><p><strong>Captura de ejemplo (en una terminal):</strong></p></li>
+</ol>
+<blockquote>
+<p>sudo tcpdump -i &lt;interfaz&gt; -c 50 -w sample.pcap</p>
+<p>sudo tcpdump -i &lt;interfaz&gt; -c 50 -w sample.pcap</p>
+<p><em>Reemplace &lt;interfaz&gt; por la suya (ej. eth0 o enp0s3). La
+opción -c 50 limita la captura a 50 paquetes.</em></p>
+</blockquote>
+<ol start="2" type="1">
+<li><p>Generar Tráfico (en otra terminal, mientras se captura):</p></li>
+</ol>
+<blockquote>
+<p>Haga un ping a un sitio, una resolución DNS y una solicitud HTTP.</p>
+<p>ping -c 3 google.com</p>
+<p>host google.com</p>
+<p>wget -qO- www.example.com &gt; /dev/null</p>
+</blockquote>
+<ol start="3" type="1">
+<li><p><strong>Detener la Captura:</strong> Vuelva a la primera terminal
+y detenga la captura (si no terminó automáticamente) con
+<strong>Ctrl+C</strong>.</p></li>
+</ol>
+<p><strong>Ejercicio 1: Resumen Básico de la Captura</strong></p>
+<p>Este ejercicio muestra información clave de los paquetes en un
+formato similar a la vista principal de Wireshark.</p>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 32%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Objetivo</strong></th>
+<th><strong>Comando tshark</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mostrar los primeros 10 paquetes</strong></td>
+<td>tshark -r sample.pcap -c 10</td>
+<td>Muestra el número, tiempo, IP de origen/destino, protocolo e
+información del paquete.</td>
+</tr>
+<tr>
+<td><strong>Contar Paquetes</strong></td>
+<td>`tshark -r sample.pcap</td>
+<td>wc -l`</td>
+</tr>
+<tr>
+<td><strong>Mostrar sólo las IPs</strong></td>
+<td>tshark -r sample.pcap -T fields -e ip.src -e ip.dst -c 5</td>
+<td>Muestra solo los campos de IP de origen y destino para los primeros
+5 paquetes.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejercicio 2: Filtrado por Protocolo (Display
+Filters)</strong></p>
+<p>Los filtros de visualización de Tshark son los mismos que se usan en
+Wireshark. Son esenciales para el análisis.</p>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 39%" />
+<col style="width: 35%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Objetivo</strong></th>
+<th><strong>Archivo de Ejemplo</strong></th>
+<th><strong>Comando tshark</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mostrar sólo tráfico DNS</strong></td>
+<td>Generado en el paso de Preparación.</td>
+<td>tshark -r sample.pcap -Y "dns"</td>
+</tr>
+<tr>
+<td><strong>Mostrar sólo peticiones HTTP</strong></td>
+<td>Generado en el paso de Preparación.</td>
+<td>tshark -r sample.pcap -Y "http.request"</td>
+</tr>
+<tr>
+<td><strong>Tráfico entre dos IPs</strong></td>
+<td>Genere tráfico entre su VM y la IP del <em>host</em> (ej.
+192.168.1.1).</td>
+<td>tshark -r sample.pcap -Y "ip.addr == 192.168.1.1"</td>
+</tr>
+<tr>
+<td><strong>Tráfico en un puerto específico</strong></td>
+<td>Genere tráfico SSH/Glances.</td>
+<td>tshark -r sample.pcap -Y "tcp.port == 22"</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejercicio 3: Extracción de Datos Específicos
+(Campos)</strong></p>
+<p>Utilice la opción <strong>-T fields</strong> para extraer valores
+concretos de los paquetes, útil para <em>scripting</em> o
+auditorías.</p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 34%" />
+<col style="width: 41%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Objetivo</strong></th>
+<th><strong>Comando de Ejemplo</strong></th>
+<th><strong>Campos a Extraer (-e)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Nombres de Host Solicitados (DNS)</strong></td>
+<td>tshark -r sample.pcap -Y "dns" -T fields -e dns.qry.name</td>
+<td>Extrae el campo dns.qry.name.</td>
+</tr>
+<tr>
+<td><strong>Códigos de Estado HTTP</strong></td>
+<td>Genere tráfico HTTP con errores y éxito (ej. wget a una página que
+no existe).</td>
+<td>tshark -r sample.pcap -Y "http.response" -T fields -e
+http.response.code</td>
+</tr>
+<tr>
+<td><strong>Tiempo de Respuesta (TCP)</strong></td>
+<td>Con el archivo sample.pcap.</td>
+<td>tshark -r sample.pcap -T fields -e tcp.time_delta</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejercicio 4: Filtros de Captura (Capture
+Filters)</strong></p>
+<p>A diferencia de los filtros de visualización (-Y), los
+<strong>filtros de captura</strong> (-f) filtran los paquetes
+<em>antes</em> de que se guarden en el archivo, ahorrando espacio y
+recursos. Utilizan la sintaxis de <strong>tcpdump (BPF)</strong>.</p>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 42%" />
+<col style="width: 35%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Objetivo</strong></th>
+<th><strong>Creación del Archivo de Ejemplo</strong></th>
+<th><strong>Comando tshark</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Capturar sólo paquetes ICMP</strong></td>
+<td><strong>Paso 1:</strong> sudo tcpdump -i &lt;interfaz&gt; -c 10 -w
+icmp.pcap 'icmp' <strong>Paso 2:</strong> ping -c 10 google.com</td>
+<td>tshark -r icmp.pcap -Y "icmp" (Verificará que solo hay ICMP)</td>
+</tr>
+<tr>
+<td><strong>Capturar solo tráfico de red (no local)</strong></td>
+<td><strong>Paso 1:</strong> sudo tcpdump -i &lt;interfaz&gt; -w
+non_local.pcap 'not port 22'</td>
+<td>tshark -r non_local.pcap -Y "tcp.port == 22"</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejercicio 5: Reconstrucción de Streams TCP</strong></p>
+<p>Este ejercicio es fundamental para la seguridad y la auditoría, ya
+que permite ver la conversación completa entre dos puntos.</p>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 37%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Objetivo</strong></th>
+<th><strong>Creación del Archivo de Ejemplo</strong></th>
+<th><strong>Comando tshark</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ver la conversación HTTP</strong></td>
+<td>Genere tráfico HTTP simple (ej. wget www.example.com).</td>
+<td>tshark -r sample.pcap -z "follow,tcp,ascii,0"</td>
+</tr>
+<tr>
+<td><strong>Ver sólo la información de un Stream</strong></td>
+<td><em>El número 0 se refiere al primer stream TCP detectado en el
+archivo.</em></td>
+<td>tshark -r sample.pcap -z "follow,tcp,ascii,1"</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Nota sobre follow,tcp:</strong> El número al final (0 o 1)
+indica el índice del <em>stream</em> TCP. Si omite el número, Tshark le
+mostrará un resumen de los <em>streams</em> disponibles.</p>
+<p><strong>Ejercicio 6: Estadísticas de Red
+(Conversaciones)</strong></p>
+<p>Utilice la opción <strong>-z</strong> de Tshark para generar
+estadísticas útiles, como un resumen de las conversaciones (pares de
+direcciones IP).</p>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 26%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Objetivo</strong></th>
+<th><strong>Comando tshark</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Listar las conversaciones IPv4</strong></td>
+<td>tshark -r sample.pcap -z conv,ip</td>
+<td>Muestra qué IPs se comunicaron, el número de paquetes y bytes
+transferidos.</td>
+</tr>
+<tr>
+<td><strong>Estadísticas por Protocolo</strong></td>
+<td>tshark -r sample.pcap -z io,phs</td>
+<td>Muestra el porcentaje de paquetes de cada protocolo (Ethernet, IP,
+TCP, etc.).</td>
+</tr>
+<tr>
+<td><strong>Gráfico de E/S por segundo</strong></td>
+<td>tshark -r sample.pcap -z io,gtime,1</td>
+<td>Muestra el número de paquetes por segundo durante la captura.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>TShark</strong> y <strong>Wireshark</strong></p>
+<p><strong>TShark es la versión de línea de comandos (CLI) de
+Wireshark.</strong></p>
+<p>Ambas herramientas comparten el mismo motor principal de análisis de
+protocolos, pero se diferencian en la forma en que se interactúa con
+ellas.</p>
+<p><strong>1. TShark: La Herramienta de Consola</strong></p>
+<p>TShark está diseñado para la <strong>automatización</strong> y el
+<strong>uso sin interfaz gráfica</strong> (headless).</p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 76%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Característica</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Interfaz</strong></td>
+<td>Línea de comandos (CLI).</td>
+</tr>
+<tr>
+<td><strong>Uso Típico</strong></td>
+<td>Captura de tráfico en servidores remotos sin GUI, <em>scripts</em>
+automatizados, filtros complejos, análisis de grandes archivos .pcap en
+lote.</td>
+</tr>
+<tr>
+<td><strong>Rendimiento</strong></td>
+<td>Suele ser más eficiente en el uso de recursos, ya que no necesita
+renderizar gráficos.</td>
+</tr>
+<tr>
+<td><strong>Salida</strong></td>
+<td>Muestra los resultados en texto plano en la terminal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>TShark es esencial cuando:</strong> necesitas capturar
+tráfico en un servidor Linux/Unix al que accedes por SSH, o cuando
+quieres automatizar el filtrado de paquetes dentro de un <em>script</em>
+de Bash.</p>
+<p><strong>2. Wireshark: La Herramienta Gráfica</strong></p>
+<p>Wireshark es la aplicación de escritorio que la mayoría de la gente
+conoce, proporcionando una interfaz de usuario completa.</p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 76%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Característica</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Interfaz</strong></td>
+<td>Interfaz Gráfica de Usuario (GUI).</td>
+</tr>
+<tr>
+<td><strong>Uso Típico</strong></td>
+<td>Análisis interactivo, inspección visual de paquetes, seguimiento de
+flujos TCP, identificación rápida de anomalías, uso de gráficos
+estadísticos.</td>
+</tr>
+<tr>
+<td><strong>Rendimiento</strong></td>
+<td>Requiere más recursos del sistema (CPU y memoria) para renderizar la
+GUI.</td>
+</tr>
+<tr>
+<td><strong>Salida</strong></td>
+<td>Presentación visual y organizada de los datos en paneles de listado,
+detalle y <em>raw data</em>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Resumen</strong></p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 43%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Aspecto</strong></th>
+<th><strong>TShark</strong></th>
+<th><strong>Wireshark</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Motor de Análisis</strong></td>
+<td>Comparten el mismo motor.</td>
+<td>Comparten el mismo motor.</td>
+</tr>
+<tr>
+<td><strong>Filtros</strong></td>
+<td>Utiliza los <strong>mismos filtros de visualización</strong>
+(display filters).</td>
+<td>Utiliza los <strong>mismos filtros de visualización</strong>.</td>
+</tr>
+<tr>
+<td><strong>Archivos</strong></td>
+<td>Puede leer y escribir los mismos archivos de captura (.pcap,
+.pcapng).</td>
+<td>Puede leer y escribir los mismos archivos de captura.</td>
+</tr>
+<tr>
+<td><strong>Diferencia Clave</strong></td>
+<td><strong>Automatización y Consola.</strong></td>
+<td><strong>Visualización e Interacción.</strong></td>
+</tr>
+</tbody>
+</table>
+<p>En esencia, <strong>TShark te permite hacer todo lo que Wireshark
+puede hacer a nivel de análisis de paquetes y filtrado, pero sin
+necesidad de una pantalla gráfica.</strong></p>
+<script src="nav.js"></script>
+</body>
+</html>

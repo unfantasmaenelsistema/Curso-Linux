@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>07 Montaje de sistemas de archivos</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>Montaje de sistemas de archivos</strong></p>
+<p><strong>mount</strong>, <strong>umount</strong>, <strong>df</strong>,
+<strong>du</strong>, <strong>blkid</strong>, <strong>lsblk</strong>,
+<strong>fdisk</strong>, y <strong>parted</strong></p>
+<p><strong>Comando mount (Montar)</strong></p>
+<p>El comando <strong>mount</strong> hace que un dispositivo de
+almacenamiento (como una partición de disco, un USB o un sistema de
+archivos de red) sea <strong>accesible</strong> en el árbol de
+directorios de Linux.</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 83%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-a</td>
+<td>Monta todos los sistemas de archivos listados en /etc/fstab.</td>
+</tr>
+<tr>
+<td>-t TIPO</td>
+<td>Especifica el tipo de sistema de archivos (ej: ext4, vfat,
+ntfs).</td>
+</tr>
+<tr>
+<td>-o OPCIONES</td>
+<td>Especifica opciones de montaje (ej: ro para solo lectura, rw para
+lectura/escritura).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos con mount</strong></p>
+<p>Usa el comando lsblk para listar todos los dispositivos de bloque
+(discos, particiones, USB) y ver cómo están nombrados:</p>
+<p>lsblk</p>
+<p>Solo necesitas crear el directorio que el comando mount espera antes
+de intentar montarlo:</p>
+<p>sudo mkdir /mnt/usbdata</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 27%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;"><strong>Tarea</strong></th>
+<th style="text-align: left;"><strong>Comando Ejecutado por jose (con
+sudo)</strong></th>
+<th style="text-align: left;"><strong>Explicación</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Montar un USB (ej: /dev/sdb1)</strong></td>
+<td><em>sudo mount /dev/sdb1 /mnt/usbdata</em></td>
+<td>Monta la partición /dev/sdb1 en el punto de montaje /mnt/usbdata,
+haciéndola accesible.</td>
+</tr>
+<tr>
+<td><strong>Montar con opción de solo lectura</strong></td>
+<td><em>sudo mount -o ro /dev/cdrom /media/cd</em></td>
+<td>Monta un CD-ROM en modo de <strong>solo lectura</strong> (ro).</td>
+</tr>
+<tr>
+<td><strong>Mostrar sistemas de archivos montados</strong></td>
+<td>cat /proc/mounts</td>
+<td>Muestra una lista de todos los sistemas de archivos actualmente
+montados.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Comando umount (Desmontar) eject</strong></p>
+<p>El comando <strong>umount</strong> separa un dispositivo montado del
+árbol de directorios de Linux, permitiendo que el dispositivo sea
+retirado de forma segura.</p>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 86%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-l</td>
+<td>Desmontaje perezoso (lazy): Desmonta inmediatamente del árbol, pero
+espera a que el sistema de archivos esté realmente libre.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos con umount</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 28%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Tarea</strong></th>
+<th><strong>Comando Ejecutado por jose (con sudo)</strong></th>
+<th><strong>Explicación</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Desmontar por dispositivo</strong></td>
+<td>sudo umount /dev/sdb1</td>
+<td>Desmonta el dispositivo /dev/sdb1.</td>
+</tr>
+<tr>
+<td><strong>Desmontar por punto de montaje</strong></td>
+<td>sudo umount /mnt/usbdata</td>
+<td>Desmonta el sistema de archivos montado en el punto
+/mnt/usbdata.</td>
+</tr>
+<tr>
+<td><strong>Desmontaje forzado (si falla)</strong></td>
+<td>sudo umount -l /mnt/usbdata</td>
+<td>Intenta un desmontaje "perezoso" si el proceso normal falla porque
+está en uso.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Comando df (Disk Free)</strong></p>
+<p>El comando <strong>df</strong> muestra la cantidad de espacio libre y
+usado en los <strong>sistemas de archivos montados</strong>.</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 83%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-h</td>
+<td>Muestra el tamaño en formato legible para humanos (Human-readable:
+KB, MB, GB).</td>
+</tr>
+<tr>
+<td>-T</td>
+<td>Muestra el tipo de sistema de archivos.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos con df</strong></p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 21%" />
+<col style="width: 54%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Tarea</strong></th>
+<th><strong>Comando Ejecutado por jose</strong></th>
+<th><strong>Explicación</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ver espacio libre (fácil de leer)</strong></td>
+<td>df -h</td>
+<td>Muestra el espacio total, usado y libre de todos los sistemas de
+archivos montados en GB, MB, etc.</td>
+</tr>
+<tr>
+<td><strong>Ver tipos de sistemas de archivos</strong></td>
+<td>df -hT</td>
+<td>Añade la columna del tipo de sistema de archivos (ej: ext4,
+tmpfs).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Comando du (Disk Usage)</strong></p>
+<p>El comando <strong>du</strong> estima el <strong>espacio en disco
+utilizado</strong> por un archivo o, más comúnmente, por un
+directorio.</p>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 84%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-h</td>
+<td>Muestra el tamaño en formato legible para humanos (KB, MB, GB).</td>
+</tr>
+<tr>
+<td>-s</td>
+<td>Muestra el <strong>resumen total</strong> del tamaño del directorio,
+sin listar los subdirectorios.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos con du</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 35%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Tarea</strong></th>
+<th><strong>Comando Ejecutado por jose</strong></th>
+<th><strong>Explicación</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ver el tamaño de tu directorio personal</strong></td>
+<td>du -sh ~</td>
+<td>Muestra un resumen total (-s) y legible (-h) del espacio utilizado
+por el directorio personal de jose.</td>
+</tr>
+<tr>
+<td><strong>Ver el tamaño de cada subdirectorio</strong></td>
+<td>du -h /home/jose/Documentos</td>
+<td>Muestra el espacio utilizado por cada archivo y subdirectorio dentro
+de Documentos.</td>
+</tr>
+<tr>
+<td><strong>Ver los 10 directorios más grandes</strong></td>
+<td>du -a /var | sort -nr | head -n 10</td>
+<td>Una tubería avanzada: Calcula el uso de /var, ordena el resultado
+numéricamente e inversamente, y muestra solo las 10 líneas más
+grandes.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Comando blkid (Block ID)</strong></p>
+<p>El comando <strong>blkid</strong> imprime los atributos (UUID, LABEL,
+TIPO) de los dispositivos de bloques (particiones). Esto es
+<strong>crucial</strong> para identificar particiones de forma única al
+configurar /etc/fstab.</p>
+<p><strong>Ejemplos Prácticos con blkid</strong></p>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Tarea</strong></th>
+<th><strong>Comando Ejecutado por jose (con sudo)</strong></th>
+<th><strong>Explicación</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Listar todos los atributos</strong></td>
+<td>sudo blkid</td>
+<td>Muestra una lista de todos los dispositivos de bloques (discos y
+particiones) con su <strong>UUID</strong> (Identificador Único
+Universal), etiqueta y tipo de sistema de archivos.</td>
+</tr>
+<tr>
+<td><strong>Buscar solo el UUID de una partición</strong></td>
+<td>sudo blkid -s UUID -o value /dev/sda2</td>
+<td>Extrae solo el valor del UUID de la partición /dev/sda2.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Comando lsblk (List Block Devices)</strong></p>
+<p>El comando <strong>lsblk</strong> lista todos los dispositivos de
+bloques disponibles (discos duros, SSD, USB), mostrando la
+<strong>estructura jerárquica</strong> de los discos y sus
+particiones.</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 82%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción Común</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-f</td>
+<td>Muestra más detalles, incluyendo UUID, etiqueta y sistema de
+archivos.</td>
+</tr>
+<tr>
+<td>-o COLUMNAS</td>
+<td>Personaliza las columnas a mostrar (ej:
+NAME,SIZE,FSTYPE,MOUNTPOINT).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Prácticos con lsblk</strong></p>
+<table>
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 21%" />
+<col style="width: 49%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Tarea</strong></th>
+<th><strong>Comando Ejecutado por jose</strong></th>
+<th><strong>Explicación</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ver estructura de discos y particiones</strong></td>
+<td>lsblk</td>
+<td>Muestra de forma concisa y jerárquica los discos (sda, sdb) y sus
+particiones (sda1, sda2).</td>
+</tr>
+<tr>
+<td><strong>Ver con detalles de sistema de archivos</strong></td>
+<td>lsblk -f</td>
+<td>Añade columnas para el tipo de sistema de archivos, UUID y puntos de
+montaje.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Comando fdisk (Partition Manipulator)</strong></p>
+<p><strong>fdisk</strong> es una utilidad de manipulación de tablas de
+particiones para discos que usan la tabla de particiones
+<strong>MBR</strong> (Master Boot Record). Es una herramienta
+interactiva, ideal para crear o modificar particiones en discos que no
+son la partición del sistema operativo.</p>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 77%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando Interno (fdisk)</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>p</strong></td>
+<td><strong>Imprimir la tabla de particiones actual.</strong> (Muestra
+las particiones existentes en el disco seleccionado.)</td>
+</tr>
+<tr>
+<td><strong>n</strong></td>
+<td><strong>Crear una nueva partición.</strong> (Pide el tipo de
+partición, el número y los sectores de inicio/fin.)</td>
+</tr>
+<tr>
+<td><strong>d</strong></td>
+<td><strong>Eliminar una partición.</strong> (Pide el número de
+partición a eliminar.)</td>
+</tr>
+<tr>
+<td><strong>w</strong></td>
+<td><strong>Escribir los cambios al disco (guardar).</strong> (Aplica
+las modificaciones de la tabla de particiones al disco físico.)</td>
+</tr>
+<tr>
+<td><strong>q</strong></td>
+<td><strong>Salir sin guardar los cambios.</strong> (Sale del programa
+sin aplicar las modificaciones de la tabla de particiones.)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="comandos-adicionales-útiles-de-fdisk"><strong>Comandos
+Adicionales Útiles de fdisk</strong></h3>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 76%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando Interno (fdisk)</strong></th>
+<th><strong>Descripción Adicional</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>m</strong></td>
+<td>Imprimir este menú de ayuda (muestra todos los comandos internos
+disponibles).</td>
+</tr>
+<tr>
+<td><strong>t</strong></td>
+<td>Cambiar el tipo de sistema de archivos (ID) de una partición (ej.,
+cambiar de Linux a FAT32).</td>
+</tr>
+<tr>
+<td><strong>l</strong></td>
+<td>Listar los tipos de partición conocidos (los códigos que se usan con
+el comando t).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplo Práctico con fdisk</strong></p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 21%" />
+<col style="width: 61%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Tarea</strong></th>
+<th><strong>Comando Ejecutado por jose (con sudo)</strong></th>
+<th><strong>Explicación</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Iniciar la edición del disco</strong></td>
+<td>sudo fdisk /dev/sda</td>
+<td>Inicia la interfaz interactiva de fdisk para trabajar en el disco
+/dev/sda. Dentro, usarías <strong>p</strong> para ver el estado, y luego
+<strong>n</strong> para crear una nueva partición. <strong>¡Recuerda
+usar w o q para finalizar!</strong></td>
+</tr>
+</tbody>
+</table>
+<h3
+id="paso-seguro-usar-fdisk-en-el-disco-existente-devsda"><strong>Paso
+Seguro: Usar fdisk en el Disco Existente (/dev/sda)</strong></h3>
+<p>La forma más sencilla y segura de practicar los comandos de fdisk
+(como p, n, d, w, q) <strong>sin riesgo de dañar tu sistema
+operativo</strong> es iniciar el programa con tu disco principal
+(/dev/sda), pero asegurarte de <strong>salir con el comando q
+(quit)</strong>.</p>
+<p>El comando q saldrá sin guardar ningún cambio, lo que te permite
+simular la edición sin modificar realmente tu disco duro.</p>
+<h2 id="práctica-segura-de-fdisk"><strong>Práctica Segura de
+fdisk</strong></h2>
+<h3 id="iniciar-la-edición-solo-para-práctica"><strong>1. Iniciar la
+Edición (Solo para Práctica)</strong></h3>
+<p>Usa el comando fdisk con tu disco principal existente (/dev/sda).
+Necesitas sudo para ejecutarlo.</p>
+<p>sudo fdisk /dev/sda</p>
+<h3 id="comandos-a-probar-modo-interactivo"><strong>2. Comandos a Probar
+(Modo Interactivo)</strong></h3>
+<p>Una vez dentro de la interfaz de fdisk, verás el <em>prompt</em>
+Command (m for help):. Aquí puedes probar los comandos que querías:</p>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Acción en fdisk</strong></th>
+<th><strong>Seguridad</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>p</strong></td>
+<td><strong>Imprimir</strong> la tabla de particiones actual (muestra
+sda1 y sda2 con sus detalles, incluyendo el <strong>UUID</strong>
+87dbb037-344b-4c0f-9d18-a6a0757c5f6f de sda2).</td>
+<td>100% Seguro (solo lectura).</td>
+</tr>
+<tr>
+<td><strong>n</strong></td>
+<td><strong>Crear</strong> una nueva partición. Puedes practicar la
+simulación de creación aquí.</td>
+<td>Seguro (los cambios son temporales).</td>
+</tr>
+<tr>
+<td><strong>d</strong></td>
+<td><strong>Eliminar</strong> una partición. Puedes simular la
+eliminación.</td>
+<td>Seguro (los cambios son temporales).</td>
+</tr>
+<tr>
+<td><strong>q</strong></td>
+<td><strong>Salir sin guardar los cambios.</strong></td>
+<td><strong>CRÍTICO:</strong> Este comando evita que se escriban los
+cambios.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="ejemplo-de-creación-de-partición-con-fdisk"><strong>Ejemplo de
+Creación de Partición con fdisk</strong></h2>
+<p>Este ejemplo asume que tienes espacio libre al final del disco (que
+es lo más común cuando se practica en un disco virtual).</p>
+<h3 id="iniciar-fdisk"><strong>1. Iniciar fdisk</strong></h3>
+<p>Inicia el programa con el disco que quieres editar (en tu caso,
+/dev/sda):</p>
+<p>sudo fdisk /dev/sda</p>
+<p>Verás el <em>prompt</em> de comandos:</p>
+<p>Welcome to fdisk (util-linux 2.37.2).</p>
+<p>Changes will remain in memory only, until you decide to write
+them.</p>
+<p>Be careful before using the write command.</p>
+<p>Command (m for help):</p>
+<h3 id="imprimir-la-tabla-opcional-pero-recomendado"><strong>2. Imprimir
+la Tabla (Opcional, pero Recomendado)</strong></h3>
+<p>Usa p para ver el estado actual del disco y el espacio libre:</p>
+<p>Command (m for help): p</p>
+<h3 id="iniciar-la-creación"><strong>3. Iniciar la
+Creación</strong></h3>
+<p>Usa el comando n para crear una nueva partición:</p>
+<p>Command (m for help): n</p>
+<p>El programa te hará una serie de preguntas:</p>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 20%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Pregunta de fdisk</strong></th>
+<th><strong>Respuesta de Ejemplo</strong></th>
+<th><strong>Explicación</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Select the type of partition:</strong></td>
+<td><strong>p</strong> (primary) o <strong>e</strong> (extended)</td>
+<td>Si eliges p, te preguntará el número de partición (ej. 3 o 4).</td>
+</tr>
+<tr>
+<td><strong>Partition number (3-4, default 3):</strong></td>
+<td><strong>3</strong> (Enter)</td>
+<td>Seleccionamos el siguiente número de partición disponible.</td>
+</tr>
+<tr>
+<td><strong>First sector (1048576-104857599, default
+1048576):</strong></td>
+<td>(Enter)</td>
+<td>Aceptamos el valor por defecto, que es el inicio del espacio libre
+disponible.</td>
+</tr>
+<tr>
+<td><strong>Last sector, +/-sectors or +/-size{K,M,G}
+(1048576-104857599, default 104857599):</strong></td>
+<td><strong>+5G</strong></td>
+<td>Especificamos el tamaño, por ejemplo, 5 Gigabytes. También podrías
+introducir el número del último sector disponible.</td>
+</tr>
+</tbody>
+</table>
+<p>Una vez que completes la última pregunta, fdisk te notificará que la
+partición ha sido creada (ej. Created a new partition 3 of type 'Linux'
+and of size 5 GiB).</p>
+<h3 id="verificar-la-partición-creada-temporalmente"><strong>4.
+Verificar la Partición Creada Temporalmente</strong></h3>
+<p>Vuelve a usar p para ver la tabla y confirmar que la nueva partición
+(/dev/sda3) está en la lista (recuerda: <strong>solo está en
+memoria</strong>):</p>
+<p>Command (m for help): p</p>
+<p><strong>Nota:</strong></p>
+<p>No nos ha pedido elegir entre <strong>p (primaria)</strong> o
+<strong>e (extendida)</strong> porque estamos utilizando un disco que
+tiene una <strong>tabla de particiones GPT</strong> (Tipo de etiqueta de
+disco: gpt).</p>
+<h3 id="explicación-de-la-diferencia"><strong>Explicación de la
+Diferencia</strong></h3>
+<p>En MBR, solo podías tener 4 particiones primarias, por lo que
+necesitabas la opción "extendida" para crear más de cuatro.</p>
+<p>En cambio, nuestro disco está usando el <strong>esquema de
+particiones GPT (GUID Partition Table)</strong>, que es el estándar
+moderno.</p>
+<ol type="1">
+<li><p><strong>GPT no tiene particiones primarias/extendidas:</strong>
+En GPT, todas las particiones son simplemente "particiones" y el límite
+no es de 4, sino de <strong>128 particiones</strong> (o más, dependiendo
+del sistema).</p></li>
+<li><p><strong>fdisk lo sabe:</strong> Cuando fdisk detecta una etiqueta
+GPT (como indica la línea Tipo de etiqueta de disco: gpt), omite la
+pregunta sobre el tipo (p o e) y asume que vas a crear una partición
+estándar de Linux.</p></li>
+<li><p><strong>Resultado:</strong> Por eso, te pasa directamente a la
+pregunta del número de partición (Número de partición (3-128, valor
+predeterminado 3):) y luego asume el tipo <strong>'Linux
+filesystem'</strong> por defecto.</p></li>
+</ol>
+<h3 id="análisis-de-la-creación-partición-3"><strong>Análisis de la
+Creación (Partición 3)</strong></h3>
+<p>Hemos creado la partición 3, pero ha salido muy pequeña porque el
+espacio libre disponible en ese disco era mínimo:</p>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 71%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Parámetro</strong></th>
+<th><strong>Valor que usamos</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Inicio del disco:</strong></td>
+<td>2048</td>
+</tr>
+<tr>
+<td><strong>Final del disco:</strong></td>
+<td>107583040</td>
+</tr>
+<tr>
+<td><strong>Particiones existentes:</strong></td>
+<td>sda1 (1M) y sda2 (51.3G)</td>
+</tr>
+<tr>
+<td><strong>Espacio libre disponible:</strong></td>
+<td>Del sector 107579392 al 107583006.</td>
+</tr>
+<tr>
+<td><strong>Tamaño del espacio libre:</strong></td>
+<td><strong>Solo 3615 sectores</strong>, lo que equivale a <strong>1
+MiB</strong> (el tamaño de la partición 3 que creaste).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="section"></h4>
+<h4 id="conclusión"><strong>Conclusión</strong></h4>
+<p>La partición 3 se creó de 1 MiB porque <strong>solo nos quedaba ese
+espacio libre</strong> en el disco de 51.3 GiB después de que se usara
+el espacio para sda1 y sda2. La creación fue exitosa dentro de las
+restricciones de espacio de nuestro disco.</p>
+<h3 id="section-1"></h3>
+<h3 id="salir-de-forma-segura"><strong>3. Salir de Forma
+Segura</strong></h3>
+<p>Cuando termines de practicar, <strong>escribe q</strong> y presiona
+<strong>Enter</strong> para salir sin modificar nada.</p>
+<p>Command (m for help): q</p>
+<p>Si por accidente escribieras w (write/guardar), podrías dañar tu
+sistema operativo. <strong>Asegúrate siempre de usar q para
+salir</strong> cuando solo estés practicando.</p>
+<h2 id="si-quieres-particionar-un-disco-real"><strong>Si Quieres
+Particionar un Disco Real</strong></h2>
+<p>Si en el futuro quieres practicar la partición en un disco real sin
+riesgo, el método correcto es:</p>
+<ol type="1">
+<li><p><strong>Apagar la VM.</strong></p></li>
+<li><p>En la configuración de VirtualBox, ir a
+<strong>Almacenamiento</strong>.</p></li>
+<li><p>Añadir un <strong>nuevo disco virtual (VDI)</strong> de un tamaño
+pequeño (ej: 1 GB). Este aparecerá como /dev/sdb.</p></li>
+<li><p>Arrancar la VM y ejecutar sudo fdisk /dev/sdb.</p></li>
+<li><p>Entonces sí, podrías usar w (write/guardar) sin riesgo para tu
+sistema operativo principal.</p></li>
+</ol>
+<p><strong>Comando parted (Partition Manipulator)</strong></p>
+<p><strong>parted</strong> es una utilidad de manipulación de tablas de
+particiones, a menudo preferida sobre fdisk porque soporta tablas de
+particiones <strong>GPT</strong> (GUID Partition Table) y discos de más
+de 2 TB. Puede usarse de forma interactiva o no interactiva.</p>
+<p><strong>Ejemplos Prácticos con parted</strong></p>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 27%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Tarea</strong></th>
+<th><strong>Comando Ejecutado por jose (con sudo)</strong></th>
+<th><strong>Explicación</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mostrar la tabla de particiones</strong></td>
+<td>sudo parted -l</td>
+<td>Muestra las tablas de particiones de todos los discos de forma no
+interactiva (como fdisk -l).</td>
+</tr>
+<tr>
+<td><strong>Ver detalles de un disco</strong></td>
+<td>sudo parted /dev/sda print</td>
+<td>Muestra la información de las particiones del disco /dev/sda y su
+tabla de particiones (MBR/GPT).</td>
+</tr>
+<tr>
+<td><strong>Crear una nueva partición (no interactivo)</strong></td>
+<td><em>sudo parted /dev/sdb mkpart primary ext4 0% 1000MB</em></td>
+<td>Crea una partición primaria, de tipo ext4, desde el inicio hasta 1
+GB en el disco /dev/sdb.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejercicios:</strong></p>
+<p><strong>Usuario:</strong> jose<br />
+<strong>Sistema operativo:</strong> Ubuntu 24.04<br />
+<strong>Ruta base:</strong> /home/jose/</p>
+<p><strong>1. Comando mount — Montar sistemas de archivos</strong></p>
+<p>mount se utiliza para <strong>montar un dispositivo o
+partición</strong> en un punto del sistema de archivos, haciéndolo
+accesible.</p>
+<p><strong>Sintaxis</strong></p>
+<p>sudo mount [opciones] dispositivo punto_de_montaje</p>
+<p><strong>Ejemplos prácticos</strong></p>
+<p><strong>1.1. Ver los sistemas de archivos montados</strong></p>
+<p>mount</p>
+<p>Muestra todas las particiones y dispositivos actualmente
+montados.</p>
+<p><strong>1.2. Montar una unidad USB</strong></p>
+<p>Supón que el dispositivo es /dev/sdb1 y deseas montarlo en
+/mnt/usb:</p>
+<p>sudo mkdir -p /mnt/usb</p>
+<p>sudo mount /dev/sdb1 /mnt/usb</p>
+<p><strong>1.3. Montar con un tipo de sistema de archivos
+específico</strong></p>
+<p>sudo mount -t vfat /dev/sdb1 /mnt/usb</p>
+<p>Monta una memoria USB con formato FAT32.</p>
+<p><strong>1.4. Montar en modo solo lectura</strong></p>
+<p>sudo mount -o ro /dev/sdb1 /mnt/usb</p>
+<p><strong>1.5. Montar automáticamente con /etc/fstab</strong></p>
+<p>Añadir una línea como:</p>
+<p>UUID=XXXX-XXXX /mnt/usb vfat defaults 0 0</p>
+<p><strong>2. Comando umount — Desmontar sistemas de
+archivos</strong></p>
+<p>umount (sin “n”) se usa para <strong>desmontar</strong> un
+dispositivo o punto de montaje.</p>
+<p><strong>Sintaxis</strong></p>
+<p>sudo umount [dispositivo | punto_de_montaje]</p>
+<p><strong>Ejemplos prácticos</strong></p>
+<p><strong>2.1. Desmontar una memoria USB</strong></p>
+<p>sudo umount /mnt/usb</p>
+<p><strong>2.2. Desmontar usando el nombre del dispositivo</strong></p>
+<p>sudo umount /dev/sdb1</p>
+<p><strong>2.3. Desmontar cuando está ocupado</strong></p>
+<p>Si aparece el error “device is busy”, puedes ver qué procesos lo
+usan:</p>
+<p>sudo lsof /mnt/usb</p>
+<p>y luego cerrarlos o forzar el desmontaje:</p>
+<p>sudo umount -l /mnt/usb</p>
+<p><strong>3. Comando df — Mostrar espacio disponible en
+discos</strong></p>
+<p>df (disk free) muestra <strong>el uso de espacio en disco</strong>
+por sistema de archivos.</p>
+<p><strong>Sintaxis</strong></p>
+<p>df [opciones] [ruta]</p>
+<p><strong>Opciones comunes</strong></p>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 85%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-h</td>
+<td>Formato legible (MB, GB).</td>
+</tr>
+<tr>
+<td>-T</td>
+<td>Muestra el tipo de sistema de archivos.</td>
+</tr>
+<tr>
+<td>-i</td>
+<td>Muestra el uso de inodos.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos prácticos</strong></p>
+<p><strong>3.1. Mostrar el uso del disco de forma legible</strong></p>
+<p>df -h</p>
+<p><strong>3.2. Mostrar el uso de un punto específico</strong></p>
+<p>df -h /home/jose/</p>
+<p><strong>3.3. Mostrar el tipo de sistema de archivos</strong></p>
+<p>df -Th</p>
+<p>Salida típica:</p>
+<p>Filesystem Type Size Used Avail Use% Mounted on</p>
+<p>/dev/sda2 ext4 100G 75G 25G 75% /</p>
+<p><strong>4. Comando du — Mostrar tamaño de directorios o
+archivos</strong></p>
+<p>du (disk usage) calcula <strong>cuánto espacio ocupa un archivo o
+carpeta</strong>.</p>
+<p><strong>Sintaxis</strong></p>
+<p>du [opciones] [ruta]</p>
+<p><strong>Opciones comunes</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 74%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Opción</strong></th>
+<th><strong>Descripción</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-h</td>
+<td>Tamaño legible.</td>
+</tr>
+<tr>
+<td>-s</td>
+<td>Muestra solo el total.</td>
+</tr>
+<tr>
+<td>-c</td>
+<td>Muestra un total acumulado.</td>
+</tr>
+<tr>
+<td>--max-depth=N</td>
+<td>Limita la profundidad de subdirectorios.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos prácticos</strong></p>
+<p><strong>4.1. Ver el tamaño de una carpeta</strong></p>
+<p>du -h /home/jose/documentos/</p>
+<p><strong>4.2. Mostrar solo el total</strong></p>
+<p>du -sh /home/jose/documentos/</p>
+<p><strong>4.3. Ver tamaño con límite de profundidad</strong></p>
+<p>du -h --max-depth=1 /home/jose/</p>
+<p><strong>4.4. Ver totales acumulados</strong></p>
+<p>du -ch /home/jose/descargas/</p>
+<p><strong>5. Comando blkid — Mostrar UUID y tipo de sistema de
+archivos</strong></p>
+<p>blkid (block ID) muestra <strong>información de identificación de
+dispositivos</strong>, como <strong>UUID</strong>, <strong>tipo de
+sistema de archivos</strong> y <strong>etiqueta</strong>.</p>
+<p><strong>Sintaxis</strong></p>
+<p>sudo blkid</p>
+<p><strong>Ejemplos prácticos</strong></p>
+<p><strong>5.1. Ver todos los dispositivos</strong></p>
+<p>sudo blkid</p>
+<p>Salida ejemplo:</p>
+<p>/dev/sda1: UUID="b6c9b84a-0d7a-44c0-a5b4-bc3c9d50c07b"
+TYPE="ext4"</p>
+<p>/dev/sdb1: UUID="B2E1-3F1A" TYPE="vfat" LABEL="USB"</p>
+<p><strong>5.2. Ver información de un solo dispositivo</strong></p>
+<p>sudo blkid /dev/sdb1</p>
+<p><strong>5.3. Extraer solo el UUID</strong></p>
+<p>sudo blkid -s UUID -o value /dev/sda1</p>
+<p><strong>6. Comando lsblk — Listar dispositivos de bloque (discos y
+particiones)</strong></p>
+<p>lsblk (list block devices) muestra una <strong>vista
+jerárquica</strong> de los discos y particiones del sistema.</p>
+<p><strong>Sintaxis</strong></p>
+<p>lsblk [opciones]</p>
+<p><strong>Ejemplos prácticos</strong></p>
+<p><strong>6.1. Mostrar los discos y particiones</strong></p>
+<p>lsblk</p>
+<p>Salida típica:</p>
+<p>NAME MAJ:MIN RM SIZE RO TYPE MOUNTPOINTS</p>
+<p>sda 8:0 0 120G 0 disk</p>
+<p>├─sda1 8:1 0 512M 0 part /boot</p>
+<p>└─sda2 8:2 0 119.5G 0 part /</p>
+<p>sdb 8:16 1 32G 0 disk</p>
+<p>└─sdb1 8:17 1 32G 0 part /mnt/usb</p>
+<p><strong>6.2. Mostrar con tipo de sistema de archivos</strong></p>
+<p>lsblk -f</p>
+<p><strong>6.3. Mostrar solo nombres y puntos de montaje</strong></p>
+<p>lsblk -o NAME,MOUNTPOINT</p>
+<p><strong>7. Comando fdisk — Administrar particiones MBR</strong></p>
+<p>fdisk es una herramienta interactiva para <strong>crear, eliminar o
+modificar particiones</strong> en discos con esquema MBR.</p>
+<p>Solo debe usarse con precaución y privilegios de sudo.</p>
+<p><strong>Sintaxis</strong></p>
+<p>sudo fdisk [dispositivo]</p>
+<p><strong>Ejemplos prácticos</strong></p>
+<p><strong>7.1. Listar particiones de todos los discos</strong></p>
+<p>sudo fdisk -l</p>
+<p><strong>7.2. Administrar un disco específico</strong></p>
+<p>sudo fdisk /dev/sdb</p>
+<p>Dentro de fdisk:</p>
+<ul>
+<li><p>m → mostrar ayuda</p></li>
+<li><p>p → listar particiones</p></li>
+<li><p>n → crear nueva partición</p></li>
+<li><p>d → eliminar partición</p></li>
+<li><p>w → guardar cambios y salir</p></li>
+<li><p>q → salir sin guardar</p></li>
+</ul>
+<p><strong>7.3. Ver información del disco principal</strong></p>
+<p>sudo fdisk -l /dev/sda</p>
+<p><strong>8. Comando parted — Administrar particiones (MBR y
+GPT)</strong></p>
+<p>parted es una herramienta más moderna que fdisk, compatible con
+discos <strong>GPT</strong> y más grandes.</p>
+<p><strong>Sintaxis</strong></p>
+<p>sudo parted [dispositivo] [comando]</p>
+<p><strong>Ejemplos prácticos</strong></p>
+<p><strong>8.1. Ver información de particiones</strong></p>
+<p>sudo parted -l</p>
+<p><strong>8.2. Entrar en modo interactivo</strong></p>
+<p>sudo parted /dev/sdb</p>
+<p>Dentro de parted:</p>
+<ul>
+<li><p>print → mostrar particiones</p></li>
+<li><p>mklabel gpt → crear tabla GPT</p></li>
+<li><p>mkpart primary ext4 1MiB 10GiB → crear partición</p></li>
+<li><p>rm 1 → eliminar partición 1</p></li>
+<li><p>quit → salir</p></li>
+</ul>
+<p><strong>8.3. Crear una partición de 5 GB automáticamente</strong></p>
+<p>sudo parted /dev/sdb mkpart primary ext4 1MiB 5GiB</p>
+<p><strong>8.4. Ver espacio libre en el disco</strong></p>
+<p>sudo parted /dev/sda print free</p>
+<p><strong>Resumen</strong></p>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 50%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Comando</strong></th>
+<th><strong>Función principal</strong></th>
+<th><strong>Ejemplo típico</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mount</td>
+<td>Montar sistemas de archivos</td>
+<td>sudo mount /dev/sdb1 /mnt/usb</td>
+</tr>
+<tr>
+<td>umount</td>
+<td>Desmontar sistemas de archivos</td>
+<td>sudo umount /mnt/usb</td>
+</tr>
+<tr>
+<td>df</td>
+<td>Mostrar espacio disponible</td>
+<td>df -h</td>
+</tr>
+<tr>
+<td>du</td>
+<td>Calcular tamaño de directorios</td>
+<td>du -sh /home/jose</td>
+</tr>
+<tr>
+<td>blkid</td>
+<td>Mostrar UUID y tipo</td>
+<td>sudo blkid</td>
+</tr>
+<tr>
+<td>lsblk</td>
+<td>Ver estructura de discos y particiones</td>
+<td>lsblk -f</td>
+</tr>
+<tr>
+<td>fdisk</td>
+<td>Crear/modificar particiones MBR</td>
+<td>sudo fdisk /dev/sda</td>
+</tr>
+<tr>
+<td>parted</td>
+<td>Administrar particiones GPT/MBR</td>
+<td>sudo parted /dev/sdb</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejercicio práctico sugerido</strong></p>
+<p>1️ Conecta una memoria USB y localízala:</p>
+<p>Lsblk</p>
+<p>2️ Monta la unidad en /mnt/usb:</p>
+<p>sudo mkdir /mnt/usb</p>
+<p>sudo mount /dev/sdb1 /mnt/usb</p>
+<p>3️ Verifica espacio disponible:</p>
+<p>df -h /mnt/usb</p>
+<p>4️ Comprueba su UUID:</p>
+<p>sudo blkid /dev/sdb1</p>
+<p>5️ Desmonta el dispositivo:</p>
+<p>sudo umount /mnt/usb</p>
+<p>6️ (Opcional) Examina sus particiones:</p>
+<p>sudo parted /dev/sdb print</p>
+<script src="nav.js"></script>
+</body>
+</html>

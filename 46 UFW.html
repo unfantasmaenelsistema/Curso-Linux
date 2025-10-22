@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>46 UFW</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+<p><strong>UFW</strong></p>
+<p><strong>UFW</strong> (Uncomplicated Firewall), que es una interfaz
+simplificada para <strong>iptables/nftables</strong> (el motor
+subyacente del <em>firewall</em> de Linux).</p>
+<p>UFW es mucho más fácil de entender y usar que manipular directamente
+iptables. Aquí tiene una guía completa paso a paso para configurar
+UFW.</p>
+<p><strong>Configuración de Firewall con UFW (Ubuntu 24.04)</strong></p>
+<p><strong>Paso 1: Verificar el Estado de UFW e Instalación</strong></p>
+<p>UFW suele venir preinstalado, pero por si acaso, puede confirmar su
+estado e instalarlo si es necesario.</p>
+<ol type="1">
+<li><p><strong>Verificar estado:</strong></p></li>
+</ol>
+<blockquote>
+<p>sudo ufw status</p>
+<p><em>Si dice <strong>Status: inactive</strong>, necesita
+activarlo.</em></p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Instalar (si es necesario):</strong></p></li>
+</ol>
+<blockquote>
+<p>sudo apt install ufw -y</p>
+</blockquote>
+<p><strong>Paso 2: Definir las Políticas por Defecto (Reglas
+Base)</strong></p>
+<p>Lo primero es establecer cómo debe comportarse el <em>firewall</em>
+cuando no hay una regla específica. La práctica de seguridad más
+recomendada es <strong>denegar (deny) todas las conexiones
+entrantes</strong> y <strong>permitir (allow) todas las
+salientes</strong>.</p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 38%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Política</strong></th>
+<th><strong>Significado</strong></th>
+<th><strong>Comando</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Entrante (Input)</strong></td>
+<td>Todo lo que llega al servidor.</td>
+<td>sudo ufw default deny incoming</td>
+</tr>
+<tr>
+<td><strong>Saliente (Output)</strong></td>
+<td>Todo lo que sale del servidor.</td>
+<td>sudo ufw default allow outgoing</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejecución:</strong></p>
+<p># Denegar todo el tráfico entrante por defecto</p>
+<p>sudo ufw default deny incoming</p>
+<p># Permitir todo el tráfico saliente por defecto</p>
+<p>sudo ufw default allow outgoing</p>
+<p><strong>Paso 3: Permitir Conexiones Esenciales (SSH)</strong></p>
+<p>Dado que ha denegado todo el tráfico entrante, debe permitir
+explícitamente el puerto SSH (generalmente el puerto
+<strong>22</strong>) para no quedarse fuera del servidor.</p>
+<ol type="1">
+<li><p><strong>Permitir el puerto 22 (SSH):</strong></p></li>
+</ol>
+<blockquote>
+<p>sudo ufw allow ssh</p>
+<p># Alternativamente, puede especificar el puerto:</p>
+<p># sudo ufw allow 22/tcp</p>
+</blockquote>
+<p><strong>Paso 4: Habilitar y Verificar el Firewall</strong></p>
+<p>Una vez que el acceso SSH está permitido, puede activar UFW de forma
+segura.</p>
+<ol type="1">
+<li><p>Habilitar UFW:</p></li>
+</ol>
+<blockquote>
+<p>Se le preguntará si desea continuar. Escriba y (yes).</p>
+<p>sudo ufw enable</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p>Verificar el estado (detallado):</p></li>
+</ol>
+<blockquote>
+<p>Confirme que está activo y que su regla de SSH está en su lugar.</p>
+<p>sudo ufw status verbose</p>
+<p><em>La salida debe mostrar <strong>Status: active</strong> y la regla
+22/tcp (SSH) en la sección To Action.</em></p>
+</blockquote>
+<ol start="3" type="1">
+<li><p>Verificar el estado (numerado):</p></li>
+</ol>
+<blockquote>
+<p>Esto es útil para eliminar reglas específicas.</p>
+<p>sudo ufw status numbered</p>
+</blockquote>
+<p><strong>Paso 5: Añadir Reglas para Servicios Comunes</strong></p>
+<p>Añada reglas para cualquier servicio que quiera exponer públicamente
+(como un servidor web o el servicio Glances/Nagios).</p>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 33%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Servicio</strong></th>
+<th><strong>Puerto</strong></th>
+<th><strong>Comando de Ejemplo</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HTTP (Web)</strong></td>
+<td>80</td>
+<td>sudo ufw allow http</td>
+</tr>
+<tr>
+<td><strong>HTTPS (Web Segura)</strong></td>
+<td>443</td>
+<td>sudo ufw allow https</td>
+</tr>
+<tr>
+<td><strong>Glances</strong></td>
+<td>61208</td>
+<td>sudo ufw allow 61208/tcp</td>
+</tr>
+<tr>
+<td><strong>Nagios Web</strong></td>
+<td>80 (ya cubierto por http)</td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>Nagios NRPE</strong> (para agentes)</td>
+<td>5666</td>
+<td>sudo ufw allow 5666/tcp</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos Avanzados de Reglas</strong></p>
+<ul>
+<li><p><strong>Permitir acceso a HTTP solo desde una IP
+específica:</strong></p></li>
+</ul>
+<blockquote>
+<p>sudo ufw allow from 192.168.1.100 to any port 80</p>
+</blockquote>
+<ul>
+<li><p><strong>Permitir un rango de puertos:</strong></p></li>
+</ul>
+<blockquote>
+<p>sudo ufw allow 10000:20000/tcp</p>
+</blockquote>
+<ul>
+<li><p><strong>Denegar un puerto específico (si previamente fue
+permitido):</strong></p></li>
+</ul>
+<blockquote>
+<p>sudo ufw deny 8080/tcp</p>
+</blockquote>
+<p><strong>Paso 6: Eliminar Reglas</strong></p>
+<p>Hay dos formas de eliminar reglas: por número o por regla
+literal.</p>
+<ol type="1">
+<li><p>Eliminar por número (Recomendado):</p></li>
+</ol>
+<blockquote>
+<p>Primero, obtenga la lista numerada:</p>
+<p>sudo ufw status numbered</p>
+<p>Si desea eliminar la regla número 3:</p>
+<p>sudo ufw delete 3</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p><strong>Eliminar por regla literal:</strong></p></li>
+</ol>
+<blockquote>
+<p>sudo ufw delete allow 80/tcp</p>
+</blockquote>
+<p><strong>Paso 7: Deshabilitar o Restablecer el Firewall</strong></p>
+<p>Si necesita deshabilitar UFW temporalmente o revertir todas las
+reglas, use estos comandos.</p>
+<ol type="1">
+<li><p><strong>Deshabilitar UFW (mantiene las reglas):</strong></p></li>
+</ol>
+<blockquote>
+<p>sudo ufw disable</p>
+</blockquote>
+<ol start="2" type="1">
+<li><p>Restablecer UFW (borra todas las reglas):</p></li>
+</ol>
+<blockquote>
+<p>Esto devuelve UFW al estado original (deshabilitado y sin reglas
+definidas).</p>
+<p>sudo ufw reset</p>
+</blockquote>
+<p><strong>Resumen de la Configuración Mínima de Seguridad</strong></p>
+<p>Para un servidor básico, los siguientes tres comandos son la
+configuración de seguridad esencial:</p>
+<p># 1. Denegar todo lo entrante y permitir lo saliente</p>
+<p>sudo ufw default deny incoming</p>
+<p>sudo ufw default allow outgoing</p>
+<p># 2. Abrir el puerto SSH (imprescindible)</p>
+<p>sudo ufw allow ssh</p>
+<p># 3. Activar el firewall</p>
+<p>sudo ufw enable</p>
+<script src="nav.js"></script>
+</body>
+</html>
