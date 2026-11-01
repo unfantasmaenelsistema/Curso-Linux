@@ -1,0 +1,50 @@
+name: Comprobación y despliegue
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Generar y comprobar el sitio
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Generar el sitio (solo biblioteca estándar)
+        run: python tools/build.py
+      - name: Enlaces, imágenes, CSP y banco de preguntas
+        run: python tools/comprobar.py
+      - name: Sin scripts ni estilos de terceros
+        run: |
+          ! grep -rnE '<script[^>]+src="https?://|<link[^>]+rel="(stylesheet|preload|modulepreload)"[^>]+href="https?://' _site --include=*.html
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        with:
+          path: ./_site
+
+  deploy:
+    name: Publicar en GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

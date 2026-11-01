@@ -1,0 +1,200 @@
+<pre><code>grep , sed , awk , tr , y xargs</code></pre>
+<p>Seguiremos utilizando el usuario jose en Ubuntu 24.04 y nos basaremos principalmente en nuestro archivo <strong>informe.log</strong> para los ejemplos, ya que son comandos ideales para manipular registros y logs.</p>
+<h3>11. Comando grep (Global Regular Expression Print)</h3>
+<p><strong>grep</strong> es la herramienta fundamental para <strong>buscar texto o patrones</strong> (Expresiones Regulares) dentro de archivos y mostrar las líneas que coinciden.</p>
+<div class="tabla"><table><thead><tr><th><strong>Opción Común</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-i</td><td>Ignora mayúsculas/minúsculas en la búsqueda.</td></tr><tr><td>-v</td><td>Invierte la coincidencia; muestra las líneas <strong>que NO coinciden</strong> con el patrón.</td></tr><tr><td>-n</td><td>Muestra el <strong>número de línea</strong> donde se encontró la coincidencia.</td></tr><tr><td>-c</td><td>Muestra solo el <strong>conteo</strong> del número de líneas coincidentes.</td></tr></tbody></table></div>
+<h3>Ejemplos Prácticos con grep</h3>
+<div class="tabla"><table><thead><tr><th><strong>Tarea</strong></th><th><strong>Comando Ejecutado por jose</strong></th><th><strong>Resultado y Explicación</strong></th></tr></thead><tbody><tr><td><strong>Buscar errores</strong></td><td><code>grep "ERROR" informe.log</code></td><td>Muestra solo la línea 5, ya que contiene el texto exacto "ERROR".</td></tr><tr><td><strong>Buscar sesiones sin distinguir mayúsculas</strong></td><td><code>grep -i "usuario" informe.log</code></td><td>Muestra las líneas 11 y 12, ya que busca "usuario" sin importar mayúsculas/minúsculas.</td></tr><tr><td><strong>Contar líneas que NO son de inicio de sesión</strong></td><td><code>grep -v "ha iniciado sesión" informe.log | wc -l</code></td><td>Muestra todas las líneas que <em>no</em> contienen la frase de inicio de sesión, y luego <strong>wc -l</strong> cuenta cuántas líneas son.</td></tr><tr><td><strong>Mostrar errores con número de línea</strong></td><td><code>grep -n "ERROR" informe.log</code></td><td>Muestra: 5:[ERROR] Fallo al escribir en disco: Permiso denegado.</td></tr></tbody></table></div>
+<h3>12. Comando sed (Stream Editor)</h3>
+<p><strong>sed</strong> es un editor de flujo de texto. Se utiliza principalmente para <strong>sustituir texto</strong> o eliminar líneas de un archivo. A diferencia de un editor de texto normal, sed no modifica el archivo original por defecto, sino que opera sobre el flujo de datos.</p>
+<div class="tabla"><table><thead><tr><th><strong>Comando Común</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>s/patrón/reemplazo/g</td><td>El comando de sustitución (s). Reemplaza el patrón por el reemplazo. La g indica reemplazo <strong>global</strong> (todas las ocurrencias en la línea).</td></tr><tr><td>d</td><td>Comando de borrado (delete).</td></tr><tr><td>-i</td><td><strong>Modifica el archivo original</strong> (¡Usar con precaución!).</td></tr></tbody></table></div>
+<h3>Ejemplos Prácticos con sed</h3>
+<div class="tabla"><table><thead><tr><th><strong>Tarea</strong></th><th><strong>Comando Ejecutado por jose</strong></th><th><strong>Resultado y Explicación</strong></th></tr></thead><tbody><tr><td><strong>Reemplazar 'Usuario' por 'User'</strong></td><td><code>sed 's/Usuario/User/g' informe.log</code></td><td>Muestra todo el log, pero las líneas 11 y 12 dirán: "User 'maria' ha iniciado sesión."</td></tr><tr><td><strong>Eliminar líneas de error</strong></td><td><code>sed '/ERROR/d' informe.log</code></td><td>Muestra todo el log, <strong>excepto</strong> la línea 5 que contenía "[ERROR]".</td></tr><tr><td><strong>Modificar el archivo (usando -i)</strong></td><td><code>sed -i 's/ha iniciado sesión/logged in/g' informe.log</code></td><td><strong>¡Cuidado!</strong> Esto cambia las líneas 11 y 12 <em>permanentemente</em> en el archivo informe.log.</td></tr></tbody></table></div>
+<h3>13. Comando awk</h3>
+<p><strong>awk</strong> es un lenguaje de programación y herramienta de procesamiento de texto increíblemente potente, ideal para <strong>analizar datos columnares (por campos)</strong> y realizar cálculos o formateo complejo. Trabaja línea por línea y campo por campo.</p>
+<div class="tabla"><table><thead><tr><th><strong>Variables Internas Clave</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td><strong>\$0</strong></td><td>Representa toda la línea actual.</td></tr><tr><td><strong>\$1, \$2, \$3, ...</strong></td><td>Representan el campo 1, 2, 3, etc., de la línea actual.</td></tr><tr><td><strong>FS</strong></td><td><em>Field Separator</em> (Separador de Campo). Por defecto es el espacio/tabulador.</td></tr><tr><td><strong>NR</strong></td><td><em>Number of Record</em> (Número de línea).</td></tr></tbody></table></div>
+<h3>Ejemplos Prácticos con awk</h3>
+<div class="tabla"><table><thead><tr><th><strong>Tarea</strong></th><th><strong>Comando Ejecutado por jose</strong></th><th><strong>Resultado y Explicación</strong></th></tr></thead><tbody><tr><td><strong>Mostrar sólo las líneas que contienen 'CPU' o 'RAM'</strong></td><td><code>awk '/CPU|RAM/' informe.log</code></td><td></td></tr><tr><td><strong>Extraer y formatear nombres de usuario</strong></td><td><code>grep "sesión" informe.log | awk '{print "Bienvenido:", $2}'</code></td><td><strong>1.</strong> grep filtra las líneas de inicio de sesión. <strong>2.</strong> awk procesa estas líneas; $2 (el segundo campo) es el nombre de usuario (ej: 'maria'). El separador de campos por defecto es el espacio.</td></tr><tr><td><strong>Simular un cálculo de uso</strong></td><td><code>echo "CPU: 45%" | awk '{print "El uso fue de:", $2}'</code></td><td>Demuestra el acceso a campos. Si la entrada es "CPU: 45%", el segundo campo ($2) es "45%".</td></tr></tbody></table></div>
+<h3>14. Comando tr (Translate or Delete Characters)</h3>
+<p>El comando <strong>tr</strong> se utiliza para <strong>traducir (reemplazar)</strong> o <strong>eliminar</strong> caracteres individuales de la entrada de datos. Solo funciona con la entrada estándar (STDOUT), por lo que siempre se utiliza con una tubería (|).</p>
+<div class="tabla"><table><thead><tr><th><strong>Opción Común</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-d</td><td><strong>Elimina</strong> los caracteres especificados.</td></tr></tbody></table></div>
+<h3>Ejemplos Prácticos con tr</h3>
+<div class="tabla"><table><thead><tr><th><strong>Tarea</strong></th><th><strong>Comando Ejecutado por jose</strong></th><th><strong>Resultado y Explicación</strong></th></tr></thead><tbody><tr><td><strong>Convertir a mayúsculas</strong></td><td><code>cat informe.log | tr 'a-z' 'A-Z'</code></td><td>Muestra todo el contenido del archivo <strong>en letras mayúsculas</strong>.</td></tr><tr><td><strong>Eliminar caracteres no deseados</strong></td><td><code>cat informe.log | tr -d '()'</code></td><td>Muestra el log, eliminando todos los paréntesis ( y ) (ej: en (backup.sh)).</td></tr><tr><td><strong>Reemplazar espacios por guiones</strong></td><td><code>echo "Hola mundo Linux" | tr ' ' '-'</code></td><td>Muestra: Hola-mundo-Linux.</td></tr></tbody></table></div>
+<h3>15. Comando xargs (Execute Arguments)</h3>
+<p>El comando <strong>xargs</strong> toma la entrada de datos (líneas o elementos separados por espacios) que recibe por la tubería (|) y la usa como <strong>argumentos</strong> para ejecutar otro comando. Es crucial cuando un comando genera una lista de elementos (ej: nombres de archivo) y necesitas pasar esa lista a un segundo comando.</p>
+<div class="tabla"><table><thead><tr><th><strong>Opción Común</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td><code>-I {}</code></td><td>Indica que se reemplace el <em>placeholder</em> {} por cada línea de entrada. Útil para comandos que solo aceptan un argumento a la vez.</td></tr><tr><td>-n 1</td><td>Ejecuta el comando una vez por cada línea de entrada.</td></tr></tbody></table></div>
+<h3>Ejemplos Prácticos con xargs</h3>
+<div class="tabla"><table><thead><tr><th><strong>Tarea</strong></th><th><strong>Comando Ejecutado por jose</strong></th><th><strong>Resultado y Explicación</strong></th></tr></thead><tbody><tr><td><strong>Eliminar archivos encontrados</strong></td><td><code>find /tmp/jose -name "*.tmp" | xargs rm</code></td><td><strong>1.</strong> find busca todos los archivos .tmp en <code>/tmp/jose</code>. <strong>2.</strong> Pasa la lista de archivos encontrados a xargs. <strong>3.</strong> xargs ejecuta el comando rm (eliminar) usando esa lista como argumentos.</td></tr><tr><td><strong>Ejecutar un comando por cada línea</strong></td><td><code>ls archivos* | xargs -n 1 echo "Procesando:"</code></td><td><strong>1.</strong> ls lista los archivos que coinciden con el patrón. <strong>2.</strong> xargs -n 1 ejecuta echo "Procesando:" una vez por cada archivo listado.</td></tr><tr><td><strong>Copiar archivos a un nuevo destino</strong></td><td><strong>find . -name "*.conf" | xargs -I {} cp {} <code>/home/jose/config_backup/</code></strong></td><td><strong>1.</strong> find busca todos los archivos .conf. <strong>2.</strong> xargs -I {} indica que por cada archivo encontrado, se ejecute cp y se reemplace {} con el nombre del archivo, copiándolo al directorio de <em>backup</em>.</td></tr></tbody></table></div>
+<h3>Ejercicios:</h3>
+<h3>Búsqueda y procesamiento de texto en Linux</h3>
+<p>Usuario: jose</p>
+<p>Sistema operativo: Ubuntu 24.04</p>
+<p>Ruta base de trabajo: <code>/home/jose/documentos/</code></p>
+<h3>1. Comando grep — Buscar texto en archivos</h3>
+<p>grep (Global Regular Expression Print) busca patrones o palabras dentro de archivos o salidas de comandos.</p>
+<p>Es uno de los comandos más usados para filtrar información.</p>
+<h3>Sintaxis</h3>
+<pre><code>grep [opciones] 'patrón' [archivo]</code></pre>
+<h3>Opciones comunes</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-i</td><td>Ignora mayúsculas/minúsculas.</td></tr><tr><td>-n</td><td>Muestra el número de línea.</td></tr><tr><td>-v</td><td>Muestra las líneas que <strong>no</strong> coinciden.</td></tr><tr><td>-r</td><td>Busca de forma recursiva en directorios.</td></tr><tr><td>-l</td><td>Muestra solo los nombres de archivos coincidentes.</td></tr><tr><td>-c</td><td>Cuenta cuántas coincidencias hay.</td></tr><tr><td>-E</td><td>Usa expresiones regulares extendidas.</td></tr></tbody></table></div>
+<h3>Ejemplos prácticos</h3>
+<h3>1.1. Buscar una palabra en un archivo</h3>
+<pre><code>grep "error" /var/log/syslog</code></pre>
+<p>Muestra las líneas que contienen “error”.</p>
+<h3>1.2. Buscar sin distinguir mayúsculas</h3>
+<pre><code>cat &lt;&lt; EOF &gt; /home/jose/Documentos/info.txt
+Resumen del Sistema Operativo
+-----------------------------</code></pre>
+<p>Esta es la primera sección de información.</p>
+<p>El servidor utiliza la distribución</p>
+<p>linux **ubuntu** 24.04 para sus operaciones.</p>
+<p>Es una plataforma estable.</p>
+<p>La configuración de red fue probada en **UBUNTU**.</p>
+<p>Otros sistemas operativos no están permitidos.</p>
+<p>Fin del resumen.</p>
+<pre><code>EOF
+grep -i "ubuntu" info.txt</code></pre>
+<h3>1.3. Mostrar el número de línea</h3>
+<pre><code>grep -n "nombre" /home/jose/Documentos/usuarios.csv</code></pre>
+<h3>1.4. Buscar en todos los archivos de un directorio</h3>
+<pre><code>grep -r "jose" /home/jose/Documentos/</code></pre>
+<h3>1.5. Contar coincidencias</h3>
+<pre><code>grep -c "login" /var/log/auth.log</code></pre>
+<h3>1.6. Excluir líneas que contengan un texto</h3>
+<pre><code>grep -v "root" /etc/passwd</code></pre>
+<h3>1.7. Buscar usando expresiones regulares</h3>
+<pre><code>grep -E "^[A-Z]" nombres.txt</code></pre>
+<p>Muestra las líneas que comienzan con una letra mayúscula.</p>
+<h3>2. Comando sed — Editor de texto por flujo (stream editor)</h3>
+<p>sed permite <strong>editar texto sin abrirlo</strong>, haciendo sustituciones, eliminaciones o inserciones sobre la marcha.</p>
+<h3>Sintaxis</h3>
+<pre><code>sed [opciones] 'expresión' [archivo]</code></pre>
+<h3>Opciones comunes</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-n</td><td>Suprime la salida automática.</td></tr><tr><td>-e</td><td>Permite usar varias expresiones.</td></tr><tr><td>-i</td><td>Edita el archivo directamente (<em>in place</em>).</td></tr></tbody></table></div>
+<h3>Ejemplos prácticos</h3>
+<h3>2.1. Reemplazar una palabra (solo muestra el resultado)</h3>
+<pre><code>echo -e "Inicio de sesión con error.\nerror crítico en el sistema de error.\nNo hay errores.\nEste es un error. Este es otro error." &gt; reporte.txt
+sed 's/error/éxito/' reporte.txt</code></pre>
+<p>Reemplaza <strong>la primera</strong> aparición de “error” por “éxito” en cada línea.</p>
+<h3>2.2. Reemplazar todas las apariciones en cada línea</h3>
+<pre><code>sed 's/error/éxito/g' reporte.txt</code></pre>
+<h3>2.3. Modificar directamente el archivo</h3>
+<pre><code>echo -e "Tarea 1: pendiente, prioritaria.\nTarea 2: pendiente, revisar el estado pendiente del reporte.\nTarea 3: completado.\nTarea 4: pendiente." &gt; tareas.txt
+sed -i 's/pendiente/completado/g' tareas.txt</code></pre>
+<p>Cambia “pendiente” por “completado” dentro del archivo real.</p>
+<h3>2.4. Eliminar líneas que contengan un patrón</h3>
+<pre><code>sed '/DEBUG/d' log.txt</code></pre>
+<p>El comando sed '/DEBUG/d' log.txt es una forma rápida y común de <strong>eliminar líneas</strong> que contienen una palabra o patrón específico de un archivo, sin modificar el archivo original.</p>
+<h3></h3>
+<div class="tabla"><table><thead><tr><th><strong>Parte</strong></th><th><strong>Nombre</strong></th><th><strong>Significado</strong></th></tr></thead><tbody><tr><td><strong>sed</strong></td><td><strong>Stream Editor</strong></td><td>Es una herramienta de procesamiento de texto que funciona línea por línea.</td></tr><tr><td><strong>'...'</strong></td><td><strong>Patrón y Acción</strong></td><td>La acción a realizar, encerrada en comillas simples.</td></tr><tr><td><strong><code>/DEBUG/</code></strong></td><td><strong>Patrón de Búsqueda</strong></td><td>Una expresión regular que selecciona todas las líneas que contengan la palabra <strong>DEBUG</strong>. Las barras diagonales (/ /) delimitan el patrón.</td></tr><tr><td><strong>d</strong></td><td><strong>Comando de Eliminación</strong></td><td>Es la acción (<em>delete</em>) que se aplica a las líneas seleccionadas por el patrón. Le dice a sed que <strong>elimine</strong> la línea actual del flujo de salida.</td></tr><tr><td><strong>log.txt</strong></td><td><strong>Archivo de Entrada</strong></td><td>El archivo cuyo contenido se va a procesar.</td></tr></tbody></table></div>
+<h3>¿Qué hace el comando?</h3>
+<p>El comando completo le indica a sed:</p>
+<p>"Toma cada línea del archivo log.txt y, si esa línea contiene la palabra <strong>DEBUG</strong> (en mayúsculas), <strong>elimínala</strong> (d). Luego, imprime todas las líneas restantes en la salida estándar (la terminal)."</p>
+<h4>Puntos Clave:</h4>
+<ol><li><strong>Eliminación Selectiva:</strong> Solo se eliminan las líneas que coinciden con el patrón <code>/DEBUG/.</code></li><li><strong>No Modifica el Archivo Original:</strong> sed por defecto imprime el resultado en la terminal (<em>stdout</em>). El archivo log.txt <strong>no se modifica</strong>.</li><li><strong>Distinción de Mayúsculas/Minúsculas:</strong> El patrón <code>/DEBUG/</code> solo eliminará líneas que contengan <strong>DEBUG</strong>; no eliminará líneas que contengan Debug o debug.</li></ol>
+<pre><code>echo -e "[2025-10-10 08:00:01] INFO: Inicio de proceso.\n[2025-10-10 08:00:05] DEBUG: Variable X es igual a 5.\n[2025-10-10 08:00:10] WARN: Conexión lenta detectada.\n[2025-10-10 08:00:12] DEBUG: El usuario A accedió a la base de datos.\n[2025-10-10 08:00:15] ERROR: Fallo al cargar módulo.\nEsta línea no tiene etiqueta, pero sí la palabra DEBUG.\n[2025-10-10 08:00:20] INFO: Fin de proceso." &gt; log.txt</code></pre>
+<p>El comando sed '/DEBUG/d' log.txt es muy útil para la limpieza de archivos de registro. Lo que hace es:</p>
+<ul><li>Busca cualquier línea en el archivo <strong>log.txt</strong> que contenga el patrón "<strong>DEBUG</strong>".</li><li>La acción <strong>d</strong> (de <em>delete</em>) <strong>elimina</strong> esa línea.</li><li>El resultado (el log sin las líneas DEBUG) se muestra en la <strong>salida estándar</strong> (la terminal), sin modificar el archivo original.</li></ul>
+<pre><code>sed '/DEBUG/d' log.txt</code></pre>
+<p>Las tres líneas que contienen la palabra "DEBUG" (sin importar su posición) habrán sido eliminadas de la salida:</p>
+<p>[2025-10-10 08:00:01] INFO: Inicio de proceso.</p>
+<pre><code>[2025-10-10 08:00:10] WARN: Conexión lenta detectada.</code></pre>
+<p>[2025-10-10 08:00:15] ERROR: Fallo al cargar módulo.</p>
+<p>[2025-10-10 08:00:20] INFO: Fin de proceso.</p>
+<h3>2.5. Mostrar solo líneas específicas</h3>
+<pre><code>sed -n '1,5p' notas.txt</code></pre>
+<p>Muestra solo las líneas 1 a 5.</p>
+<h3>2.6. Añadir texto antes o después de una línea</h3>
+<pre><code>echo -e 'Sección 1\nTítulo Principal del Documento\nEste párrafo pertenece al título principal.\nTítulo Secundario\nOtro párrafo sin título.\nTítulo final (¡con paréntesis!)' &gt; documento.txt
+sed '/Título/a Subtítulo agregado' documento.txt</code></pre>
+<p>Inserta “Subtítulo agregado” después de la línea que contiene “Título”.</p>
+<h3>3. Comando awk — Procesamiento y análisis de texto por columnas</h3>
+<p>awk es un lenguaje de procesamiento de texto diseñado para <strong>analizar y manipular datos estructurados</strong> (como CSV o tablas).</p>
+<h3>Sintaxis</h3>
+<pre><code>awk 'patrón { acción }' [archivo]</code></pre>
+<h3>Ejemplos prácticos</h3>
+<p>Supón que tienes el archivo ventas.txt:</p>
+<pre><code>Producto Precio Cantidad
+Manzanas 2.5 10
+Peras 3.0 5
+Bananas 1.8 12
+echo -e 'Producto Precio Cantidad\nManzanas 2.5 10\nPeras 3.0 5\nBananas 1.8 12' &gt; ventas.txt</code></pre>
+<h3>3.1. Mostrar una columna específica</h3>
+<pre><code>awk '{print $1}' ventas.txt</code></pre>
+<p>Muestra solo la columna de productos.</p>
+<h3>3.2. Mostrar varias columnas</h3>
+<pre><code>awk '{print $1, $2}' ventas.txt</code></pre>
+<p>Producto y precio.</p>
+<h3>3.3. Calcular totales</h3>
+<pre><code>awk '{total = $2 * $3; print $1, total}' ventas.txt</code></pre>
+<p>Muestra el producto y el total de cada línea.</p>
+<h3>3.4. Mostrar solo filas que cumplan una condición</h3>
+<pre><code>awk '$2 &gt; 2 {print $1, $2}' ventas.txt</code></pre>
+<p>Muestra productos con precio mayor que 2.</p>
+<h3>3.5. Calcular sumas o promedios</h3>
+<pre><code>awk '{suma += $2 * $3} END {print "Total general:", suma}' ventas.txt</code></pre>
+<h3>3.6. Usar delimitadores personalizados</h3>
+<pre><code>echo -e 'Nombre,Apellido,Edad,Ciudad\nJuan,Perez,20,Madrid\nMaria,Gomez,22,Barcelona\nCarlos,Lopez,19,Sevilla\nAna,Ruiz,21,Valencia' &gt; alumnos.csv
+awk -F ',' '{print $1, $3}' alumnos.csv</code></pre>
+<p>Indica que el delimitador es una coma.</p>
+<h3>4. Comando tr — Traducir o eliminar caracteres</h3>
+<p>tr (translate) se usa para <strong>reemplazar, eliminar o convertir</strong> caracteres en la entrada estándar.</p>
+<p>No opera directamente sobre archivos, sino sobre <strong>flujos de texto</strong> (usando redirección o tuberías).</p>
+<h3>Sintaxis</h3>
+<pre><code>tr [opciones] SET1 [SET2]</code></pre>
+<h3>Opciones comunes</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-d</td><td>Elimina caracteres.</td></tr><tr><td>-s</td><td>Sustituye repeticiones consecutivas por una sola.</td></tr></tbody></table></div>
+<h3>Ejemplos prácticos</h3>
+<pre><code>echo -e 'este es un texto de pRueba.\ntiene muchas vocales\ny también espacios múltiples.' &gt; texto.txt</code></pre>
+<h3>4.1. Convertir texto a mayúsculas</h3>
+<pre><code>cat texto.txt | tr 'a-z' 'A-Z'</code></pre>
+<h3>4.2. Convertir a minúsculas</h3>
+<pre><code>echo "HOLA MUNDO" | tr 'A-Z' 'a-z'</code></pre>
+<h3>4.3. Eliminar caracteres específicos</h3>
+<pre><code>cat texto.txt | tr -d 'aeiou'</code></pre>
+<p>Elimina todas las vocales.</p>
+<h3>4.4. Reemplazar espacios por guiones</h3>
+<pre><code>echo "curso linux basico" | tr ' ' '-'
+Resultado: curso-linux-basico</code></pre>
+<h3>4.5. Comprimir múltiples espacios en uno solo</h3>
+<pre><code>cat texto.txt | tr -s ' '</code></pre>
+<h3>5. Comando xargs — Construir y ejecutar comandos a partir de entradas</h3>
+<p>xargs toma una lista de elementos de la entrada estándar y los pasa como argumentos a otro comando.</p>
+<p>Es ideal cuando un comando no acepta entrada por tubería directamente.</p>
+<h3>Sintaxis</h3>
+<pre><code>xargs [comando] [opciones]</code></pre>
+<h3>Ejemplos prácticos</h3>
+<h3>5.1. Eliminar varios archivos listados</h3>
+<pre><code>ls *.log | xargs rm</code></pre>
+<p>Borra todos los archivos .log listados.</p>
+<h3>5.2. Buscar y eliminar archivos específicos</h3>
+<pre><code>find . -name "*.bak" | xargs rm</code></pre>
+<h3>5.3. Contar líneas de varios archivos</h3>
+<pre><code>ls *.txt | xargs wc -l</code></pre>
+<h3>5.4. Copiar varios archivos a otro directorio</h3>
+<pre><code>find . -name "*.txt" | xargs -I {} cp {} /home/jose/backup/</code></pre>
+<p>Usa {} como marcador de posición para cada archivo encontrado.</p>
+<h3>5.5. Combinar con grep</h3>
+<pre><code>grep -rl "ERROR" /var/log | xargs cat</code></pre>
+<p>Muestra el contenido de todos los archivos que contienen “ERROR”.</p>
+<pre><code>sudo grep -rl "ERROR" /var/log | xargs sudo cat</code></pre>
+<h3>Resumen</h3>
+<div class="tabla"><table><thead><tr><th><strong>Comando</strong></th><th><strong>Función principal</strong></th><th><strong>Ejemplo típico</strong></th></tr></thead><tbody><tr><td><code>grep</code></td><td>Buscar texto o patrones</td><td><code>grep "error" log.txt</code></td></tr><tr><td><code>sed</code></td><td>Sustituir o eliminar texto</td><td><code>sed 's/viejo/nuevo/g' archivo.txt</code></td></tr><tr><td><code>awk</code></td><td>Procesar columnas y cálculos</td><td><code>awk '{print $1, $2*$3}' datos.txt</code></td></tr><tr><td><code>tr</code></td><td>Convertir o eliminar caracteres</td><td><code>tr 'a-z' 'A-Z'</code></td></tr><tr><td><code>xargs</code></td><td>Ejecutar comandos sobre listas</td><td>`find . -name "*.log"</td></tr></tbody></table></div>
+<h3>Ejercicio práctico sugerido</h3>
+<p>Crea el archivo datos.csv:</p>
+<pre><code>cat &gt; datos.csv
+Ana,25
+Luis,32
+Marta,29
+Jose,32
+Ctrl+D</code></pre>
+<h3>Mostrar solo los nombres:</h3>
+<pre><code>cut -d ',' -f 1 datos.csv</code></pre>
+<h3>Filtrar los que tienen “32”:</h3>
+<pre><code>grep "32" datos.csv</code></pre>
+<h3>Reemplazar las comas por tabulaciones:</h3>
+<pre><code>cat datos.csv | tr ',' '\t'</code></pre>
+<h3>Calcular promedio de edad:</h3>
+<pre><code>awk -F ',' '{suma+=$2} END {print "Promedio:", suma/NR}' datos.csv</code></pre>
+<h3>Guardar el resultado y mostrarlo:</h3>
+<pre><code>awk -F ',' '{suma+=$2} END {print "Promedio:", suma/NR}' datos.csv | tee resumen.txt</code></pre>

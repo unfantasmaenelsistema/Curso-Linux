@@ -1,0 +1,108 @@
+<h2>1) Conceptos clave</h2>
+<ul><li><strong>NFS (Network File System)</strong> → clásico en entornos Linux/Unix, rápido y sencillo.</li><li><strong>Samba (SMB/CIFS)</strong> → protocolo de Windows, permite compartir carpetas entre Linux ↔︎ Windows.</li><li><code>scp / sftp</code> → transferencia segura puntual por SSH, no es “compartir permanente”.</li></ul>
+<p><strong>NFS</strong> (Linux a Linux) y <strong>Samba</strong> (Linux ↔︎ Windows).</p>
+<h2>2) Compartir archivos con NFS</h2>
+<h2>Instalación (Debian/Ubuntu)</h2>
+<pre><code>sudo apt update
+sudo apt install -y nfs-kernel-server</code></pre>
+<h2>Configurar carpeta compartida</h2>
+<ol><li>Crear carpeta y asignar permisos:</li></ol>
+<pre><code>sudo mkdir -p /srv/nfs/compartido
+sudo chown nobody:nogroup /srv/nfs/compartido
+sudo chmod 777 /srv/nfs/compartido</code></pre>
+<figure><img src="../media/compartir-archivos-en-red/imagen1.webp" width="769" height="166" alt="Captura 1 de la lección «Compartir archivos en red»" loading="lazy" decoding="async"></figure>
+<ol><li>Editar <code>/etc/exports</code> y añadir:</li></ol>
+<pre><code>sudo nano /etc/exports
+
+/srv/nfs/compartido 192.168.1.0/24(rw,sync,no_subtree_check)</code></pre>
+<p>Esto comparte la carpeta con toda la subred 192.168.1.0/24.</p>
+<figure><img src="../media/compartir-archivos-en-red/imagen2.webp" width="808" height="334" alt="Captura 2 de la lección «Compartir archivos en red»" loading="lazy" decoding="async"></figure>
+<ol><li>Aplicar cambios:</li></ol>
+<pre><code>sudo exportfs -ra
+sudo systemctl restart nfs-kernel-server</code></pre>
+<h2>Cliente NFS</h2>
+<p>Usamos la ip de la máquina Ubuntu:</p>
+<pre><code>sudo apt install -y nfs-common
+sudo mount 192.168.1.41:/srv/nfs/compartido /mnt</code></pre>
+<figure><img src="../media/compartir-archivos-en-red/imagen3.webp" width="804" height="177" alt="Captura 3 de la lección «Compartir archivos en red»" loading="lazy" decoding="async"></figure>
+<p>Ya tienes tu servidor NFS funcionando en <strong>192.168.1.41</strong>. Ahora toca ver cómo acceder desde <strong>otros equipos de tu red local</strong> (por ejemplo, otra VM o un portátil conectado al mismo router).</p>
+<h2>Pasos en el cliente NFS (otro equipo)</h2>
+<ol><li><strong>Instalar utilidades NFS</strong> (en Ubuntu/Debian):</li></ol>
+<pre><code>sudo apt update
+sudo apt install -y nfs-common</code></pre>
+<ol><li><strong>Crear un punto de montaje</strong> (carpeta donde se verá el recurso compartido):</li></ol>
+<pre><code>sudo mkdir -p /mnt/nfs</code></pre>
+<ol><li><strong>Montar el recurso compartido</strong> desde el servidor:</li></ol>
+<pre><code>sudo mount 192.168.1.41:/srv/nfs/compartido /mnt/nfs</code></pre>
+<ol><li><strong>Verificar</strong>:</li></ol>
+<pre><code>df -h | grep nfs
+ls -la /mnt/nfs</code></pre>
+<h2>Montaje automático al arrancar</h2>
+<p>Si quieres que el cliente monte el recurso siempre al iniciar, edita <code>/etc/fstab</code> en el cliente y añade:</p>
+<pre><code>192.168.1.41:/srv/nfs/compartido /mnt/nfs nfs defaults 0 0</code></pre>
+<p>Luego prueba con:</p>
+<pre><code>sudo mount -a</code></pre>
+<h2>Cosas a tener en cuenta</h2>
+<ul><li>En el servidor, en <code>/etc/exports</code>, asegúrate de haber permitido a la red local:</li></ul>
+<pre><code>/srv/nfs/compartido 192.168.1.0/24(rw,sync,no_subtree_check)</code></pre>
+<ul><li>Si usas VirtualBox, revisa que las VMs estén en <strong>modo puente (bridged)</strong> o <strong>red interna</strong> para que se vean entre sí.</li><li>Puedes probar conectividad con:</li></ul>
+<pre><code>ping 192.168.1.41</code></pre>
+<h2>Ejercicio 1</h2>
+<ul><li>En VM1 (servidor): exporta <code>/srv/nfs/compartido</code>.</li><li>En VM2 (cliente): móntalo en <code>/mnt</code>.</li><li>Crea un archivo en el cliente y comprueba que aparece en el servidor.</li></ul>
+<h2>3) Compartir archivos con Samba</h2>
+<h2>Instalación</h2>
+<pre><code>sudo apt install -y samba</code></pre>
+<h2>Configurar carpeta compartida</h2>
+<ol><li>Crear carpeta:</li></ol>
+<pre><code>sudo mkdir -p /srv/samba/publico
+sudo chmod 777 /srv/samba/publico</code></pre>
+<ol><li>Editar <code>/etc/samba/smb.conf</code> y añadir al final:</li></ol>
+<pre><code>sudo nano /etc/samba/smb.conf
+
+[Publico]
+path = /srv/samba/publico
+browsable = yes
+writable = yes
+guest ok = yes
+read only = no</code></pre>
+<figure><img src="../media/compartir-archivos-en-red/imagen4.webp" width="805" height="482" alt="Captura 4 de la lección «Compartir archivos en red»" loading="lazy" decoding="async"></figure>
+<ol><li>Reiniciar servicio:</li></ol>
+<pre><code>sudo systemctl restart smbd</code></pre>
+<h2>Acceso desde cliente Linux</h2>
+<pre><code>smbclient -L //192.168.1.41 -N
+smbclient //192.168.1.41/Publico -N</code></pre>
+<h2>Acceso desde Windows</h2>
+<ul><li>En el explorador: \\192.168.1.41\Publico</li><li>Copiar/pegar archivos.</li></ul>
+<figure><img src="../media/compartir-archivos-en-red/imagen5.webp" width="909" height="249" alt="Captura 5 de la lección «Compartir archivos en red»" loading="lazy" decoding="async"></figure>
+<h2>Ejercicio 2</h2>
+<ol><li>Configura Samba para compartir <code>/srv/samba/publico</code>.</li><li>Accede desde otra VM Linux con smbclient o desde Windows con \\IP.</li><li>Copia un archivo y verifica que aparece en el servidor.</li></ol>
+<h2>4) Compartir archivos de forma puntual (scp, sftp)</h2>
+<h2>Copiar con scp</h2>
+<pre><code>scp archivo.txt usuario@192.168.56.20:/home/usuario/</code></pre>
+<h2>Acceder con sftp</h2>
+<pre><code>sftp usuario@192.168.56.20</code></pre>
+<h2>Ejercicio 3</h2>
+<ol><li>Desde un cliente, copia un archivo a otro host con scp.</li><li>Comprueba que se transfirió correctamente.</li></ol>
+<h2>5) Ejercicio integrador</h2>
+<p><strong>Escenario</strong>:</p>
+<ul><li>VM1 (Servidor Linux): comparte <code>/srv/nfs/compartido</code> vía NFS y <code>/srv/samba/publico</code> vía Samba.</li><li>VM2 (Cliente Linux): monta el NFS en <code>/mnt/nfs</code>.</li><li>VM3 (Cliente Windows o Linux): accede al recurso Samba.</li></ul>
+<h2>Objetivo:</h2>
+<ul><li><strong>Crear un archivo compartido</strong> y verlo desde las otras máquinas.</li></ul>
+<h2>6) Cheatsheet rápido</h2>
+<pre><code># NFS
+sudo apt install nfs-kernel-server nfs-common
+sudo nano /etc/exports
+
+sudo exportfs -ra
+sudo mount server:/ruta /mnt
+# Samba
+sudo apt install samba smbclient
+sudo nano /etc/samba/smb.conf
+
+sudo systemctl restart smbd
+smbclient -L //server -N
+# SCP / SFTP
+scp file.txt user@host:/path
+sftp user@host</code></pre>
+<h2>Consejos:</h2>
+<ul><li><strong>NFS es más natural en Linux</strong>, mientras que <strong>Samba es la mejor opción si hay Windows en la red</strong>.</li><li>Para <strong>ejercicios rápidos</strong>, usa scp/sftp porque no requieren configurar servicios.</li></ul>

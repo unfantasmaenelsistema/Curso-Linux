@@ -1,0 +1,86 @@
+<h2>Objetivo</h2>
+<ul><li>Instalar y configurar <strong>Fail2Ban</strong>.</li><li>Detectar intentos de fuerza bruta en servicios como <strong>SSH</strong>.</li><li>Bloquear automáticamente direcciones IP maliciosas mediante firewall.</li></ul>
+<h2>1. Preparación</h2>
+<ul><li>Sistema: Ubuntu/Debian (aunque también vale CentOS/RHEL con pequeñas diferencias).</li><li>Instalar Fail2Ban:</li></ul>
+<pre><code>sudo apt update
+sudo apt install fail2ban -y</code></pre>
+<p>Comprobar estado:</p>
+<pre><code>sudo systemctl status fail2ban</code></pre>
+<figure><img src="../media/fail2ban/imagen1.webp" width="806" height="354" alt="Captura 1 de la lección «Fail2Ban»" loading="lazy" decoding="async"></figure>
+<h2>2. Archivos de configuración</h2>
+<p>Fail2Ban no se edita directamente en <code>/etc/fail2ban/jail.conf</code> (ese es el template).</p>
+<p>Se usa <code>/etc/fail2ban/jail.local</code> para configuraciones personalizadas.</p>
+<p>Crea el archivo:</p>
+<pre><code>sudo nano /etc/fail2ban/jail.local</code></pre>
+<p>Ejemplo de configuración para <strong>SSH</strong>:</p>
+<pre><code>[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 3
+bantime = 600
+findtime = 600</code></pre>
+<p>Explicación:</p>
+<ul><li><strong>enabled</strong>: activa la protección.</li><li><strong>maxretry</strong>: nº de intentos fallidos antes de bloquear.</li><li><strong>findtime</strong>: ventana de tiempo (segundos) en la que cuentan los intentos.</li><li><strong>bantime</strong>: tiempo de bloqueo en segundos (ej. 600 = 10 minutos).</li></ul>
+<figure><img src="../media/fail2ban/imagen2.webp" width="575" height="235" alt="Captura 2 de la lección «Fail2Ban»" loading="lazy" decoding="async"></figure>
+<h2>3. Reiniciar Fail2Ban</h2>
+<pre><code>sudo systemctl restart fail2ban
+sudo systemctl enable fail2ban</code></pre>
+<figure><img src="../media/fail2ban/imagen3.webp" width="806" height="124" alt="Captura 3 de la lección «Fail2Ban»" loading="lazy" decoding="async"></figure>
+<p>Comprobar estado de las “celdas” (jails):</p>
+<pre><code>sudo fail2ban-client status</code></pre>
+<p>Debe aparecer algo como:</p>
+<p>Status</p>
+<pre><code>|- Number of jail: 1
+`- Jail list: sshd</code></pre>
+<figure><img src="../media/fail2ban/imagen4.webp" width="550" height="130" alt="Captura 4 de la lección «Fail2Ban»" loading="lazy" decoding="async"></figure>
+<p>Y para ver detalles:</p>
+<pre><code>sudo fail2ban-client status sshd</code></pre>
+<figure><img src="../media/fail2ban/imagen5.webp" width="669" height="252" alt="Captura 5 de la lección «Fail2Ban»" loading="lazy" decoding="async"></figure>
+<h2>Pasos para habilitar SSH en Ubuntu:</h2>
+<ol><li><strong>Instalar el servidor SSH</strong> (si no lo tienes):</li></ol>
+<pre><code>sudo apt update
+sudo apt install openssh-server -y</code></pre>
+<ol><li><strong>Verificar si el servicio está activo</strong>:</li></ol>
+<pre><code>systemctl status ssh</code></pre>
+<ul><li>Si aparece "inactive" o "dead", arráncalo con:</li></ul>
+<pre><code>sudo systemctl start ssh</code></pre>
+<ul><li>Para que arranque siempre al iniciar Ubuntu:</li></ul>
+<pre><code>sudo systemctl enable ssh</code></pre>
+<ol><li><strong>Comprobar el puerto 22</strong>:</li></ol>
+<pre><code>sudo ss -tulpn | grep ssh</code></pre>
+<p>Si está escuchando, deberías ver algo como 0.0.0.0:22.</p>
+<ol><li><strong>Firewall (UFW)</strong><br> Si tienes <strong>ufw</strong> activado en Ubuntu, abre el puerto 22:</li></ol>
+<pre><code>sudo ufw allow ssh
+sudo ufw reload</code></pre>
+<figure><img src="../media/fail2ban/imagen6.webp" width="812" height="180" alt="Captura 6 de la lección «Fail2Ban»" loading="lazy" decoding="async"></figure>
+<ol><li><strong>Probar conexión desde otra máquina</strong>:</li></ol>
+<pre><code>ssh jose@192.168.1.41</code></pre>
+<h2>4. Prueba de funcionamiento</h2>
+<p>Desde otra máquina o usando el mismo host (con cuidado):</p>
+<pre><code>ssh usuario@tu_ip -p 22
+ssh jose@192.168.1.41 -p 22</code></pre>
+<p>Introduce varias contraseñas incorrectas.</p>
+<figure><img src="../media/fail2ban/imagen7.webp" width="563" height="300" alt="Captura 7 de la lección «Fail2Ban»" loading="lazy" decoding="async"></figure>
+<p>Luego revisa si la IP fue bloqueada:</p>
+<pre><code>sudo fail2ban-client status sshd</code></pre>
+<p>Debería mostrar la IP bajo “Banned IP list”.</p>
+<figure><img src="../media/fail2ban/imagen8.webp" width="657" height="227" alt="Captura 8 de la lección «Fail2Ban»" loading="lazy" decoding="async"></figure>
+<p>Para desbloquear manualmente una IP:</p>
+<pre><code>sudo fail2ban-client set sshd unbanip 192.168.1.42</code></pre>
+<figure><img src="../media/fail2ban/imagen9.webp" width="810" height="274" alt="Captura 9 de la lección «Fail2Ban»" loading="lazy" decoding="async"></figure>
+<h2>5. Extensiones útiles</h2>
+<ul><li><strong>Enviar notificaciones por correo</strong> cuando se bloquea una IP (útil en servidores de producción).</li><li>Crear filtros personalizados para otros servicios (ejemplo: Apache, Nginx, Postfix, Dovecot).</li><li>Ajustar bantime a -1 para bloquear <strong>permanentemente</strong>.</li></ul>
+<p>Ejemplo de otra <em>jail</em> para proteger Apache:</p>
+<pre><code>[apache-auth]
+enabled = true
+port = http,https
+logpath = /var/log/apache*/*error.log
+maxretry = 5</code></pre>
+<h2>6. Verificación de logs</h2>
+<p>Logs de Fail2Ban:</p>
+<pre><code>sudo tail -f /var/log/fail2ban.log</code></pre>
+<figure><img src="../media/fail2ban/imagen10.webp" width="1280" height="251" alt="Captura 10 de la lección «Fail2Ban»" loading="lazy" decoding="async"></figure>
+<h2>Resumen:</h2>
+<ul><li>Monitoreo de <strong>logs</strong>.</li><li>Uso de <strong>expresiones regulares</strong> para detectar ataques.</li><li>Gestión de <strong>firewall automático</strong> con Fail2Ban.</li><li>Buenas prácticas de <strong>hardening de servidores</strong>.</li></ul>

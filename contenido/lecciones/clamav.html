@@ -1,0 +1,67 @@
+<figure><img src="../media/clamav/imagen1.webp" width="1600" height="914" alt="Captura 1 de la lección «Antivirus ClamAV»" loading="lazy" decoding="async"></figure>
+<h2>¿Qué es ClamAV?</h2>
+<p><strong>ClamAV</strong> es un software <strong>antivirus de código abierto</strong>, ampliamente utilizado para detectar troyanos, virus, malware y otras amenazas en sistemas Unix-like, incluyendo Linux, BSD y macOS. Se puede encontrar por <strong>defecto</strong> en <strong>Kali Linux Purple.</strong></p>
+<figure><img src="../media/clamav/imagen2.webp" width="599" height="469" alt="Captura 2 de la lección «Antivirus ClamAV»" loading="lazy" decoding="async"></figure>
+<h2>El funcionamiento básico de un antivirus</h2>
+<p>Un antivirus como ClamAV (como la la mayoría de antivirus) opera siguiendo estos pasos generales:</p>
+<ol><li><strong>Definición de firmas:</strong> Los antivirus utilizan <strong>bases de datos de firma</strong>s, que son patrones únicos asociados a <strong>cada tipo de malwar</strong>e. Estas firmas se actualizan constantemente para incluir nuevas amenazas. En el caso de <strong>ClamAV</strong> se realiza mediante el comando <strong>freshclam</strong></li></ol>
+<figure><img src="../media/clamav/imagen3.webp" width="602" height="325" alt="Captura 3 de la lección «Antivirus ClamAV»" loading="lazy" decoding="async"></figure>
+<p><strong>2. Análisis de archivos:</strong> Cuando un archivo es escaneado, el antivirus compara su contenido con las firmas conocidas. Si encuentra una coincidencia, se considera que el archivo está infectado. En este caso se procede a analizar dos archivos, un archivo ejecutable de windows descargado desde una página web y el segundo sacado de un repositorio de github.</p>
+<figure><img src="../media/clamav/imagen4.webp" width="681" height="443" alt="Captura 4 de la lección «Antivirus ClamAV»" loading="lazy" decoding="async"></figure>
+<p>Para analizar los archivos se utiliza el comando</p>
+<pre><code>clamscan -i -r --max-scansize=4000M --max-filesize=4000M /home/kali/archivo1</code></pre>
+<figure><img src="../media/clamav/imagen5.webp" width="862" height="451" alt="Captura 5 de la lección «Antivirus ClamAV»" loading="lazy" decoding="async"></figure>
+<p>Usamos el mismo comando para el segundo archivo</p>
+<pre><code>clamscan -i -r --max-scansize=4000M --max-filesize=4000M /home/kali/archivo2</code></pre>
+<figure><img src="../media/clamav/imagen6.webp" width="602" height="321" alt="Captura 6 de la lección «Antivirus ClamAV»" loading="lazy" decoding="async"></figure>
+<p>Como podemos ver, el <strong>primer archivo no es detectado como amenaz</strong>a, pero lo recomendable es pasarlo una <strong>segunda vez o probar otro antivirus</strong> para <strong>evitar falsos negativos</strong>. El segundo archivo tiene <strong>Malware</strong> ( <strong>Coinminers</strong> que se utiliza para obtener criptomonedas )</p>
+<p>Lo recomendable siempre es consultar en las máximas bases de datos por si la firma o hash ya está <strong>registrada</strong>. Esta última característica se puede ver en la herramienta <strong>Virustotal</strong> que <strong>consulta en diferentes bases de datos</strong> de antivirus.</p>
+<figure><img src="../media/clamav/imagen7.webp" width="602" height="243" alt="Captura 7 de la lección «Antivirus ClamAV»" loading="lazy" decoding="async"></figure>
+<p><strong>3. Heurística:</strong> Además de las firmas, muchos antivirus utilizan técnicas heurísticas para <strong>detectar malware desconocid</strong>o. Estas técnicas se basan en el análisis del comportamiento de los archivos y pueden identificar patrones sospechosos que no se corresponden con ninguna firma conocida.</p>
+<figure><img src="../media/clamav/imagen8.webp" width="602" height="300" alt="Captura 8 de la lección «Antivirus ClamAV»" loading="lazy" decoding="async"></figure>
+<h2>¿Por qué ClamAV es una buena herramienta en el análisis forense?</h2>
+<p><strong>• Detección temprana:</strong> ClamAV puede ayudar a identificar infecciones en sistemas comprometidos, lo que es fundamental para contener una amenaza y evitar una mayor propagación.</p>
+<p><strong>• Análisis de malware:</strong> Al analizar archivos infectados, ClamAV puede proporcionar información valiosa sobre el tipo de malware, su función y su origen.</p>
+<p><strong>• Verificación de la integridad:</strong> ClamAV se puede utilizar para verificar la integridad de archivos y sistemas, asegurando que no hayan sido modificados por malware.</p>
+<p><strong>• Integración con otros sistemas:</strong> ClamAV se integra fácilmente con otros sistemas y herramientas de análisis forense, lo que facilita la creación de flujos de trabajo automatizados.</p>
+<p><strong>• Gratuito y de código abierto:</strong> Esto permite a cualquier persona <strong>acceder a su código fuente</strong> y personalizarlo según sus necesidades.</p>
+<p><strong>• Alta velocidad de escaneo:</strong> ClamAV es conocido por su eficiencia, lo que lo hace ideal para escanear grandes cantidades de datos.</p>
+<p><strong>• Modularidad:</strong> ClamAV se puede configurar para <strong>adaptarse a diferentes entornos</strong> y necesidades.</p>
+<h2>Usos de ClamAV en el análisis forense:</h2>
+<p><strong>• Investigación de incidentes:</strong> Identificar malware en sistemas comprometidos y determinar el alcance de una infección.</p>
+<p><strong>• Análisis de malware:</strong> Desensamblar y <strong>analizar muestras de malware</strong> para comprender su funcionamiento.</p>
+<p><strong>• Verificación de la integridad de la evidencia:</strong> Asegurar que las evidencias digitales no hayan sido alteradas.</p>
+<p><strong>• Creación de entornos de análisis seguros:</strong> Escanear imágenes de disco y memorias USB para identificar posibles amenazas antes de analizarlas en un entorno aislado.</p>
+<p>ClamAV es una herramienta invaluable para cualquier profesional de la ciberseguridad. Su capacidad para <strong>detectar malware, su facilidad de uso y su integración</strong> con otras herramientas lo convierten en un componente esencial de cualquier arsenal de análisis forense.</p>
+<h3>Uso Avanzado de ClamAV (clamscan y freshclam)</h3>
+<p>El comando clamscan es la herramienta de línea de comandos para escaneos únicos, mientras que freshclam gestiona la base de datos de firmas.</p>
+<h3>1. Opciones Avanzadas de Escaneo</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción de clamscan</strong></th><th><strong>Descripción</strong></th><th><strong>Ejemplo de Uso</strong></th></tr></thead><tbody><tr><td><strong>-i o --infected</strong></td><td>Muestra solo los archivos que están infectados, suprimiendo la salida para archivos limpios.</td><td><code>sudo clamscan -r -i /home/feval</code></td></tr><tr><td><strong>-r o --recursive</strong></td><td>Escanea todos los subdirectorios dentro de la ruta especificada. Es esencial para un escaneo profundo.</td><td><code>sudo clamscan -r /</code> (Para escanear todo el sistema)</td></tr><tr><td><strong>-l &lt;fichero&gt; o --log=&lt;fichero&gt;</strong></td><td>Vuelca toda la salida del escaneo (incluyendo los archivos limpios y los errores) a un archivo de registro en lugar de mostrarla en la terminal.</td><td><code>sudo clamscan -r /home -l reporte_scan.txt</code></td></tr><tr><td><strong>--max-scansize y --max-filesize</strong></td><td>Permiten establecer límites de tamaño para los archivos y el tamaño total de escaneo. El valor máximo posible es 4000M.</td><td><code>clamscan -r --max-filesize=2000M /ruta</code></td></tr></tbody></table></div>
+<h3>2. Manejo de Archivos Infectados (Cuarentena y Eliminación)</h3>
+<p>Cuando clamscan encuentra una amenaza, la acción por defecto es solo notificar. Para tomar medidas, debes añadir las siguientes opciones:</p>
+<div class="tabla"><table><thead><tr><th><strong>Opción de clamscan</strong></th><th><strong>Función</strong></th><th><strong>Ejemplo de Uso</strong></th></tr></thead><tbody><tr><td><strong>--move=&lt;directorio&gt;</strong></td><td>Mueve los archivos detectados como infectados al directorio de cuarentena especificado, permitiendo aislarlos y analizarlos más tarde.</td><td><code>sudo clamscan -r --move=/home/cuarentena /home</code></td></tr><tr><td><strong>--remove</strong></td><td>Elimina permanentemente los archivos infectados. <strong>Usar con extrema precaución</strong>, ya que no se pueden recuperar.</td><td><code>sudo clamscan -r --remove /media/pendrive</code></td></tr></tbody></table></div>
+<h3>3. Gestión del Servicio freshclam</h3>
+<p>La actualización de firmas se realiza mediante freshclam. Este se suele ejecutar como un servicio en segundo plano para garantizar que las firmas estén siempre actualizadas.</p>
+<ul><li><strong>Detener el servicio (para una actualización manual):</strong></li></ul>
+<pre><code>sudo systemctl stop clamav-freshclam.service</code></pre>
+<ul><li><strong>Actualización manual (como ya se mostró):</strong></li></ul>
+<pre><code>sudo freshclam</code></pre>
+<ul><li><strong>Reiniciar el servicio:</strong></li></ul>
+<pre><code>sudo systemctl start clamav-freshclam.service</code></pre>
+<p>El servicio clamav-freshclam.service ejecuta freshclam en modo demonio y verifica actualizaciones múltiples veces al día (por defecto, cada 2 horas).</p>
+<h3>Monitoreo Continuo con ClamAV Daemon (clamd)</h3>
+<p>Para un escaneo de alto rendimiento o para integraciones con servidores de correo/proxy, ClamAV utiliza un <strong>demonio (daemon)</strong> que se ejecuta continuamente en segundo plano llamado <strong>clamd</strong>.</p>
+<h3>1. Uso de clamdscan</h3>
+<p>En lugar de usar clamscan (que carga la base de datos de firmas cada vez), puedes usar clamdscan para interactuar con el <em>daemon</em> clamd.</p>
+<ul><li><strong>Ventaja:</strong> El <em>daemon</em> mantiene la base de datos de firmas cargada en memoria, haciendo que los escaneos sean <strong>mucho más rápidos</strong>.</li></ul>
+<h3>Ejemplo de uso de clamdscan:</h3>
+<pre><code># Escaneo recursivo de tu directorio /home usando el daemon
+sudo clamdscan -r /home</code></pre>
+<h3>2. Activación del Daemon</h3>
+<p>Para usar clamdscan, el servicio clamav-daemon.service debe estar activo y ejecutándose en segundo plano.</p>
+<ul><li><strong>Comando para iniciar el servicio si está detenido:</strong></li></ul>
+<pre><code>sudo systemctl start clamav-daemon.service</code></pre>
+<ul><li><strong>Comando para habilitar el servicio en el arranque:</strong></li></ul>
+<pre><code>sudo systemctl enable clamav-daemon.service</code></pre>
+<p><strong>Nota:</strong> Cuando se usa clamdscan, muchas de las opciones de configuración (como el tamaño máximo de escaneo) se ignoran, ya que el <em>daemon</em> lee su configuración del archivo</p>
+<pre><code>/etc/clamav/clamd.conf.</code></pre>

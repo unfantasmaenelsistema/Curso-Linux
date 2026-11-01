@@ -1,0 +1,116 @@
+<p><strong>Dsniff</strong> es una colección de herramientas esenciales para la auditoría de red y las pruebas de penetración, que se centran principalmente en la <strong>intercepción de tráfico (sniffing)</strong>. Incluye herramientas como dsniff, filesniff, webspy, y sshmitm.</p>
+<h2>Guía de Instalación y Uso de Dsniff (Suite)</h2>
+<h2>1. Instalación de Dsniff</h2>
+<p>Dsniff requiere algunas librerías específicas que pueden no estar instaladas por defecto y a veces presenta dependencias problemáticas en versiones recientes de Ubuntu. La instalación a través de los repositorios es la forma más sencilla.</p>
+<ol><li><strong>Actualizar el índice de paquetes:</strong></li></ol>
+<pre><code>sudo apt update</code></pre>
+<ol><li><strong>Instalar Dsniff:</strong></li></ol>
+<pre><code>sudo apt install dsniff -y</code></pre>
+<p><em>Si su sistema ya tiene el paquete dsh, puede experimentar un conflicto de nombres. La instalación de dsniff puede requerir la desinstalación de otros paquetes que usen el nombre.</em></p>
+<h2>2. Configuración Esencial (Modo Promiscuo) 🔌</h2>
+<p>Para que Dsniff (y sus herramientas como dsniff y arpspoof) pueda capturar todo el tráfico de la red, su interfaz de red debe estar en <strong>Modo Promiscuo</strong> (Promiscuous Mode).</p>
+<ol><li><strong>Identificar su interfaz de red:</strong></li></ol>
+<pre><code>ip a
+# Busque su interfaz principal, ej. eth0, enp0s3, etc.
+enp0s3</code></pre>
+<ol><li>Habilitar el Modo Promiscuo:</li></ol>
+<p>Reemplace &lt;interfaz&gt; con su nombre de interfaz (ej. enp0s3).</p>
+<pre><code>sudo ip link set dev &lt;interfaz&gt; promisc on</code></pre>
+<h2>3. Puesta en Funcionamiento y Ejercicios (Herramientas Clave)</h2>
+<p>Dsniff es en realidad una suite de programas. A continuación, se detallan los usos de las herramientas más importantes.</p>
+<h2>Herramienta A: dsniff (Captura de Contraseñas)</h2>
+<p>dsniff captura y muestra las contraseñas que pasan por la red en texto claro o en formatos débiles (como NTLMv1 o login básico HTTP/POP).</p>
+<div class="tabla"><table><thead><tr><th><strong>Objetivo</strong></th><th><strong>Comando</strong></th></tr></thead><tbody><tr><td><strong>Monitorear la interfaz</strong></td><td><code>sudo dsniff -i &lt;interfaz&gt;</code></td></tr><tr><td><strong>Guardar en un archivo</strong></td><td><code>sudo dsniff -i &lt;interfaz&gt; -w contrasenas.log</code></td></tr></tbody></table></div>
+<h2>Prueba de Ejemplo:</h2>
+<ol><li>Ejecute sudo dsniff -i &lt;interfaz&gt; en su terminal.</li><li>En otra máquina de su red, intente iniciar sesión en un servicio antiguo (ej. un sitio HTTP sin cifrar) o un servicio vulnerable.</li><li>Si las credenciales se transmiten en texto claro, dsniff las mostrará.</li></ol>
+<h2>Paso 1: Configurar el Servidor Web (Apache)</h2>
+<p>Instalaremos Apache2, el servidor web más popular, en tu máquina Ubuntu.</p>
+<ol><li><strong>Instalar Apache2:</strong></li></ol>
+<pre><code>sudo apt update
+sudo apt install apache2 -y</code></pre>
+<ol><li>Configurar el Firewall (UFW):</li></ol>
+<p>Asegúrate de que tu firewall UFW (si está activo) permita el tráfico web en el puerto 80 (HTTP).</p>
+<pre><code># Habilitar el perfil completo para Apache (incluye HTTP y HTTPS)
+sudo ufw allow "Apache Full"
+# Recargar el firewall
+sudo ufw reload</code></pre>
+<ol><li>Verificar el Servidor:</li></ol>
+<p>Abre tu navegador en Ubuntu y escribe <code>http://localhost</code>. Deberías ver la página de bienvenida de Apache, confirmando que el servidor está funcionando.</p>
+<h2>Paso 2: Crear la Página de Inicio de Sesión HTTP</h2>
+<p>Vamos a crear un formulario de inicio de sesión simple que enviará el nombre de usuario y la contraseña en texto plano (HTTP) al servidor.</p>
+<ol><li>Navegar al directorio web:</li></ol>
+<p>El directorio raíz de Apache es <code>/var/www/html/.</code> Primero, elimina el archivo predeterminado index.html para reemplazarlo.</p>
+<pre><code>cd /var/www/html/
+sudo rm index.html</code></pre>
+<ol><li>Crear el nuevo index.html con el formulario:</li></ol>
+<p>Usa el editor nano para crear el nuevo archivo.</p>
+<pre><code>sudo nano index.html</code></pre>
+<p>Pega el siguiente código HTML. La clave es el atributo action="login.php" method="POST", que enviará las credenciales por HTTP:</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="es"&gt;
+&lt;head&gt;
+&lt;meta charset="UTF-8"&gt;
+&lt;title&gt;Servicio Vulnerable de Prueba&lt;/title&gt;
+&lt;style&gt;
+body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+.login-box { width: 300px; margin: 0 auto; border: 1px solid #ccc; padding: 20px; }
+input[type="text"], input[type="password"] { width: 90%; padding: 10px; margin: 5px 0; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class="login-box"&gt;
+&lt;h2&gt;Inicio de Sesión (HTTP)&lt;/h2&gt;
+&lt;p style="color: red;"&gt;🚨 ADVERTENCIA: Esta conexión NO es segura (HTTP).&lt;/p&gt;
+&lt;form action="login.php" method="POST"&gt;
+&lt;input type="text" name="username" placeholder="Usuario" required&gt;&lt;br&gt;
+&lt;input type="password" name="password" placeholder="Contraseña" required&gt;&lt;br&gt;
+&lt;button type="submit"&gt;Iniciar Sesión&lt;/button&gt;
+&lt;/form&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>Guarda el archivo (Ctrl+O, Enter) y sal del editor (Ctrl+X).</p>
+<h2>Paso 3: Ejecutar la Prueba</h2>
+<p>Ahora puedes configurar el monitoreo en Ubuntu y la simulación de inicio de sesión en Windows.</p>
+<h2>A. Preparar dsniff (Máquina Ubuntu)</h2>
+<ol><li><strong>Identifica tu Interfaz:</strong> Averigua el nombre de la interfaz de red que conecta tu Ubuntu con la red de Windows (p. ej., eth0, enp0s3).</li></ol>
+<pre><code>ip a</code></pre>
+<ol><li><strong>Ejecuta dsniff:</strong></li></ol>
+<pre><code>sudo dsniff -i &lt;tu_interfaz_de_red&gt;
+sudo dsniff -i enp0s3</code></pre>
+<p>Deberías ver una línea que dice dsniff: listening on &lt;tu_interfaz_de_red&gt;.</p>
+<h2>B. Ejecutar el Inicio de Sesión (Máquina Windows)</h2>
+<ol><li><strong>Obtener la IP de Ubuntu:</strong> En tu máquina Ubuntu, obtén la dirección IP que Windows usará para acceder al servidor web.</li></ol>
+<pre><code>hostname -I
+Ejemplo: 192.168.1.39</code></pre>
+<ol><li><strong>Acceder al sitio desde Windows:</strong> En el navegador de Windows, ingresa la dirección IP de tu Ubuntu <strong>usando HTTP</strong>:</li><li>http://&lt;Dirección_IP_de_Ubuntu&gt;</li></ol>
+<p>Verás la página de inicio de sesión que creaste.</p>
+<ol><li><strong>Iniciar Sesión y Capturar:</strong><ul><li>En la página web de Windows, ingresa un <strong>Usuario</strong> (ej. testuser) y una <strong>Contraseña</strong> (ej. secreto123).</li><li>Haz clic en <strong>"Iniciar Sesión"</strong>.</li></ul></li></ol>
+<h2>C. Resultado en Ubuntu</h2>
+<p>Inmediatamente después de enviar el formulario en Windows, la terminal en tu máquina Ubuntu (donde se está ejecutando dsniff) debería mostrar las credenciales capturadas en texto plano, confirmando el éxito de la prueba.</p>
+<h2>Ejemplo de salida de dsniff:</h2>
+<pre><code>...
+---------------------------------------------------------
+192.168.1.10 -&gt; 192.168.1.5 (http)
+USER: testuser
+PASS: secreto123
+---------------------------------------------------------
+...</code></pre>
+<h2>Herramienta B: arpspoof (Ataques Man-in-the-Middle - MITM)</h2>
+<p>arpspoof envenena la caché ARP del <em>gateway</em> (router) y de la víctima, redirigiendo el tráfico de la víctima a través de su máquina. Esto es esencial para que la mayoría de las herramientas de Dsniff funcionen en una LAN conmutada.</p>
+<ol><li><strong>Habilitar el <em>IP Forwarding</em> (Para que los paquetes sigan su camino después de pasar por usted):</strong></li></ol>
+<pre><code>echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward</code></pre>
+<ol><li><strong>Identificar IPs:</strong><ul><li><strong>Gateway (Router):</strong> &lt;IP_del_Router&gt; (ej. 192.168.1.1)</li><li><strong>Víctima:</strong> &lt;IP_de_la_Víctima&gt; (ej. 192.168.1.50)</li></ul></li><li><strong>Ejecutar el Ataque (En dos terminales separadas):</strong><ul><li><strong>Terminal 1 (Engañar a la víctima para que envíe tráfico a usted, haciéndose pasar por el router):</strong></li></ul></li></ol>
+<pre><code>sudo arpspoof -i &lt;interfaz&gt; -t &lt;IP_de_la_Víctima&gt; &lt;IP_del_Router&gt;</code></pre>
+<ul><li><strong>Terminal 2 (Engañar al router para que envíe tráfico a usted, haciéndose pasar por la víctima):</strong></li></ul>
+<pre><code>sudo arpspoof -i &lt;interfaz&gt; -t &lt;IP_del_Router&gt; &lt;IP_de_la_Víctima&gt;</code></pre>
+<ol><li><strong>Ejecutar Dsniff:</strong> Ahora que el tráfico fluye a través de usted, ejecute dsniff (o cualquier otra herramienta) en una tercera terminal para capturar los datos.</li></ol>
+<h2>Herramienta C: webspy (Seguimiento de Navegación)</h2>
+<p>webspy le permite ver en tiempo real, en su propio navegador, las páginas web que está visitando un usuario en la red. <strong>Solo funciona con tráfico HTTP (no cifrado).</strong></p>
+<ol><li><strong>Pre-requisito:</strong> Debe estar ejecutando el ataque <strong>arpspoof</strong> (Herramienta B) para redirigir el tráfico de la víctima hacia su máquina.</li><li><strong>Ejecutar webspy:</strong></li></ol>
+<pre><code>sudo webspy -i &lt;interfaz&gt;</code></pre>
+<ol><li><strong>Observación:</strong> Abra su navegador. webspy debería abrir automáticamente nuevas pestañas que reflejan las URLs visitadas por la víctima.</li></ol>
+<h2>Herramienta D: filesniff (Captura de Archivos)</h2>
+<p>filesniff monitorea la red para detectar y reconstruir archivos que se transfieren a través de NFS y SMB (protocolos de compartición de archivos).</p>
+<div class="tabla"><table><thead><tr><th><strong>Objetivo</strong></th><th><strong>Comando</strong></th></tr></thead><tbody><tr><td><strong>Capturar archivos</strong></td><td><code>sudo filesniff -i &lt;interfaz&gt;</code></td></tr></tbody></table></div>
+<p><strong>Nota de Seguridad:</strong> Dsniff es una herramienta poderosa y debe usarse <strong>solo en entornos controlados y con permiso explícito</strong> para pruebas de penetración o auditorías. Usarlo en redes que no le pertenecen es ilegal.</p>

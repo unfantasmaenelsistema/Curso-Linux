@@ -1,0 +1,78 @@
+<p>Cuando trabajamos en proyectos colaborativos, una de las tareas más básicas (y a la vez más olvidadas), es documentar la estructura de carpetas y archivos.</p>
+<p>En equipos DevOps, aulas técnicas o repositorios de onboarding, poder mostrar la arquitectura de un proyecto con un solo comando mejora la productividad, la comunicación y el mantenimiento.</p>
+<p>En Linux (Ubuntu), la herramienta clave para esto es <strong>tree</strong>.</p>
+<h2>Verifica si tienes tree</h2>
+<p>Antes de instalar nada, conviene comprobar si ya lo tienes en tu sistema:</p>
+<pre><code>which tree</code></pre>
+<p>Si devuelve una ruta, ya está instalado. Si no, sigue al paso siguiente.</p>
+<h2>Instala tree</h2>
+<p>El comando tree no siempre viene por defecto en Ubuntu.</p>
+<p>Para instalarlo:</p>
+<pre><code>sudo apt update
+sudo apt install -y tree
+tree --version</code></pre>
+<p>De esta forma, te aseguras de tener la herramienta lista y comprobada</p>
+<h2>Genera la estructura</h2>
+<p>Una vez dentro de la raíz de tu proyecto, puedes generar el archivo con la estructura de carpetas y ficheros con el siguiente comando:</p>
+<pre><code>tree -a -I ".git|node_modules|vendor|.venv|venv|dist|build|.idea|.vscode|.DS_Store|__pycache__| coverage|.next|.turbo|.parcel-cache" &gt; ESTRUCTURA.txt</code></pre>
+<p>Este comando ignora carpetas “ruidosas” que no aportan nada a la documentación. Para comprobar que el archivo se ha creado:</p>
+<pre><code>ls -lh ESTRUCTURA.txt
+head -n 40 ESTRUCTURA.txt</code></pre>
+<h2>Variantes útiles</h2>
+<p>Dependiendo de lo que quieras mostrar, puedes ajustar el comando:</p>
+<ol><li><strong>Solo carpetas (más compacto):</strong></li></ol>
+<pre><code>tree -d -a -I ".git|node_modules|vendor|.venv|venv|dist|build|.idea|.vscode|.DS_Store|__pycache__| coverage|.next|.turbo|.parcel-cache" &gt; ESTRUCTURA.txt</code></pre>
+<ol><li><strong>Limitar profundidad (ej. 3 niveles):</strong></li></ol>
+<pre><code>tree -a -L 3 -I ".git|node_modules|vendor|.venv|venv|dist|build|.idea|.vscode|.DS_Store|__pycache__| coverage|.next|.turbo|.parcel-cache" &gt; ESTRUCTURA.txt</code></pre>
+<ol><li><strong>Guardar con fecha incluida:</strong></li></ol>
+<pre><code>tree -a -I ".git|node_modules|vendor|.venv|venv|dist|build|.idea|.vscode|.DS_Store|__pycache__| coverage|.next|.turbo|.parcel-cache" &gt; ESTRUCTURA-$(date +%F).txt</code></pre>
+<p>Esto último es útil si subes varias versiones del mismo proyecto.</p>
+<h2>Alias rápido (bash o zsh)</h2>
+<p>Si lo usas a menudo, puedes crear un atajo para no escribir el comando completo cada vez: En <code>~/.bashrc</code> o <code>~/.zshrc</code>, añade al final esta línea:</p>
+<pre><code>alias estructura='tree -a -I ".git|node_modules|vendor|.venv|venv|dist|build|.idea|.vscode|.DS_Store|__pycache__|coverage|.next|.turbo|.parcel-cache" &gt; ESTRUCTURA.txt &amp;&amp; ls -lh ESTRUCTURA.txt &amp;&amp; head -n 40 ESTRUCTURA.txt'</code></pre>
+<p>Recarga la configuración:</p>
+<pre><code>source ~/.bashc
+O
+source ~/.zshrc</code></pre>
+<p>Ahora ya puedes usar tu alias.</p>
+<p>Y luego basta con escribir en tu terminal:</p>
+<p>estructura</p>
+<p>Eso ejecutará automáticamente el comando completo y te generará el archivo <strong>ESTRUCTURA.txt</strong> con la información que necesitas.</p>
+<h2>Script global opcional</h2>
+<p>Si quieres que tu equipo tenga un comando único y accesible en todo el sistema, puedes crear un script llamado estructura dentro de <code>/usr/local/bin/.</code> Así funcionará igual que cualquier otro comando de Linux.</p>
+<h3>Creación del Script</h3>
+<h3>Paso 1: Crear el script e insertar el contenido</h3>
+<p>Copia y pega este bloque completo en tu terminal y presiona Enter:</p>
+<pre><code>sudo tee /usr/local/bin/estructura &gt;/dev/null &lt;&lt;'SH'
+#!/usr/bin/env bash
+set -euo pipefail
+OUT="ESTRUCTURA.txt"
+IGNORE=".git|node_modules|vendor|.venv|venv|dist|build|.idea|.vscode|.DS_Store|__pycache__|coverage|.next|.turbo|.parcel-cache"
+tree -a -I "$IGNORE" &gt; "$OUT"
+ls -lh "$OUT"
+head -n 40 "$OUT"
+SH</code></pre>
+<p>La terminal te pedirá tu contraseña de usuario (sudo) para poder escribir en la carpeta protegida (<code>/usr/local/bin/</code>).</p>
+<h3>Paso 2: Darle permisos de ejecución (¡Crucial!)</h3>
+<p>Una vez creado el archivo, debes hacerlo ejecutable. Ejecuta este segundo comando:</p>
+<pre><code>sudo chmod +x /usr/local/bin/estructura</code></pre>
+<p><strong>Con esto, el script estructura estará listo para usarse como un comando de sistema.</strong></p>
+<p>A partir de ahora ya puedes usar tu script desde cualquier proyecto.</p>
+<p>En la terminal, escribiendo simplemente:</p>
+<p>estructura</p>
+<h2>Plan B (sin tree)</h2>
+<p>Si no puedes instalar tree, tienes una alternativa con find:</p>
+<pre><code>find . -not -path "*/.git/*" -not -path "*/node_modules/*" -maxdepth 4 &gt; ESTRUCTURA.txt</code></pre>
+<p>No es tan visual, pero cumple la misma función.</p>
+<figure><img src="../media/compartir-estructuras-con-tree/imagen1.webp" width="807" height="196" alt="Captura 1 de la lección «Compartir estructuras con tree»" loading="lazy" decoding="async"></figure>
+<p>El mensaje que ves no es un error que impida la ejecución del comando, sino una <strong>advertencia (warning)</strong> del programa find sobre el <strong>orden de los argumentos</strong>.</p>
+<p>find te está diciendo que, aunque tu comando funciona, es una <strong>mala práctica</strong> especificar la opción global <strong>-maxdepth después</strong> de otras "pruebas" (como -not -path).</p>
+<p><strong>find: atención: ha especificado la opción global -maxdepth después de un argumento -not, pero las opciones globales no son posicionales... Por favor especifique las opciones globales antes que cualquier otro argumento.</strong></p>
+<h4>La Solución Correcta (Mejor Práctica)</h4>
+<p>Aunque el comando se ejecutó y probablemente creó el archivo ESTRUCTURA.txt (porque la advertencia indica que -maxdepth afecta tanto a las pruebas anteriores como a las posteriores), la manera correcta y recomendada de escribirlo es colocando la opción <strong>global</strong> -maxdepth justo <strong>después</strong> del directorio de inicio (.).</p>
+<pre><code>find . -maxdepth 4 -not -path "*/.git/*" -not -path "*/node_modules/*" &gt; ESTRUCTURA.txt</code></pre>
+<h5>Resumen del Cambio:</h5>
+<div class="tabla"><table><thead><tr><th><strong>Versión Original (Advertencia)</strong></th><th><strong>Versión Corregida (Recomendada)</strong></th></tr></thead><tbody><tr><td><code>find . -not -path ... -maxdepth 4 &gt; ESTRUCTURA.txt</code></td><td><code>find . -maxdepth 4 -not -path ... &gt; ESTRUCTURA.txt</code></td></tr></tbody></table></div>
+<p>Al mover -maxdepth 4 al inicio, evitas la advertencia y aseguras que find aplique esa restricción de profundidad desde el principio de su lógica de búsqueda.</p>
+<h2>Problemas comunes</h2>
+<ul><li><strong>tree</strong>: <strong>command not found</strong> → instala con sudo apt install -y tree.</li><li><strong>Alias no funciona</strong> → revisa <code>~/.bashrc</code> o <code>~/.zshrc</code> y ejecuta source.</li><li><strong>Permiso denegado en <code>/usr/local/bin</code></strong> → asegúrate de usar sudo.</li><li><strong>Archivo vacío</strong> → comprueba que estás en la raíz de los proyectos (pwd, ls -la).</li></ul>

@@ -1,0 +1,24 @@
+<p>Ping, pero con un gráfico.</p>
+<ul><li>Grafica el tiempo de ping para varios hosts</li><li>Grafica el tiempo de ejecución de los comandos a través del --cmdBandera</li><li>Colores personalizados</li><li>Soporte de Windows, Mac y Linux</li></ul>
+<p>La herramienta está escrita en Rust y se puede instalar de diversas maneras dependiendo de su sistema operativo:</p>
+<h2>Sistemas Operativos Populares</h2>
+<div class="tabla"><table><thead><tr><th><strong>Sistema</strong></th><th><strong>Método de Instalación</strong></th><th><strong>Comando</strong></th></tr></thead><tbody><tr><td><strong>macOS</strong></td><td>Homebrew</td><td>brew install gping</td></tr><tr><td><strong>macOS</strong></td><td>MacPorts</td><td><code>sudo port install gping</code></td></tr><tr><td><strong>Windows</strong></td><td>Scoop</td><td>scoop install gping</td></tr><tr><td><strong>Windows</strong></td><td>Chocolatey</td><td>choco install gping</td></tr><tr><td><strong>Arch Linux</strong></td><td>Pacman</td><td><code>sudo pacman -S gping</code></td></tr><tr><td><strong>Alpine Linux</strong></td><td>APK</td><td>apk add gping</td></tr><tr><td><strong>Ubuntu/Debian</strong></td><td>APT (para versiones &gt;23.10/&gt;13)</td><td><code>sudo apt install gping</code></td></tr></tbody></table></div>
+<h2>Instalación Universal (Requiere Rust)</h2>
+<p>Si tienes <strong>Rust</strong> instalado (versión 1.67.0 o superior), puedes instalar gping usando Cargo:</p>
+<pre><code>cargo install gping</code></pre>
+<h2>Docker</h2>
+<p>También puedes ejecutar gping dentro de un contenedor Docker (asegúrate de usar la opción --network host):</p>
+<pre><code>docker run --rm -ti --network host ghcr.io/orf/gping:gping-v1.15.1 google.com</code></pre>
+<h2>Ejemplos de Uso de gping</h2>
+<p>El comando principal es simple: gping [host]. También permite opciones avanzadas como graficar la ejecución de comandos.</p>
+<h2>1. Ping Básico</h2>
+<p>Simplemente ejecute gping seguido del host o la dirección IP.</p>
+<pre><code>gping google.com</code></pre>
+<h2>2. Ping a Múltiples Hosts</h2>
+<p>Puede monitorear el tiempo de respuesta de varios destinos simultáneamente. Cada uno aparecerá como una línea separada en el gráfico.</p>
+<pre><code>gping google.com cloudflare.com 8.8.8.8</code></pre>
+<h2>3. Graficar la Ejecución de Comandos (--cmd)</h2>
+<p>Utilice la opción --cmd para graficar el tiempo que tarda en ejecutarse un comando de <em>shell</em> en lugar de un ping. Esto es útil para monitorear el rendimiento de tareas recurrentes.</p>
+<pre><code>gping --cmd "curl -sI http://example.com"</code></pre>
+<h2>4. Opciones Comunes</h2>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th><th><strong>Ejemplo</strong></th></tr></thead><tbody><tr><td><strong>-n</strong> o <strong>--watch-interval</strong></td><td>Define el intervalo entre monitoreos en segundos (admite decimales).</td><td><code>gping -n 0.5 google.com</code></td></tr><tr><td><strong>-b</strong> o <strong>--buffer</strong></td><td>Determina cuántos segundos de datos se mostrarán en el gráfico (por defecto 30s).</td><td><code>gping -b 60 google.com</code></td></tr><tr><td><strong>-4</strong> / <strong>-6</strong></td><td>Fuerza la resolución del host a <strong>IPv4</strong> o <strong>IPv6</strong>.</td><td><code>gping -4 google.com</code></td></tr><tr><td><strong>-c</strong> o <strong>--color</strong></td><td>Asigna un color específico a una entrada del gráfico.</td><td><code>gping -c red google.com</code></td></tr><tr><td><strong>--clear</strong></td><td>Limpia el gráfico de la terminal al cerrar el programa.</td><td><code>gping --clear google.com</code></td></tr></tbody></table></div>

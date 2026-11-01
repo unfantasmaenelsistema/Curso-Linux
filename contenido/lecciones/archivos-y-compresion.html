@@ -1,0 +1,273 @@
+<h3>Comandos de Archivado y Compresión</h3>
+<pre><code>tar, gzip, gunzip, bzip2, xz</code></pre>
+<p>Estos comandos se utilizan para combinar múltiples archivos en uno solo (archivado) y/o reducir su tamaño (compresión).</p>
+<h3>tar: Archivador de Cintas (Archivar y Comprimir)</h3>
+<p>El comando tar se usa para <strong>archivar</strong> (unir) varios archivos o directorios en un solo archivo (conocido como <em>tarball</em> o archivo .tar). Puede opcionalmente comprimir el resultado.</p>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Función</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td><strong>c</strong></td><td><strong>C</strong>reate</td><td>Crea un nuevo archivo .tar.</td></tr><tr><td><strong>x</strong></td><td>e<strong>X</strong>tract</td><td>Extrae archivos de un archivo .tar.</td></tr><tr><td><strong>v</strong></td><td><strong>V</strong>erbose</td><td>Muestra los archivos a medida que se procesan.</td></tr><tr><td><strong>f</strong></td><td><strong>F</strong>ile</td><td>Especifica el nombre del archivo de archivado.</td></tr><tr><td><strong>z</strong></td><td>G<strong>z</strong>ip</td><td>Comprime o descomprime usando gzip (crea archivos .tar.gz o .tgz).</td></tr><tr><td><strong>j</strong></td><td>B<strong>j</strong>ip2</td><td>Comprime o descomprime usando bzip2 (crea archivos .tar.bz2).</td></tr><tr><td><strong>J</strong></td><td><strong>J</strong> <code>/xz</code></td><td>Comprime o descomprime usando xz (crea archivos .tar.xz).</td></tr></tbody></table></div>
+<h3>Ejemplo Práctico 1: Archivar y comprimir con gzip</h3>
+<p><strong>Si</strong> quieres archivar y comprimir su directorio Documentos en un solo archivo .tar.gz.</p>
+<pre><code>tar -czvf mi_resguardo_2025.tar.gz Documentos/
+Documentos/
+Documentos/informe.pdf
+Documentos/fotos.jpg
+... (lista de archivos)</code></pre>
+<h3>Ejemplo Práctico 2: Extraer archivos</h3>
+<p>Quieres extraer el archivo recién creado en una nueva carpeta.</p>
+<pre><code>mkdir extraccion_temp
+cd extraccion_temp/
+tar -xzvf ../mi_resguardo_2025.tar.gz
+Documentos/
+Documentos/informe.pdf
+...</code></pre>
+<h3>gzip y gunzip: Compresión/Descompresión GZIP</h3>
+<p>gzip comprime un solo archivo, reemplazando el original con la versión .gz. gunzip hace lo opuesto.</p>
+<div class="tabla"><table><thead><tr><th><strong>Comando</strong></th><th><strong>Función</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td><code>gzip archivo</code></td><td>Comprime</td><td>Crea archivo.gz y <strong>elimina</strong> el original.</td></tr><tr><td><code>gunzip archivo.gz</code></td><td>Descomprime</td><td>Crea archivo y <strong>elimina</strong> el .gz.</td></tr><tr><td><code>gzip -d archivo.gz</code></td><td>Descomprime</td><td>Alternativa a gunzip.</td></tr><tr><td><code>gzip -k archivo</code></td><td><strong>K</strong>eep</td><td>Comprime archivo.gz pero <strong>mantiene</strong> el original.</td></tr></tbody></table></div>
+<h3>Ejemplo Práctico: Compresión y Descompresión</h3>
+<pre><code># Copiamos un archivo grande para el ejemplo
+cp /etc/services services
+ls -lh services
+-rw-r--r-- 1 jose jose 20K Oct 9 07:15 services
+gzip services
+ls -lh services.gz
+-rw-r--r-- 1 jose jose 7.5K Oct 9 07:15 services.gz</code></pre>
+<p>¡El original se fue!</p>
+<pre><code>gunzip services.gz
+ls -lh services
+-rw-r--r-- 1 jose jose 20K Oct 9 07:15 services
+¡El original regresó!</code></pre>
+<h3>bzip2 y xz: Compresión Alternativa</h3>
+<p>Funcionan de manera idéntica a gzip/gunzip, pero utilizan algoritmos que a menudo logran una mejor tasa de compresión (aunque son más lentos).</p>
+<div class="tabla"><table><thead><tr><th><strong>Comando</strong></th><th><strong>Archivo resultante</strong></th><th><strong>Comando de Descompresión</strong></th></tr></thead><tbody><tr><td><code>bzip2 archivo</code></td><td>archivo.bz2</td><td><code>bzip2 -d archivo.bz2 o bunzip2 archivo.bz2</code></td></tr><tr><td><code>xz archivo</code></td><td>archivo.xz</td><td><code>xz -d archivo.xz o unxz archivo.xz</code></td></tr></tbody></table></div>
+<h3>Ejemplo Práctico: Usando xz</h3>
+<pre><code># Copiamos de nuevo
+cp /etc/services services_xz
+xz services_xz
+ls -lh services_xz.xz
+-rw-r--r-- 1 jose jose 6.8K Oct 9 07:16 services_xz.xz
+# ¡Aún más pequeño que gz!
+unxz services_xz.xz
+ls services_xz
+services_xz</code></pre>
+<h3>2. Comandos de Compresión ZIP (zip, unzip)</h3>
+<p>El formato ZIP es un estándar multiplataforma muy común, diferente a los formatos nativos de Unix (tar.gz, etc.).</p>
+<h3>zip: Crear Archivos ZIP</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td><strong>-r</strong></td><td><strong>R</strong>ecursive: Incluye subdirectorios.</td></tr><tr><td><strong>-e</strong></td><td><strong>E</strong>ncrypt: Pide una contraseña para el archivo ZIP.</td></tr></tbody></table></div>
+<h3>Ejemplo Práctico: Comprimir un directorio con clave</h3>
+<p>Quieres comprimir la carpeta Trabajo y protegerla con una contraseña.</p>
+<pre><code>zip -r -e datos_trabajo.zip Trabajo/</code></pre>
+<p>Enter password:</p>
+<p>Verify password:</p>
+<pre><code>adding: Trabajo/ (stored 0%)
+adding: Trabajo/plan.doc (deflated 5%)
+...</code></pre>
+<h3>unzip: Descomprimir Archivos ZIP</h3>
+<div class="tabla"><table><thead><tr><th>Opción</th><th>Descripción</th></tr></thead><tbody><tr><td><strong>-d</strong></td><td><strong>D</strong>irectory: Especifica el directorio de destino.</td></tr></tbody></table></div>
+<h3>Ejemplo Práctico: Descomprimir en un directorio específico</h3>
+<pre><code>unzip datos_trabajo.zip -d /tmp/datos_temporales
+Archive: datos_trabajo.zip
+[datos_trabajo.zip] Trabajo/plan.doc password:
+extracting: /tmp/datos_temporales/Trabajo/plan.doc
+...</code></pre>
+<h3>3. Comandos de Visualización, Identificación y Manipulación</h3>
+<h3>zcat: Ver Contenido de Archivos Comprimidos</h3>
+<p>zcat muestra el contenido de archivos comprimidos con gzip <strong>sin descomprimirlos permanentemente</strong>. Es muy útil para inspeccionar archivos de log comprimidos.</p>
+<h3>Ejemplo Práctico: Inspeccionar un log comprimido</h3>
+<p>Si tienes un archivo de log llamado syslog.1.gz:</p>
+<pre><code>echo -e 'Oct 10 07:30:05 servidor kernel: [ 2.000000] Linux version 6.5.0\nOct 10 07:31:10 servidor sshd[1234]: Accepted publickey for jose\nOct 10 07:32:15 servidor CRON[5678]: (root) CMD (command -v logrotate)\nOct 10 07:35:20 servidor systemd[1]: logrotate.service: Succeeded.\nOct 10 07:40:30 servidor kernel: [ 45.123456] usb 1-1: new high-speed USB device\nOct 10 07:45:45 servidor sshd[9012]: pam_unix(sshd:session): session closed for user jose' &gt; syslog.1
+lo comprimimos:
+gzip syslog.1
+zcat syslog.1.gz | less</code></pre>
+<p><em>(Esto descomprime temporalmente el contenido del archivo .gz y lo envía al paginador less, permitiendo leerlo sin modificar el archivo original.)</em></p>
+<h3>file: Determinar el Tipo de Archivo (Repaso y Expansión)</h3>
+<p>Este comando ya se cubrió, pero es fundamental en el contexto de archivos comprimidos para identificar formatos desconocidos. <strong>Examina el contenido</strong>, no la extensión.</p>
+<h3>Ejemplo Práctico: Identificar un archivo tar.bz2</h3>
+<p>1. Creamos una carpeta de ejemplo</p>
+<pre><code>mkdir datos_ejemplo
+echo "Archivo 1" &gt; datos_ejemplo/a.txt
+echo "Archivo 2" &gt; datos_ejemplo/b.txt</code></pre>
+<p>2. Creamos y comprimimos el archivo tar.bz2</p>
+<pre><code>tar -cjvf backup.tar.bz2 datos_ejemplo/
+# -c: crear, -j: bzip2, -v: verbose, -f: archivo
+file backup.tar.bz2</code></pre>
+<p>El comando file examinará los bytes iniciales del archivo y te dirá exactamente lo que es. Deberías ver una salida similar a esta:</p>
+<p>backup.tar.bz2: <code>bzip2 compressed data, block size 900k</code></p>
+<h3>Ejemplo Práctico: Identificar un ejecutable</h3>
+<pre><code>file /bin/bash
+file /usr/bin/passwd</code></pre>
+<p>Cuando ejecutes file <code>/bin/bash</code>, la salida te dirá que el archivo es un <strong>ejecutable ELF</strong> para la arquitectura de tu sistema (generalmente 64 bits), y especificará que es dinámicamente enlazado.</p>
+<p>Aquí tienes un ejemplo de la salida que obtendrás:</p>
+<p><code>/bin/bash</code>: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter <code>/lib64/ld-linux-x86-64.so.2</code>, BuildID[sha1]=..., for GNU/Linux 3.2.0, stripped</p>
+<p>La información que proporciona file sobre <code>/bin/bash</code> es técnica, pero clave:</p>
+<ul><li><strong>ELF 64-bit LSB executable</strong>:<ul><li><strong>ELF (Executable and Linkable Format)</strong>: Es el formato de archivo binario estándar utilizado por Linux para ejecutables, código objeto, bibliotecas compartidas y volcados de núcleo (<em>core dumps</em>).</li><li><strong>64-bit LSB</strong>: Indica que fue compilado para un procesador de <strong>64 bits</strong> (como el x86-64) y que utiliza el formato de byte <em>Least Significant Byte</em> (LSB) o <em>Little Endian</em>.</li></ul></li><li><strong>dynamically linked</strong>: Significa que bash depende de <strong>bibliotecas externas</strong> para funcionar. Estas bibliotecas se cargan en tiempo de ejecución (cuando se ejecuta el programa), no durante su compilación. Esto ahorra espacio en disco.</li><li><strong>interpreter <code>/lib64/ld-linux-x86-64.so.2</code></strong>: Es la ruta al <strong>cargador dinámico</strong> (o <em>linker</em>). Es el programa que se encarga de cargar todas las bibliotecas dinámicas que bash necesita (como la biblioteca C estándar) antes de que pueda ejecutarse.</li><li><strong>stripped</strong>: Significa que los <strong>símbolos de depuración</strong> y otra información de desarrollo han sido eliminados del binario para reducir su tamaño.</li></ul>
+<p>En resumen, el comando file confirma que <code>/bin/bash</code> es un programa binario compilado (no un script) listo para ser ejecutado en tu sistema.</p>
+<p>La diferencia a la hora de explotar un <em>buffer overflow</em> entre arquitecturas de <strong>32 bits (x86)</strong> y <strong>64 bits (x86-64)</strong> es significativa y afecta directamente a cómo se construye y se ejecuta el ataque.</p>
+<p>Las principales diferencias radican en el tamaño de los punteros, el uso del registro base de la pila, y la presencia de técnicas de seguridad modernas que son más comunes en 64 bits.</p>
+<h3>1. Tamaño de los Punteros y Direcciones</h3>
+<p>Esta es la diferencia más fundamental:</p>
+<div class="tabla"><table><thead><tr><th><strong>Característica</strong></th><th><strong>Arquitectura de 32 bits (x86)</strong></th><th><strong>Arquitectura de 64 bits (x86-64)</strong></th></tr></thead><tbody><tr><td><strong>Tamaño del Puntero/Dirección</strong></td><td>4 bytes (32 bits)</td><td>8 bytes (64 bits)</td></tr><tr><td><strong>Impacto en el Buffer</strong></td><td>Se necesitan 4 bytes para sobrescribir el <strong>EIP</strong> (Instruction Pointer).</td><td>Se necesitan 8 bytes para sobrescribir el <strong>RIP</strong> (Instruction Pointer).</td></tr><tr><td><strong>Longitud del Payload</strong></td><td>El <em>shellcode</em> es generalmente más corto.</td><td>El <em>shellcode</em> es generalmente más largo (más instrucciones).</td></tr></tbody></table></div>
+<p><strong>Implicación:</strong> En 64 bits, se requiere <strong>el doble de datos</strong> para sobrescribir la dirección de retorno en la pila, lo que alarga la parte de la inyección de la dirección en el <em>payload</em>.</p>
+<h3>2. Convenciones de Llamada y Registros</h3>
+<p>Las arquitecturas utilizan diferentes registros para pasar argumentos a las funciones, lo que influye en cómo se organiza la pila y cómo se manipulan los datos.</p>
+<h4>a. Registro Base de la Pila (RBP vs. EBP)</h4>
+<ul><li><strong>32 bits (x86):</strong> Se utiliza el registro <strong>EBP</strong> (Extended Base Pointer) para acceder a las variables locales y a los argumentos de las funciones. La dirección de retorno se encuentra justo encima de EBP en la pila. La convención clásica de <em>buffer overflow</em> es sobrescribir primero EBP y luego el <strong>EIP</strong> (Instruction Pointer).</li><li><strong>64 bits (x86-64):</strong> Se utiliza el registro <strong>RBP</strong> (Base Pointer). Además, en 64 bits es común que los compiladores utilicen una optimización llamada <strong>"frame pointer omission"</strong>, donde se prescinde del uso de RBP como puntero base para liberar el registro, haciendo que la <strong>dirección de retorno</strong> esté en una posición más predecible con respecto al inicio del <em>buffer</em> vulnerable.</li></ul>
+<h4>b. Paso de Argumentos</h4>
+<ul><li><strong>32 bits:</strong> La mayoría de las veces, los argumentos de las funciones se pasan por la <strong>pila</strong> (stack).</li><li><strong>64 bits:</strong> Los primeros seis argumentos de una función se pasan a través de <strong>registros</strong> específicos (RDI, RSI, RDX, RCX, R8, R9), y solo los argumentos adicionales se colocan en la pila.</li></ul>
+<p><strong>Implicación:</strong> En 64 bits, la pila no contiene tantos argumentos ni el registro base de manera tan consistente, lo que hace que la posición de la dirección de retorno sea a veces más simple de calcular, pero requiere que el <em>shellcode</em> se adapte a estas convenciones de registros.</p>
+<p><strong>Conclusión:</strong> La explotación de <em>buffer overflows</em> en 64 bits es técnicamente más compleja, no solo porque se manipulan punteros de 8 bytes, sino porque requiere el uso casi obligatorio de técnicas avanzadas (como <strong>ROP</strong> y <strong>ROP <em>chaining</em></strong>) para sortear las sólidas implementaciones de <strong>NX/DEP</strong> y <strong>ASLR</strong>.</p>
+<h3>dd: Conversión y Copia de Archivos de Bajo Nivel</h3>
+<p>El comando dd se utiliza para copiar y convertir datos de un lugar a otro, byte a byte. Es extremadamente poderoso (y peligroso si se usa incorrectamente) y se usa comúnmente para crear imágenes de disco, grabar ISOs, o realizar copias de seguridad a nivel de bloque.</p>
+<p><strong>¡Advertencia!</strong> El uso incorrecto de dd puede sobrescribir particiones del sistema.</p>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Función</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td><strong>if=</strong></td><td><strong>I</strong>nput <strong>F</strong>ile</td><td>Especifica el archivo de entrada (source).</td></tr><tr><td><strong>of=</strong></td><td><strong>O</strong>utput <strong>F</strong>ile</td><td>Especifica el archivo de salida (destination).</td></tr><tr><td><strong>bs=</strong></td><td><strong>B</strong>lock <strong>S</strong>ize</td><td>Establece el tamaño de bloque para la lectura/escritura (ej. 4M).</td></tr><tr><td><strong>status=progress</strong></td><td>Muestra el progreso de la copia.</td><td></td></tr></tbody></table></div>
+<h3>Ejemplo: Crear una imagen de un disco (requiere sudo)</h3>
+<p>Si quieres crear una imagen del primer disco duro (<code>/dev/sda</code>) en un archivo, copiando bloques y mostrando el progreso.</p>
+<pre><code>sudo dd if=/dev/sda of=/mnt/usb/sda_image.img bs=4M status=progress
+450+0 records in
+450+0 records out
+1887436800 bytes (1.9 GB, 1.8 GiB) copied, 32.545 s, 58.0 MB/s</code></pre>
+<p><em>(Generalmente, if se dirige a un dispositivo de disco y of a un archivo, o viceversa, dependiendo de si se está creando una imagen o escribiéndola.)</em></p>
+<h3>Ejemplo Práctico: Crear un archivo de 100MB relleno de ceros</h3>
+<p>Útil para pruebas o crear archivos swap:</p>
+<pre><code>dd if=/dev/zero of=archivo_vacio.dat bs=1M count=100
+100+0 records in
+100+0 records out
+104857600 bytes (105 MB, 100 MiB) copied, 0.04 s, 2.6 GB/s</code></pre>
+<p><em>(Aquí, if=/dev/zero es un dispositivo especial que proporciona un flujo interminable de bytes nulos.)</em></p>
+<h3></h3>
+<div class="tabla"><table><thead><tr><th><strong>Parte del Comando</strong></th><th><strong>Significado</strong></th><th><strong>Propósito en el Ejemplo</strong></th></tr></thead><tbody><tr><td><strong>dd</strong></td><td><strong>Data Duplicator</strong></td><td>El comando principal para la copia a nivel de bloque.</td></tr><tr><td><strong>if=/dev/zero</strong></td><td><strong>Input File</strong> (Archivo de Entrada)</td><td>Es una fuente virtual que solo produce el <strong>carácter nulo</strong> (cero binario) indefinidamente.</td></tr><tr><td><strong>of=archivo_vacio.dat</strong></td><td><strong>Output File</strong> (Archivo de Salida)</td><td>Es el nombre del archivo que se va a crear en tu directorio actual.</td></tr><tr><td><strong>bs=1M</strong></td><td><strong>Block Size</strong> (Tamaño de Bloque)</td><td>Establece que cada lectura y escritura se hará en bloques de <strong>1 Megabyte</strong>.</td></tr><tr><td><strong>count=100</strong></td><td><strong>Count</strong> (Conteo)</td><td>Indica que se deben escribir <strong>100</strong> de estos bloques de 1MB.</td></tr></tbody></table></div>
+<p>1 MB/bloque×100 bloques=100 MB</p>
+<p>Después de ejecutar el comando, puedes usar ls -lh para confirmar que el archivo tiene el tamaño correcto:</p>
+<pre><code>ls -lh archivo_vacio.dat</code></pre>
+<h3>Resultado esperado:</h3>
+<pre><code>-rw-r--r-- 1 jose jose 100M Oct 10 08:45 archivo_vacio.dat</code></pre>
+<h3>Ejercicios:</h3>
+<h3>Índice de comandos</h3>
+<ul><li><code>tar</code></li><li><code>gzip / gunzip</code></li><li><code>bzip2 / bunzip2</code></li><li><code>xz / unxz</code></li><li><code>zip / unzip</code></li><li><code>zcat</code></li><li><code>file</code></li><li><code>dd</code></li></ul>
+<h3>1. tar – Archivar y comprimir archivos y carpetas</h3>
+<h3>Sintaxis general:</h3>
+<pre><code>tar [opciones] archivo.tar [archivos/directorios]</code></pre>
+<h3>Opciones comunes:</h3>
+<ul><li>-c: crear</li><li>-x: extraer</li><li>-t: listar contenido</li><li>-v: modo detallado (verbose)</li><li><code>-f</code>: nombre del archivo</li><li>-z: usar gzip</li><li>-j: usar bzip2</li><li>-J: usar xz</li></ul>
+<h3>Ejemplos prácticos:</h3>
+<h3>Crea el directorio y algunos archivos de ejemplo:</h3>
+<pre><code>mkdir -p /home/jose/documentos/informes
+echo "Reporte 1" &gt; /home/jose/documentos/documento_a.txt
+echo "Informe de ventas" &gt; /home/jose/documentos/informes/ventas_2025.txt</code></pre>
+<h3>Ejecuta el comando tar para crear el archivo:</h3>
+<pre><code>tar -cvf backup.tar / home/jose/documentos/
+^
+|--- ¡La ruta comienza en la raíz (/)!</code></pre>
+<p>Cuando tar ve que la ruta de origen comienza con la barra / (indicando que es una ruta que comienza en la raíz), automáticamente <strong>elimina esta barra inicial</strong> del nombre de los archivos dentro del archivo backup.tar.</p>
+<h4>¿Por qué lo hace? (Seguridad y Portabilidad)</h4>
+<ol><li><strong>Seguridad (Sobrescritura Accidental):</strong> Si tar incluyera la barra / en los nombres de los archivos archivados, al descomprimir el archivo (tar -xvf backup.tar), el sistema intentaría escribir los archivos en su <strong>ruta original</strong>. Por ejemplo, el archivo <code>/home/jose/documentos/documento_a.txt</code> se intentaría extraer exactamente a esa ubicación en el sistema. Si el archivo lo descomprime otro usuario, esto podría sobrescribir archivos del sistema de forma peligrosa o accidental.</li><li><strong>Portabilidad:</strong> Al eliminar la barra /, los archivos se extraen de forma segura en una <strong>ruta relativa</strong> al directorio donde se ejecuta el comando de extracción. Esto garantiza que el archivo de respaldo pueda ser movido y restaurado en cualquier parte del sistema sin riesgo.</li></ol>
+<h3>Crear un archivo comprimido con gzip (.tar.gz):</h3>
+<pre><code>tar -czvf backup.tar.gz /home/jose/documentos/</code></pre>
+<h3>Extraer un .tar.gz:</h3>
+<pre><code>tar -xzvf backup.tar.gz</code></pre>
+<h3>Listar contenido sin extraer:</h3>
+<pre><code>tar -tvf backup.tar.gz</code></pre>
+<h3>Extraer archivo a carpeta específica:</h3>
+<pre><code>tar -xzvf backup.tar.gz -C /home/jose/restaurar/</code></pre>
+<h3>2. gzip – Comprimir archivos individuales</h3>
+<h3>Uso:</h3>
+<pre><code>gzip archivo</code></pre>
+<h3>Ejemplos prácticos:</h3>
+<h3>Comprimir un archivo:</h3>
+<pre><code>gzip /home/jose/notas.txt
+# Crea notas.txt.gz y elimina el original</code></pre>
+<h3>Mantener el original:</h3>
+<pre><code>gzip -k /home/jose/notas.txt</code></pre>
+<h3>Ver compresión sin comprimir:</h3>
+<pre><code>gzip -l /home/jose/notas.txt.gz</code></pre>
+<h3>3. gunzip – Descomprimir archivos .gz</h3>
+<h3>Uso:</h3>
+<pre><code>gunzip archivo.gz</code></pre>
+<h3>Ejemplo práctico:</h3>
+<h3>Descomprimir:</h3>
+<pre><code>gunzip /home/jose/notas.txt.gz</code></pre>
+<h3>4. bzip2 – Compresión más eficiente (pero más lenta)</h3>
+<h3>Uso:</h3>
+<pre><code>bzip2 archivo</code></pre>
+<h3>Comprimir:</h3>
+<pre><code>bzip2 /home/jose/logs.txt
+# Crea logs.txt.bz2</code></pre>
+<h3>Mantener el original:</h3>
+<pre><code>bzip2 -k /home/jose/logs.txt</code></pre>
+<h3>Descomprimir con bunzip2:</h3>
+<pre><code>bunzip2 logs.txt.bz2</code></pre>
+<h3>5. xz – Alta compresión, similar a bzip2 pero más moderno</h3>
+<h3>Uso:</h3>
+<pre><code>xz archivo</code></pre>
+<h3>Comprimir:</h3>
+<pre><code>xz /home/jose/grande.txt
+# Crea grande.txt.xz</code></pre>
+<h3>Mantener original:</h3>
+<pre><code>xz -k grande.txt</code></pre>
+<h3>Descomprimir:</h3>
+<pre><code>unxz grande.txt.xz</code></pre>
+<h3>6. zip – Comprimir archivos con formato .zip</h3>
+<h3>Uso:</h3>
+<pre><code>zip archivo.zip archivo1 archivo2 ...</code></pre>
+<h3>Ejemplos:</h3>
+<h3>Comprimir varios archivos:</h3>
+<pre><code>zip documentos.zip /home/jose/archivo1.txt /home/jose/archivo2.txt</code></pre>
+<h3>Comprimir recursivamente un directorio:</h3>
+<pre><code>zip -r documentos.zip /home/jose/documentos/</code></pre>
+<h3>7. unzip – Extraer archivos .zip</h3>
+<h3>Uso:</h3>
+<pre><code>unzip archivo.zip</code></pre>
+<h3>Extraer en carpeta específica:</h3>
+<pre><code>unzip documentos.zip -d /home/jose/restaurar/</code></pre>
+<h3>8. zcat – Ver el contenido de un archivo .gz sin descomprimir</h3>
+<h3>Uso:</h3>
+<pre><code>zcat archivo.gz</code></pre>
+<h3>Ejemplo:</h3>
+<h3>Ver contenido de logs comprimidos:</h3>
+<pre><code>zcat /var/log/syslog.1.gz | less</code></pre>
+<p>El archivo syslog.1.gz <strong>existe</strong> en un sistema Linux estándar, pero es un archivo <strong>temporal y rotado</strong>.</p>
+<h3>Cuándo Existe syslog.1.gz</h3>
+<p>En un sistema Linux que ha estado funcionando por un tiempo, el archivo syslog.1.gz existe si el servicio <strong>logrotate</strong> ha hecho su trabajo.</p>
+<ol><li><strong>logrotate</strong> es una utilidad del sistema que gestiona automáticamente los archivos de <em>log</em> (registro) para evitar que crezcan indefinidamente.</li><li>Cuando el archivo syslog principal alcanza cierto tamaño o edad, logrotate le cambia el nombre a <strong>syslog.1</strong> y lo <strong>comprime</strong> (usando gzip) para ahorrar espacio, convirtiéndolo en <strong>syslog.1.gz</strong>.</li><li>El sistema sigue escribiendo nuevos registros en un nuevo archivo syslog.</li><li>En la siguiente rotación, syslog.1.gz podría convertirse en syslog.2.gz, y así sucesivamente.</li></ol>
+<p><strong>Conclusión:</strong> Si estás en un servidor o una máquina virtual que ha estado en uso, <strong>es muy probable que exista</strong> en la ruta <code>/var/log/syslog.1.gz</code>.</p>
+<h3>Cuándo hay que Crearlo para Practicar</h3>
+<p>Si estás usando una máquina virtual <strong>recién instalada</strong> o una máquina que nunca ha pasado por la rotación de <em>logs</em>, el archivo syslog.1.gz <strong>podría no existir todavía</strong>.</p>
+<ol><li><strong>Verificar primero:</strong> Comprueba si el archivo ya existe y si tienes permisos para leerlo:</li></ol>
+<pre><code>ls -lh /var/log/syslog.1.gz</code></pre>
+<ol><li><strong>Si existe</strong>, usa el comando con sudo:</li></ol>
+<pre><code>sudo zcat /var/log/syslog.1.gz | less</code></pre>
+<ol><li><strong>Si no existe</strong>, sigue los pasos que te di anteriormente para <strong>crear un archivo de prueba</strong> llamado syslog.1.gz en tu directorio personal para practicar, sin depender de los archivos del sistema:</li></ol>
+<pre><code>echo "Línea de prueba 1" &gt; syslog.1
+gzip syslog.1</code></pre>
+<h3>9. file – Detectar tipo de archivo</h3>
+<p>Aquí lo aplicamos a archivos comprimidos:</p>
+<pre><code>file backup.tar.gz
+# Resultado: gzip compressed data
+file backup.zip
+# Resultado: Zip archive data</code></pre>
+<h3>10. dd – Copiar y convertir archivos a bajo nivel (¡muy potente y peligroso!)</h3>
+<h3>Uso:</h3>
+<pre><code>dd if=origen of=destino [opciones]</code></pre>
+<h3>Ejemplos prácticos:</h3>
+<h3>Copiar un archivo:</h3>
+<pre><code>dd if=/home/jose/iso/original.iso of=/home/jose/iso/copia.iso bs=4M status=progress</code></pre>
+<h3>Crear un archivo de 100 MB lleno de ceros:</h3>
+<pre><code>dd if=/dev/zero of=/home/jose/archivo_ceros.bin bs=1M count=100</code></pre>
+<h3>Hacer copia exacta de un dispositivo (ej: USB):</h3>
+<pre><code>sudo dd if=/dev/sdb of=/home/jose/usb_backup.img bs=4M status=progress</code></pre>
+<p>¡Ten mucho cuidado con dd, puedes sobrescribir discos si te equivocas!</p>
+<h3>Ejercicio práctico final</h3>
+<h3>Supón que quieres:</h3>
+<ol><li>Crear una carpeta con archivos</li><li>Comprimirla en varios formatos</li><li>Extraerla</li><li>Ver los contenidos sin descomprimir</li><li>Usar file para inspeccionar</li></ol>
+<pre><code># 1. Crear carpeta de prueba
+mkdir -p /home/jose/test
+echo "Hola mundo" &gt; /home/jose/test/uno.txt
+echo "Prueba 2" &gt; /home/jose/test/dos.txt
+# 2. Comprimir en tar.gz
+tar -czvf /home/jose/test.tar.gz /home/jose/test/
+# 3. Ver contenido sin extraer
+tar -tf /home/jose/test.tar.gz
+# 4. Ver tipo de archivo
+file /home/jose/test.tar.gz
+# 5. Extraer
+tar -xzvf /home/jose/test.tar.gz -C /home/jose/
+# 6. Crear un backup exacto con dd
+dd if=/home/jose/test.tar.gz of=/home/jose/test_backup.img bs=1M status=progress</code></pre>

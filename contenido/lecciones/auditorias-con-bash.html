@@ -1,0 +1,115 @@
+<figure><img src="../media/auditorias-con-bash/imagen1.webp" width="1600" height="914" alt="Captura 1 de la lección «Automatización de auditorías de seguridad con Bash»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/auditorias-con-bash/imagen2.webp" width="600" height="600" alt="Captura 2 de la lección «Automatización de auditorías de seguridad con Bash»" loading="lazy" decoding="async"></figure>
+<h2>Objetivo del Proyecto</h2>
+<p>Desarrollar un script que pudiera realizar las siguientes tareas de forma automática:</p>
+<p>1.Verificar si el sistema tiene parches de seguridad pendientes.</p>
+<p>2.Comprobar la configuración del firewall (UFW).</p>
+<p>3.Identificar cuentas inactivas o con privilegios de root que podrían representar un riesgo.</p>
+<p>4.Generar un reporte consolidado con la información recolectada.</p>
+<h2>Creación del Script</h2>
+<h2>Paso 1: Configuración del Entorno</h2>
+<p>Primero, abre la terminal y actualiza el sistema:</p>
+<pre><code>sudo apt update &amp;&amp; sudo apt upgrade -y</code></pre>
+<p>Luego crea un nuevo archivo en tu directorio de trabajo para escribir el script:</p>
+<pre><code>nano auditoria.sh</code></pre>
+<h2>Paso 2: Escribe el Código</h2>
+<p>Añade las siguientes líneas al archivo para que el script cubriera cada objetivo definido:</p>
+<h3>Script de Auditoría de Seguridad Revisado</h3>
+<p>auditoria.sh.</p>
+<pre><code>#!/bin/bash
+# --- Configuración y Variables ---
+DATE=$(date +%Y-%m-%d_%H%M%S)
+REPORT_FILE="reporte_auditoria_${DATE}.txt"
+# Usamos 'tee -a' en lugar de redireccionar varias veces para simplificar</code></pre>
+<p># y asegurar que el contenido se muestra en pantalla y se guarda en el archivo.</p>
+<pre><code># Inicialmente limpiamos el archivo de reporte, luego siempre usamos -a (append)
+# --- Encabezado del Reporte ---
+echo "==================================================" | tee "$REPORT_FILE"
+echo " REPORTE DE AUDITORÍA DE SEGURIDAD " | tee -a "$REPORT_FILE"
+echo "Fecha: $(date)" | tee -a "$REPORT_FILE"
+echo "==================================================" | tee -a "$REPORT_FILE"
+echo "" | tee -a "$REPORT_FILE"
+# --------------------------------------------------
+# #1. Verificar Actualizaciones y Parches de Seguridad
+# --------------------------------------------------
+echo "### [1] Verificando Actualizaciones y Parches de Seguridad..." | tee -a "$REPORT_FILE"
+sudo apt update &gt; /dev/null
+echo "Actualizaciones pendientes:" | tee -a "$REPORT_FILE"</code></pre>
+<p># Se usa 'apt list --upgradable' que es más estándar que 'apt-get -s upgrade | grep Inst'</p>
+<pre><code>apt list --upgradable 2&gt;/dev/null | grep -v 'Listing...' | tee -a "$REPORT_FILE"
+echo "Actualizaciones pendientes listadas." | tee -a "$REPORT_FILE"
+echo "" | tee -a "$REPORT_FILE"
+# --------------------------------------------------
+# #2. Comprobar configuración de Firewall (UFW)
+# --------------------------------------------------
+echo "### [2] Verificando configuración de Firewall (UFW)..." | tee -a "$REPORT_FILE"
+if sudo ufw status | grep -q "active"; then
+echo "Firewall está habilitado (activo)." | tee -a "$REPORT_FILE"
+# Muestra las reglas detalladas
+sudo ufw status verbose | tee -a "$REPORT_FILE"
+else
+echo "⚠️ ¡Firewall NO está habilitado (inactivo)!" | tee -a "$REPORT_FILE"
+fi
+echo "" | tee -a "$REPORT_FILE"
+# --------------------------------------------------
+# #3. Detectar cuentas de usuario con acceso root
+# --------------------------------------------------
+echo "### [3] Revisando cuentas con privilegios de root..." | tee -a "$REPORT_FILE"
+echo "Cuentas con UID=0 (Root):" | tee -a "$REPORT_FILE"
+# El campo ':$3' debe ser ':$3=='0'' para buscar el UID 0.</code></pre>
+<p># Además, se puede incluir el nombre del usuario ($1) y la shell ($7)</p>
+<pre><code>awk -F: '($3 == "0") {print "Usuario: "$1", UID: "$3", Shell: "$7}' /etc/passwd | tee -a "$REPORT_FILE"
+echo "Cuentas con UID=0 listadas." | tee -a "$REPORT_FILE"
+echo "" | tee -a "$REPORT_FILE"
+# --------------------------------------------------
+# #4. Detectar usuarios inactivos
+# --------------------------------------------------
+echo "### [4] Buscando inicios de sesión recientes y fallidos..." | tee -a "$REPORT_FILE"
+# El grep original ('grep "Never logged in"') solo funciona en algunas distribuciones.</code></pre>
+<p># Usamos 'lastlog' y filtramos usuarios con 'Never logged in' o una fecha muy antigua.</p>
+<pre><code>echo "Usuarios que nunca han iniciado sesión o con inicio de sesión muy antiguo (requiere revisión manual):" | tee -a "$REPORT_FILE"
+sudo lastlog | grep -E 'Never|**' | tee -a "$REPORT_FILE"
+echo "Inicios de sesión inactivos/antiguos listados." | tee -a "$REPORT_FILE"
+echo "" | tee -a "$REPORT_FILE"
+# --------------------------------------------------
+# #5. Escaneo básico de puertos abiertos
+# --------------------------------------------------
+echo "### [5] Escaneo básico de puertos abiertos..." | tee -a "$REPORT_FILE"</code></pre>
+<p># Se usa 'ss -tuln' que es el reemplazo moderno y más rápido de 'netstat -tuln'</p>
+<pre><code>echo "Puertos abiertos (LISTEN) en TCP y UDP (IPv4 e IPv6):" | tee -a "$REPORT_FILE"
+sudo ss -tuln | tee -a "$REPORT_FILE"
+echo "Puertos abiertos listados." | tee -a "$REPORT_FILE"
+echo "" | tee -a "$REPORT_FILE"
+# --------------------------------------------------
+# Conclusión
+# --------------------------------------------------
+echo "==================================================" | tee -a "$REPORT_FILE"
+echo "Auditoría finalizada. Revisa el archivo de reporte: $REPORT_FILE" | tee -a "$REPORT_FILE"
+echo "==================================================" | tee -a "$REPORT_FILE"</code></pre>
+<h3>1. Variables y Salida</h3>
+<ul><li>Se definió $REPORT_FILE y se utiliza <strong>| tee -a "$REPORT_FILE"</strong> para que la salida se muestre en la terminal (por donde lo estás ejecutando) y, a la vez, se guarde en el archivo de reporte (-a para añadir contenido).</li></ul>
+<h3>2. Actualizaciones</h3>
+<ul><li><code>apt list --upgradable</code>, que es el método moderno y más claro en Ubuntu/Debian para listar paquetes que pueden actualizarse.</li></ul>
+<h3>3. Firewall</h3>
+<ul><li>Usa ufw status. El módulo ufw está instalado por defecto en Ubuntu 24.04, por lo que este chequeo es muy pertinente.</li></ul>
+<h3>4. Cuentas Root</h3>
+<ul><li><code>awk -F: '($3 == "0") {print "Usuario: "$1",..."}'</code>. Esto filtra <strong>exactamente</strong> las cuentas con UID 0 (root), que son las que tienen privilegios máximos, y te da más información de contexto.</li></ul>
+<h3>5. Usuarios Inactivos</h3>
+<ul><li>uso de lastlog, pero se mejoró el filtro para buscar patrones que indiquen un inicio de sesión nunca realizado (Never) o uno con una fecha no registrada (**).</li></ul>
+<h3>6. Escaneo de Puertos (Actualizado)</h3>
+<ul><li><code>ss -tuln</code>. El comando ss (Socket Statistics) es el reemplazo moderno de netstat y es mucho más rápido y preferido en sistemas Linux recientes como Ubuntu 24.04.</li></ul>
+<h3>Pasos para la Implementación</h3>
+<ol><li><strong>Guarda el script:</strong> Copia el código revisado y guárdalo en un archivo llamado auditoria.sh.</li><li><strong>Da permisos de ejecución:</strong></li></ol>
+<pre><code>chmod +x auditoria.sh</code></pre>
+<ol><li><strong>Ejecútalo:</strong></li></ol>
+<pre><code>sudo ./auditoria.sh</code></pre>
+<p>(Se requiere sudo para ejecutar apt update, ufw status, ss, y lastlog).</p>
+<figure><img src="../media/auditorias-con-bash/imagen3.webp" width="1462" height="780" alt="Captura 3 de la lección «Automatización de auditorías de seguridad con Bash»" loading="lazy" decoding="async"></figure>
+<p>Al finalizar, verás la salida en la terminal y se generará un archivo llamado reporte_auditoria_YYYY-MM-DD_HHMMSS.txt en el mismo directorio con todos los hallazgos.</p>
+<figure><img src="../media/auditorias-con-bash/imagen4.webp" width="984" height="681" alt="Captura 4 de la lección «Automatización de auditorías de seguridad con Bash»" loading="lazy" decoding="async"></figure>
+<p>Al abrirlo con cat o nano, pude ver un resumen detallado:</p>
+<p>1.Actualizaciones pendientes: Una lista de paquetes que necesitan ser actualizados, identificando posibles parches críticos.</p>
+<p>2.Firewall: Confirmó si el firewall estaba habilitado y mostró detalles sobre las reglas configuradas.</p>
+<p>3.Cuentas con UID 0: Identificó si había usuarios con privilegios de root, lo cual es crucial para la seguridad.</p>
+<p>4.Usuarios inactivos: Listó cuentas que nunca habían iniciado sesión.</p>
+<p>5.Puertos abiertos: Un mapeo de los servicios escuchando en la máquina.</p>

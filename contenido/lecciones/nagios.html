@@ -1,0 +1,124 @@
+<p>La instalación de Nagios Core en Ubuntu 24.04 (Noble Numbat) se realiza generalmente compilando el código fuente, ya que esto asegura la versión más reciente y la configuración óptima. Este proceso incluye la instalación de dependencias, la compilación de Nagios Core y los Plugins, la configuración de Apache y la puesta en marcha.</p>
+<h2>1. Instalación de Dependencias</h2>
+<p>Nagios requiere herramientas de compilación, bibliotecas para gráficos web, y el servidor web Apache con soporte PHP.</p>
+<ol><li><strong>Actualizar el sistema:</strong></li></ol>
+<pre><code>sudo apt update
+sudo apt upgrade -y</code></pre>
+<ol><li><strong>Instalar paquetes esenciales (Dependencies):</strong></li></ol>
+<pre><code>sudo apt install -y autoconf gcc libc6 make wget unzip \
+apache2 php libapache2-mod-php libgd-dev openssl libssl-dev \
+build-essential
+sudo apt install -y \
+autoconf gcc libc6 make wget unzip \
+apache2 php libapache2-mod-php libgd-dev openssl \
+libssl-dev build-essential</code></pre>
+<ul><li><strong>autoconf, gcc, make, build-essential</strong>: Herramientas necesarias para compilar el código fuente.</li><li><strong>apache2, php, libapache2-mod-php</strong>: Servidor web y soporte PHP para la interfaz de Nagios.</li><li><strong>libgd-dev</strong>: Biblioteca de gráficos necesaria para generar los gráficos de la interfaz web de Nagios.</li><li><code>openssl, libssl-dev</code>: Librerías de seguridad necesarias para comunicaciones.</li></ul>
+<h2>2. Configuración de Usuario y Grupo</h2>
+<p>Es una práctica recomendada crear un usuario y un grupo específicos para que Nagios se ejecute de forma segura.</p>
+<pre><code># Crear el usuario nagios
+sudo useradd nagios
+# Crear el grupo nagcmd para comandos externos
+sudo groupadd nagcmd
+# Añadir el usuario nagios al grupo nagcmd
+sudo usermod -a -G nagcmd nagios
+# Añadir el usuario del servidor web (www-data) al grupo nagcmd
+sudo usermod -a -G nagcmd www-data</code></pre>
+<h2>3. Descarga y Compilación de Nagios Core</h2>
+<p>Descargue la última versión estable de Nagios Core y sus plugins. (Las versiones pueden cambiar, compruebe el sitio web oficial si necesita la más reciente).</p>
+<ol><li><strong>Descargar Nagios Core (Ejemplo con v4.5.3):</strong></li></ol>
+<pre><code>cd /tmp
+wget https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.5.3.tar.gz
+tar -zxvf nagios-4.5.3.tar.gz
+cd nagios-4.5.3</code></pre>
+<ol><li><strong>Compilar y Configurar Nagios:</strong></li></ol>
+<pre><code># Ejecutar la configuración inicial
+sudo ./configure --with-command-group=nagcmd
+# Compilar todo el código
+sudo make all</code></pre>
+<ol><li><strong>Instalar Nagios Core:</strong></li></ol>
+<pre><code>sudo make install
+# Instala binarios, CGIs y archivos HTML
+sudo make install-init
+# Instala los scripts de inicio del servicio (systemd/init.d)
+sudo make install-commandmode
+# Configura el archivo de comando externo
+sudo make install-config
+# Instala los archivos de configuración de ejemplo
+sudo make install-webconf
+# Instala los archivos de configuración de Apache</code></pre>
+<h2>4. Instalación de Plugins de Nagios (Comprobaciones)</h2>
+<p>Nagios necesita plugins para realizar cualquier comprobación de servicios.</p>
+<ol><li><strong>Descargar Plugins (Ejemplo con v2.4.10):</strong></li></ol>
+<pre><code>cd /tmp
+wget https://nagios-plugins.org/download/nagios-plugins-2.4.10.tar.gz
+tar -zxvf nagios-plugins-2.4.10.tar.gz
+cd nagios-plugins-2.4.10</code></pre>
+<ol><li><strong>Compilar e Instalar Plugins:</strong></li></ol>
+<pre><code>sudo ./configure --with-nagios-user=nagios --with-nagios-group=nagios
+sudo make
+sudo make install</code></pre>
+<h2>5. Configuración de Acceso Web y Servicio</h2>
+<p>Configure el servidor web y defina el usuario administrador para el acceso a la interfaz web.</p>
+<ol><li><strong>Habilitar Módulos de Apache:</strong></li></ol>
+<pre><code>sudo a2enmod rewrite
+sudo a2enmod cgi</code></pre>
+<ol><li>Crear el Usuario Administrador Web (nagiosadmin):</li></ol>
+<p>Se le pedirá que introduzca y confirme la contraseña del usuario nagiosadmin.</p>
+<pre><code>sudo htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
+dingdong</code></pre>
+<ol><li><strong>Verificar y Reiniciar Servicios:</strong></li></ol>
+<pre><code># Reiniciar Apache para aplicar la configuración web
+sudo systemctl restart apache2
+# Verificar la configuración de Nagios antes de iniciar el servicio
+sudo /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+# Iniciar y habilitar Nagios
+sudo systemctl enable nagios
+sudo systemctl start nagios</code></pre>
+<h2>6. Acceso a la Interfaz Web</h2>
+<p>Una vez que el servicio esté activo, acceda a la interfaz web desde cualquier navegador.</p>
+<ol><li><strong>Dirección de Acceso:</strong></li><li>http://&lt;su_direccion_IP&gt;/nagios</li><li><strong>Credenciales:</strong><ul><li><strong>Usuario:</strong> nagiosadmin</li><li><strong>Contraseña:</strong> La que estableció en el Paso 5.</li></ul></li></ol>
+<p>Si utiliza un firewall (UFW), asegúrese de permitir el tráfico en el puerto 80 (HTTP):</p>
+<pre><code>sudo ufw allow 'Apache'</code></pre>
+<figure><img src="../media/nagios/imagen1.webp" width="1600" height="740" alt="Captura 1 de la lección «Nagios»" loading="lazy" decoding="async"></figure>
+<h2>Guía Básica para Usar Nagios Core</h2>
+<p>Nagios se basa en la definición de dos elementos principales: <strong>Hosts (Máquinas)</strong> y <strong>Services (Servicios)</strong> que se ejecutan en esos <em>hosts</em>.</p>
+<h2>1. Navegación en la Interfaz</h2>
+<p>La interfaz tiene dos secciones principales en el menú izquierdo:</p>
+<div class="tabla"><table><thead><tr><th><strong>Sección del Menú</strong></th><th><strong>Función</strong></th></tr></thead><tbody><tr><td><strong>Current Status</strong></td><td>Muestra el estado actual y los problemas (en rojo/naranja) en tiempo real.</td></tr><tr><td><strong>Reports</strong></td><td>Muestra el historial de eventos, notificaciones y gráficos de disponibilidad.</td></tr></tbody></table></div>
+<p>La mayoría de tu trabajo inicial será en la sección <strong>Current Status</strong>:</p>
+<ul><li><strong>Tactical Overview:</strong> Un resumen de alto nivel de toda la red.</li><li><strong>Hosts:</strong> Muestra el estado de las máquinas (<em>UP</em>, <em>DOWN</em>, <em>UNREACHABLE</em>).</li><li><strong>Services:</strong> Muestra el estado de los servicios individuales (<em>OK</em>, <em>WARNING</em>, <em>CRITICAL</em>, <em>UNKNOWN</em>).</li></ul>
+<h2>2. Configuración Inicial: Añadir Hosts y Servicios</h2>
+<p>Nagios Core <strong>no tiene una interfaz gráfica para añadir configuraciones</strong> (a diferencia de Nagios XI). Toda la configuración se realiza editando archivos de texto en tu servidor Ubuntu.</p>
+<h2>Ubicación de los Archivos de Configuración</h2>
+<ul><li><strong>Directorio principal:</strong> <code>sudo nano /usr/local/nagios/etc/nagios.cfg</code></li><li><strong>Hosts/Servicios:</strong> Los archivos de definición suelen estar en <code>/usr/local/nagios/etc/objects/</code> o en un directorio que Apache carga, como <code>/etc/nagios/conf.d/.</code></li></ul>
+<h2>A. Monitorizar una Nueva Máquina (Host)</h2>
+<p>Para añadir tu máquina Windows o cualquier otro servidor a Nagios, debes crear un archivo de definición de <em>host</em> (por ejemplo, miservidores.cfg).</p>
+<h2>Ejemplo de Definición de Host (en /usr/local/nagios/etc/objects/hosts.cfg):</h2>
+<p>Fragmento de código</p>
+<pre><code>define host{
+use linux-server ; Plantilla heredada (de templates.cfg)
+host_name Servidor_Windows ; Nombre que aparecerá en Nagios
+alias Mi Servidor de Pruebas; Descripción
+address 192.168.1.5 ; Dirección IP del Host (Tu máquina Windows)
+}</code></pre>
+<h2>B. Monitorizar un Servicio (Service)</h2>
+<p>Los servicios se definen para correr un <em>plugin</em> de Nagios. El <em>plugin</em> más básico es check_ping.</p>
+<h2>Ejemplo de Definición de Servicio:</h2>
+<p>Fragmento de código</p>
+<pre><code>define service{
+use generic-service ; Plantilla heredada
+host_name Servidor_Windows; El nombre del Host definido arriba
+service_description Estado del Ping ; Descripción del servicio
+check_command check_ping!100.0,20%!500.0,60% ; Comando del plugin
+# Argumentos del comando: 100ms WARN, 500ms CRITICAL
+notifications_enabled 1
+}</code></pre>
+<h2>3. Comandos Esenciales de Nagios</h2>
+<p>Después de modificar cualquier archivo de configuración, <strong>debes verificar y recargar Nagios</strong>.</p>
+<div class="tabla"><table><thead><tr><th><strong>Comando</strong></th><th><strong>Función</strong></th></tr></thead><tbody><tr><td><code>sudo /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg</code></td><td><strong>Verifica</strong> la sintaxis de todos los archivos de configuración. Si hay errores, no continúes.</td></tr><tr><td><code>sudo systemctl restart nagios</code></td><td><strong>Recarga</strong> el servicio Nagios (el <em>daemon</em> con PID 96800 de tu imagen).</td></tr><tr><td><code>sudo systemctl status nagios</code></td><td><strong>Verifica</strong> que el <em>daemon</em> (Daemon running) se haya iniciado correctamente.</td></tr></tbody></table></div>
+<h2>Flujo de Trabajo</h2>
+<ol><li>Añadir o editar archivos .cfg.</li><li>Ejecutar la <strong>Verificación</strong> (nagios -v).</li><li>Ejecutar el <strong>Reinició</strong> (systemctl restart).</li><li>Revisar el <strong>Current Status</strong> en la interfaz web.</li></ol>
+<h2>4. El Próximo Paso: El Plugin NRPE</h2>
+<p>Para monitorizar recursos internos de tu máquina Windows (como el uso de CPU, disco duro o memoria), necesitas el <strong>Nagios Remote Plugin Executor (NRPE)</strong>.</p>
+<ol><li><strong>Instala NRPE <em>client</em>:</strong> En la máquina Windows, instala un <em>daemon</em> como <strong>NSClient++</strong> o el cliente NRPE.</li><li><strong>Instala NRPE <em>plugin</em>:</strong> En la máquina Ubuntu (el servidor Nagios), instala el <em>plugin</em> check_nrpe.</li><li><strong>Configura Nagios:</strong> Define nuevos comandos y servicios en Nagios que usen check_nrpe para preguntar a Windows sobre su salud interna.</li></ol>
+<p>Este es el camino a seguir si deseas ir más allá de los chequeos básicos de PING y HTTP.</p>

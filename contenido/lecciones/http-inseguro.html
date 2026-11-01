@@ -1,0 +1,59 @@
+<h3>Resumen rápido</h3>
+<p>Para que la apertura de una imagen genere paquete(s) capturables y un registro en python -m http.server debes asegurarte de:</p>
+<ul><li>Que el navegador obtenga la imagen vía <strong>HTTP</strong> (<code>http://127.0.0.1:8080/tu.jpg</code>) y <strong>no</strong> file://.</li><li>Que la captura de paquetes esté hecha en la <strong>interfaz correcta</strong> (loopback / Npcap Loopback Adapter si estás en Windows).</li><li>Que la petición no esté servirda desde la <strong>caché</strong> del navegador (forzar recarga o desactivar caché en DevTools).</li><li>Opcional: usar curl para forzar un GET y comprobar la captura rápidamente.</li></ul>
+<h3>Pasos detallados (Windows)</h3>
+<h3>1) Instala Npcap con soporte loopback (si no lo tienes)</h3>
+<ul><li>Descarga e instala <strong>Npcap</strong> (marca la opción “Support loopback traffic (‘Npcap Loopback Adapter’)”).</li><li>Reinicia Wireshark si estaba abierto.</li></ul>
+<h3>2) Selecciona la interfaz de loopback en Wireshark</h3>
+<ul><li>Abre Wireshark → <em>Capture Options</em>.</li><li>Selecciona:</li></ul>
+<p><strong>"Npcap Loopback Adapter"</strong> (o interfaz que muestre tráfico localhost).</p>
+<ul><li>(Opcional) en <em>Capture Filter</em> pon:</li></ul>
+<pre><code>host 127.0.0.1 and port 8080</code></pre>
+<p>Eso reduce el ruido (BPF capture filter).</p>
+<h3>3) Desactiva o evita caché en el navegador</h3>
+<ul><li>Abre DevTools (F12) → pestaña <strong>Network</strong> → marca <strong>Disable cache</strong> (mientras DevTools esté abierto).</li><li>O abre la imagen en una pestaña nueva y pulsa <strong>Ctrl+F5</strong>.</li></ul>
+<h3>4) Inicia la captura y luego abre la imagen por HTTP</h3>
+<ol><li>En Wireshark, inicia la captura en la interfaz loopback.</li><li>Desde el navegador navega a:</li></ol>
+<p><code>http://127.0.0.1:8080/kl.jpg</code></p>
+<p>o la ruta que corresponda (usa 127.0.0.1 mejor que localhost si quieres evitar problemas IPv6).</p>
+<p>3. Observa en el servidor python -m http.server si aparece un GET <code>/kl.jpg</code> 200 -. Si aparece, ya llegó la petición al servidor.</p>
+<h3>5) Filtros útiles en Wireshark (display filters)</h3>
+<ul><li>Ver solo GET a puerto 8080:</li></ul>
+<pre><code>http.request.method == "GET" &amp;&amp; tcp.port == 8080</code></pre>
+<ul><li>Ver solo respuestas 200:</li></ul>
+<pre><code>http.response.code == 200 &amp;&amp; tcp.port == 8080</code></pre>
+<ul><li>Ver peticiones que contienen ".jpg" (URI):</li></ul>
+<pre><code>http.request &amp;&amp; http.request.uri contains ".jpg"</code></pre>
+<h3>Alternativa: usar línea de comandos (tshark / tcpdump)</h3>
+<p>Si prefieres línea:</p>
+<ul><li>Captura en vivo con tshark (selecciona el índice de interfaz apropiado):</li></ul>
+<pre><code>tshark -i &lt;iface_number&gt; -f "host 127.0.0.1 and port 8080" -w capture.pcapng</code></pre>
+<ul><li>Leer un pcap y mostrar GETs:</li></ul>
+<pre><code>tshark -r capture.pcapng -Y "http.request and tcp.port==8080" -T fields -e frame.number -e ip.src -e ip.dst -e http.request.method -e http.request.uri</code></pre>
+<ul><li>Buscar POSTs:</li></ul>
+<pre><code>tshark -r capture.pcapng -Y 'http.request.method == "POST"'</code></pre>
+<h3>Si estás en una VM / host distinto</h3>
+<ul><li>Si sirves desde la VM y el navegador está en el host (o viceversa), captura en la <strong>máquina que origina</strong> la petición o en la red entre ambas.</li><li>Si el servicio corre en la VM y navegas dentro de la VM → captura dentro de la VM (o en la interfaz virtual del host que conecta con la VM).</li></ul>
+<h3>Puntos importantes / errores típicos</h3>
+<ul><li>Si abres la imagen desde el sistema de archivos (file://...), no habrá petición HTTP ni registro en http.server.</li><li>Si la petición se sirve desde la caché, no verás paquetes; por eso <strong>desactivar caché</strong> o forzar recarga es clave.</li><li>Si en tus logs aparece ::ffff:127.0.0.1 (IPv4-mapped IPv6) — Wireshark puede mostrarlo como IPv6; usar tcp.port == 8080 es la forma más robusta de filtrar.</li><li>python -m http.server <strong>sí</strong> registra GET; si no ves nada en el log, la petición no llegó al servidor.</li></ul>
+<p><strong>RECOMPONER/EXTRAER</strong> <strong>LA IMAGEN</strong></p>
+<h2>1) Método fácil — Wireshark (GUI)</h2>
+<h3>Para una imagen servida en la respuesta (GET → response contiene la jpg):</h3>
+<ol><li>Abre el pcap en Wireshark.</li><li>Usa este filtro de visualización:</li></ol>
+<pre><code>http &amp;&amp; http.content_type contains "jpeg"</code></pre>
+<p>ó para búsquedas más amplias:</p>
+<pre><code>http.request || http.response</code></pre>
+<ol><li>En la lista de paquetes localiza la respuesta HTTP que tiene Content-Type: image/jpeg.</li><li>Menú: <strong>File → Export Objects → HTTP</strong>.<ul><li>Aparecerá una lista de objetos HTTP (archivos). Selecciona el .jpg y pulsa <strong>Save</strong>.</li><li>Esto te exporta el JPG ya reconstruido.</li></ul></li></ol>
+<p><strong>Si no lo ves como objeto HTTP,</strong> selecciona el paquete de la respuesta → botón derecho → <strong>Follow → TCP Stream</strong>. En la ventana que abre:</p>
+<ul><li>En <em>Show data as</em> elige <strong>Raw</strong>.</li><li>Guarda el contenido (Save As) con extensión .jpg.<br> (Wireshark ya reensambla automáticamente si la opción está activada — ver punto 4 abajo.)</li></ul>
+<h2>2) Método rápido — tshark (línea de comandos)</h2>
+<p>tshark tiene una opción muy útil para volcar objetos HTTP:</p>
+<pre><code>tshark -r captura.pcapng --export-objects "http,./export_http"</code></pre>
+<ul><li>Esto crea la carpeta ./export_http con todos los objetos HTTP (incluidas las .jpg).</li><li>Si sólo quieres listar las respuestas con content-type:</li></ul>
+<pre><code>tshark -r captura.pcapng -Y 'http.response and http.content_type contains "jpeg"' -T fields -e frame.number -e http.content_type -e http.content_length -e http.response.code -e http.response.line</code></pre>
+<h2>3) Si la imagen fue subida (POST multipart/form-data)</h2>
+<p>Wireshark no siempre lista las partes subidas en <strong>Export Objects</strong> (porque Export Objects muestra objetos <em>servidos</em>, no necesariamente el body del request). Para extraer un fichero que viajó dentro de un POST:</p>
+<ol><li>Localiza el <strong>paquete</strong> donde empieza el POST (o cualquier paquete perteneciente a ese TCP stream).</li><li>Botón derecho → <strong>Follow → TCP Stream</strong>.</li><li>En la ventana "Follow TCP Stream":<ul><li>Cambia "Show data as" a <strong>Raw</strong> (o Hex Dump si deseas ver en hex).</li><li>Guarda el contenido como upload_raw.bin.</li></ul></li><li>El upload_raw.bin contiene todo el stream TCP (cabeceras HTTP + body multipart). Ahora necesitas <strong>extraer la parte binaria</strong> entre los boundary del multipart. Los boundary aparecen en las cabeceras Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryXXXX.</li></ol>
+<h2>4) Asegúrate de que Wireshark reensamble TCP/HTTP</h2>
+<p>En Wireshark: Edit → Preferences → Protocols → TCP → activa "Allow subdissector to reassemble TCP streams".</p>
+<p>Y en Protocols → HTTP marca "Reassemble HTTP bodies spanning multiple TCP segments". Esto garantiza que HTTP bodies largos se muestren completos y Export Objects/Follow TCP Stream te den el archivo entero.</p>

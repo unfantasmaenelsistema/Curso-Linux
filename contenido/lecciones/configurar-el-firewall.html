@@ -1,0 +1,159 @@
+<p>Final del formulario</p>
+<p>Final del formulario</p>
+<p>Ubuntu 24.04 LTS viene con UFW (cortafuegos sencillo) que protege el escritorio o servidor contra accesos no autorizados. UFW es una aplicación de interfaz fácil de usar para un sistema de filtrado de paquetes Linux llamado Netfilter o nftables. Tradicionalmente, las reglas de Netfilter/nftables se configuran mediante el comando iptables o el comando nft por parte de desarrolladores y administradores de sistemas. Sin embargo, los nuevos usuarios y desarrolladores de Ubuntu Linux que no están familiarizados con los conceptos de cortafuegos encuentran confusa la sintaxis de Netfilter/nft. Por lo tanto, el proyecto ufw proporciona una interfaz fácil de usar para servidores y escritorios Linux Ubuntu 24.04 LTS. Esta guía rápida hace que la configuración de UFW en Ubuntu 24.04 LTS sea extremadamente sencilla. Proporciona instrucciones paso a paso para que los desarrolladores y administradores de sistemas aseguren sus servidores de manera eficiente.</p>
+<p></p>
+<p>Esta página explica cómo configurar un cortafuegos con UFW en servidores o escritorios Ubuntu 24.04 LTS.</p>
+<p>Los pasos para configurar UFW son los siguientes:</p>
+<h4>Paso 1: Configurar políticas UFW predeterminadas</h4>
+<p>Mirar el actual estado</p>
+<pre><code>sudo ufw status</code></pre>
+<p>De forma predeterminada, el firewall no está habilitado. Por lo tanto, verá algo como esto en un sistema recién instalado:</p>
+<pre><code>Status: inactive</code></pre>
+<p>La política predeterminada del firewall funciona de maravillas para servidores y computadoras de escritorio. Siempre es una buena política cerrar todos los puertos del servidor y abrir solo los puertos TCP o UDP necesarios. Bloqueemos todas las conexiones entrantes y solo permitamos las conexiones salientes desde el servidor en la nube Ubuntu 24.04 LTS:</p>
+<pre><code>sudo ufw default allow outgoing
+sudo ufw default deny incoming</code></pre>
+<p># Asegúrese de que la compatibilidad con IPv6 también esté habilitada. Ejecute el comando grep de la siguiente manera:</p>
+<pre><code>grep IPV6 /etc/default/ufw</code></pre>
+<p>De lo contrario, edite el archivo <code>/etc/default/ufw</code> usando un editor de texto (siéntase libre de elegir su editor de texto preferido):</p>
+<pre><code>sudo nano /etc/default/ufw</code></pre>
+<p>Configúrelo de la siguiente manera:</p>
+<pre><code>IPV6=yes</code></pre>
+<p>Aquí se explica cómo verificar todo nuevamente usando el comando egrep:</p>
+<pre><code>sudo grep -E 'POLICY|IPV6' /etc/default/ufw</code></pre>
+<p>That is all.</p>
+<h4>Paso 2 – Abra el puerto TCP 22 de SSH usando ufw</h4>
+<p>El siguiente paso racional es permitir conexiones SSH entrantes en el puerto TCP predeterminado 22 de la siguiente manera:</p>
+<pre><code>sudo ufw allow ssh</code></pre>
+<p>Digamos que está ejecutando el servidor OpenSSH en el puerto TCP 1222, entonces:</p>
+<pre><code>sudo ufw allow 1222/tcp</code></pre>
+<p>También puedes limitar el acceso al puerto ssh a los bots de combate de la siguiente manera:</p>
+<pre><code>sudo ufw limit ssh</code></pre>
+<h4>Paso 3 – Activar el firewall</h4>
+<p>Eso es todo lo que necesitas. A continuación, debes activar la protección del firewall para tu máquina Ubuntu Linux 24.04 LTS. Por ejemplo:</p>
+<pre><code>sudo ufw enable</code></pre>
+<p>Es posible que deba confirmar la operación si se le solicita. Para ver el estado actual del firewall, escriba el comando systemctl de la siguiente manera:</p>
+<pre><code>sudo ufw status</code></pre>
+<p>Tenga en cuenta que una vez que se habilita UFW, se ejecuta incluso después de reiniciar el sistema. Puede comprobarlo fácilmente con el comando systemctl:</p>
+<pre><code>sudo systemctl status ufw.service</code></pre>
+<p>Salida::</p>
+<pre><code>● ufw.service - Uncomplicated firewall
+Loaded: loaded (/usr/lib/systemd/system/ufw.service; enabled; preset: enabled)</code></pre>
+<p>Active: active (exited) since Wed 2024-05-15 09:22:12 UTC; 10min ago</p>
+<p>Docs: <code>man:ufw(8)</code></p>
+<pre><code>Main PID: 503 (code=exited, status=0/SUCCESS)
+CPU: 6ms</code></pre>
+<p>May 15 09:22:12 ubuntu systemd[1]: Starting ufw.service - Uncomplicated firewall...</p>
+<p>May 15 09:22:12 ubuntu-24-04 systemd[1]: Finished ufw.service - Uncomplicated firewall.</p>
+<pre><code>root@ubuntu-24-04:~#</code></pre>
+<h4>Paso 4 – Abrir (permitir) puertos TCP o UDP</h4>
+<p>Después de configurar una política de firewall y abrir el puerto TCP 22 para SSH, el siguiente paso es abrir puertos de servicio adicionales según los requisitos de su aplicación. Por ejemplo, es posible que necesite abrir los puertos TCP 80 y 443 para servidores web Nginx, Apache o Lighttpd:</p>
+<pre><code>sudo ufw allow 80/tcp comment 'Allow Apache HTTP'
+sudo ufw allow 443/tcp comment 'Allow Apache HTTPS'</code></pre>
+<p>Aquí se explica cómo abrir el puerto UDP 1194 de OpenVPN: escriba:</p>
+<pre><code>sudo ufw allow 1194/udp comment 'Allow OpenVPN'</code></pre>
+<p>Las palabras clave de comentario ufw agregan comentarios, que actúan como un instrumento para comprender las reglas del firewall.</p>
+<figure><img src="../media/configurar-el-firewall/imagen1.webp" width="1076" height="1358" alt="Captura 1 de la lección «Cómo configurar el firewall»" loading="lazy" decoding="async"></figure>
+<p>UFW instalado y funcionando en el servidor Ubuntu versión 24.04 LTS (haga clic para ampliar)</p>
+<h5>Apertura de rangos de puertos TCP y UDP</h5>
+<pre><code>sudo ufw allow 3000:3200/tcp
+sudo ufw allow 7000:8000/udp</code></pre>
+<h5>Permitir la conexión desde una única IP o CIDR</h5>
+<p>En este ejemplo, si desea permitir TODAS las conexiones desde una dirección IP llamada 8.8.8.8, ingrese:</p>
+<pre><code>sudo ufw allow from 8.8.8.8</code></pre>
+<p>Permitamos conexiones desde una dirección IP llamada 123.1.2.3 a nuestro puerto 25, ingrese:</p>
+<pre><code>sudo ufw allow from 123.1.2.3 to any port 25 proto tcp</code></pre>
+<p>También puedes configurar la IP de destino 111.1.2.3 para el puerto 25:</p>
+<pre><code>sudo ufw allow from 123.2.3.4 to 111.1.2.3 port 25 proto tcp</code></pre>
+<h5>Cómo permitir la conexión en una interfaz específica</h5>
+<p>Abra el puerto TCP 22 solo para la interfaz wg1:</p>
+<pre><code>sudo ufw allow in on wg1 to any port 22</code></pre>
+<p>Digamos que desea permitir la conexión para el puerto TCP 3306 en la interfaz incusbr0 desde 10.105.28.22, luego agregue:</p>
+<pre><code>sudo ufw allow in on incusbr0 from 10.105.28.22 to any port 3306 proto tcp</code></pre>
+<h4>Paso 5 – Bloqueo de puertos y conexiones TCP o UDP</h4>
+<p>¿Quieres cerrar puertos y bloquear determinadas direcciones IP? La sintaxis para denegar el acceso es la siguiente. En otras palabras, simplemente se ignora el acceso al puerto 23:</p>
+<pre><code>sudo ufw deny 23/tcp comment 'Block telnet'</code></pre>
+<p>Aquí se explica cómo denegar todas las conexiones desde una dirección IP llamada 1.1.1.1, ingrese:</p>
+<pre><code>sudo ufw deny from 1.1.1.1</code></pre>
+<p>¿Qué tal si la IP/subred de reloj (CIDR) se llama 1.42.42.32/27, ingresa:</p>
+<pre><code>sudo ufw deny from 1.42.42.32/27</code></pre>
+<p>Por último, ¿quieres denegar el acceso a 1.1.1.4 (por ejemplo, a la dirección IP de los malhechores o de los piratas informáticos) en el puerto 22? Prueba:</p>
+<pre><code>sudo ufw deny from 1.1.1.4 to any port 22 proto tcp</code></pre>
+<h5>Prueba de reglas ufw para detectar errores de sintaxis</h5>
+<p>Pase la opción --dry-run para probar una regla ufw. Esto significa no modificar nada, solo mostrar los cambios del firewall. Esto es ideal para probar reglas antes de insertarlas o eliminarlas. La sintaxis:</p>
+<pre><code>sudo ufw --dry-run rule
+sudo ufw --dry-run allow from 192.168.1.0/24 to any port 3128 proto tcp
+# make some error and see what it doe
+sudo ufw --dry-run allow from 192.168.1.1000/24 to any port 3128 proto tcp</code></pre>
+<p>Outputs:</p>
+<pre><code>ERROR: Bad source address
+sudo ufw --dry-run allow from 192.168.1.1/24 to any port 3128 proto tcp_fake_proto</code></pre>
+<p>Outputs:</p>
+<pre><code>ERROR: Unsupported protocol 'tcp_fake_proto'</code></pre>
+<h4>Paso 6 – Visualización de las reglas del firewall</h4>
+<p>Puede ver el estado del firewall como una lista numerada de REGLAS:</p>
+<pre><code>sudo ufw status numbered</code></pre>
+<figure><img src="../media/configurar-el-firewall/imagen2.webp" width="888" height="660" alt="Captura 2 de la lección «Cómo configurar el firewall»" loading="lazy" decoding="async"></figure>
+<h4>Paso 7 – Eliminar las reglas del firewall de ufw</h4>
+<p>Obtenga una lista de todas las reglas actuales en formato de lista numerada:</p>
+<pre><code>sudo ufw status numbered</code></pre>
+<p>Salida::</p>
+<pre><code>Status: active
+To Action From
+-- ------ ----
+[ 1] 22/tcp ALLOW IN Anywhere
+[ 2] 80/tcp ALLOW IN Anywhere # Allow Apache HTTP
+[ 3] 443/tcp ALLOW IN Anywhere # Allow Apache HTTPS
+[ 4] 1194/udp ALLOW IN Anywhere # Allow OpenVPN
+[ 5] 3000:3200/tcp ALLOW IN Anywhere
+[ 6] 7000:8000/udp ALLOW IN Anywhere
+[ 7] Anywhere ALLOW IN 8.8.8.8
+[ 8] 25/tcp ALLOW IN 123.1.2.3
+[ 9] 111.1.2.3 25/tcp ALLOW IN 123.2.3.4
+[10] 22 on wg1 ALLOW IN Anywhere
+[11] 3306/tcp on incusbr0 ALLOW IN 10.105.28.22
+[12] 23/tcp DENY IN Anywhere # Block telnet
+[13] Anywhere DENY IN 1.1.1.1
+[14] Anywhere DENY IN 1.42.42.32/27
+[15] 22/tcp DENY IN 1.1.1.4
+[16] 22/tcp (v6) ALLOW IN Anywhere (v6)
+[17] 80/tcp (v6) ALLOW IN Anywhere (v6) # Allow Apache HTTP
+[18] 443/tcp (v6) ALLOW IN Anywhere (v6) # Allow Apache HTTPS
+[19] 1194/udp (v6) ALLOW IN Anywhere (v6) # Allow OpenVPN
+[20] 3000:3200/tcp (v6) ALLOW IN Anywhere (v6)
+[21] 7000:8000/udp (v6) ALLOW IN Anywhere (v6)
+[22] 22 (v6) on wg1 ALLOW IN Anywhere (v6)
+[23] 23/tcp (v6) DENY IN Anywhere (v6) # Block telnet</code></pre>
+<p>Para eliminar la regla de firewall n.° 22, escriba el comando:</p>
+<pre><code>sudo ufw delete 22
+sudo ufw status numbered</code></pre>
+<p>Consulte el tutorial sobre cómo eliminar una regla de firewall UFW en Ubuntu/Debian Linux para obtener más información.</p>
+<h4>Paso 8 – Detención y eliminación de UFW</h4>
+<p>Si ya no necesita ufw, aquí le mostramos cómo deshabilitarlo:</p>
+<pre><code>sudo ufw disable
+sudo ufw reset</code></pre>
+<h4>Paso 9 – Ver los registros del firewall</h4>
+<p>De manera predeterminada, todas las entradas de UFW se registran en el archivo <code>/var/log/ufw.log</code>. Utilice grep/less/more y otros comandos para ver los registros de UFW. Por ejemplo:</p>
+<pre><code>sudo journalctl -u ufw.service</code></pre>
+<p>Imprimamos una lista de todas las direcciones IP que intentan iniciar sesión a través del puerto SSH pero que el UFW descarta:</p>
+<pre><code>journalctl -u ufw.service -g 'DPT=22' |\
+grep -E -o 'SRC=([0-9]{1,3}[\.]){3}[0-9]{1,3}' |\
+awk -F'=' '{ print $2 }' | sort -u</code></pre>
+<p>Finalmente, aquí se explica cómo mostrar la lista de reglas:</p>
+<pre><code>sudo ufw show listening</code></pre>
+<p>Salida::</p>
+<pre><code>tcp:
+tcp6:
+22 * (systemd)
+[16] allow 22/tcp
+
+udp:
+68 10.83.200.36 (systemd-networkd)
+[ 7] allow from 8.8.8.8
+[13] deny from 1.1.1.1
+[14] deny from 1.42.42.32/27</code></pre>
+<p>También:</p>
+<pre><code>sudo ufw show added</code></pre>
+<h3>Resumiendo</h3>
+<p>Para obtener más instrucciones, consulte la documentación en línea o acceda a ella mediante el comando man (comando ufw help).</p>
+<pre><code>man ufw
+ufw help</code></pre>

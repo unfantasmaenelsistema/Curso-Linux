@@ -1,0 +1,63 @@
+<h2>1. ¿Qué es la Escalada de Privilegios?</h2>
+<p>La <strong>escalada de privilegios</strong> (<em>Privilege Escalation</em>) es un tipo de ataque informático en el que un usuario o proceso con bajos permisos de seguridad (un usuario regular, por ejemplo) obtiene acceso a recursos o funciones que normalmente están restringidas a usuarios con mayores privilegios, como el usuario <strong>root</strong> (el administrador absoluto del sistema).</p>
+<p>El objetivo final de un atacante es siempre obtener acceso de <strong>root</strong> (o <strong>privilegios de administrador</strong>) para poder controlar totalmente el sistema: instalar <em>malware</em>, modificar archivos críticos del sistema, acceder a datos de otros usuarios, o usar el servidor como plataforma de ataque a otras redes.</p>
+<h2>2. Tipos de Escalada</h2>
+<p>Existen dos categorías principales de escalada:</p>
+<ol><li><strong>Escalada Horizontal:</strong> Un atacante accede a los recursos o cuenta de <strong>otro usuario regular</strong> (por ejemplo, el usuario A obtiene acceso a la cuenta del usuario B). Los privilegios no aumentan en nivel, sino en alcance.</li><li><strong>Escalada Vertical (o Elevación de Privilegios):</strong> Un usuario o proceso con pocos privilegios eleva su estatus al nivel de <strong>root</strong>. Este es el tipo más peligroso y el foco de la mayoría de los ataques.</li></ol>
+<h2>3. Mecanismos Comunes de Producción (Vectores de Ataque)</h2>
+<p>La escalada de privilegios rara vez es el primer paso de un ataque; ocurre <em>después</em> de que un atacante ya ha obtenido un punto de apoyo inicial en el sistema (una Shell de bajo nivel).</p>
+<h2>A. Archivos y Binarios con Permiso SUID/SGID Mal Configurado</h2>
+<p>El vector de escalada más clásico.</p>
+<ul><li><strong>SUID (Set User ID):</strong> Cuando este <em>bit</em> está activado en un binario ejecutable, permite que el binario se ejecute <strong>con los permisos del dueño del archivo</strong>, en lugar de con los permisos del usuario que lo ejecuta.</li><li><strong>Problema:</strong> Si un comando potencialmente peligroso (como find, vim, less o nmap) tiene activado el <em>bit</em> SUID y es propiedad de root, un usuario regular puede ejecutarlo para luego ejecutar comandos de root o incluso abrir una <em>shell</em> de root.</li><li><strong>Comando de Detección:</strong></li></ul>
+<pre><code>find / -type f -perm /4000 2&gt;/dev/null</code></pre>
+<h2>B. Fallas en el Kernel y Controladores (Vulnerabilidades)</h2>
+<p>Son las vulnerabilidades más críticas y a menudo las más difíciles de mitigar.</p>
+<ul><li><strong>Mecanismo:</strong> Un atacante explota un error (<em>bug</em>) o una debilidad de seguridad (<em>security flaw</em>) en el código fuente del <strong>Núcleo de Linux</strong> o en alguno de sus <strong>módulos/controladores</strong>.</li><li><strong>Resultado:</strong> Esto permite al atacante ejecutar código arbitrario con privilegios de <em>kernel</em> (que son equivalentes a los de root).</li><li><strong>Solución:</strong> Mantener el <em>kernel</em> y los paquetes del sistema <strong>siempre actualizados</strong>.</li></ul>
+<h2>C. Mala Configuración del sudo</h2>
+<p>El archivo <code>/etc/sudoers</code> define qué usuarios pueden ejecutar comandos como <em>root</em> y sin pedir contraseña.</p>
+<ul><li><strong>Mecanismo:</strong> Si un usuario regular tiene permiso para ejecutar un comando que puede ser usado para obtener una <em>shell</em> interactiva (como vi, less, awk, find, o utilidades de gestión de paquetes), puede explotar ese permiso para saltar a una <em>shell</em> de root.</li><li><strong>Ejemplo de Riesgo:</strong> Permitir a un usuario ejecutar solo <code>/usr/bin/find</code> como <em>sudo</em> le permite ejecutar sudo find / -exec <code>/bin/sh</code> \;, lo que le da una <em>shell</em> de root.</li></ul>
+<h2>D. Credenciales Almacenadas en Archivos (Hardcoded Credentials)</h2>
+<p>Ocurre a menudo en entornos de desarrollo o scripts mal escritos.</p>
+<ul><li><strong>Mecanismo:</strong> Un atacante encuentra contraseñas o claves de API codificadas (<em>hardcoded</em>) en archivos de configuración, <em>scripts</em> de <em>shell</em>, o variables de entorno que están accesibles para usuarios de bajo privilegio.</li><li><strong>Archivos típicos de búsqueda:</strong> <code>~/.bash_history</code>, archivos de configuración de bases de datos, <code>~/.ssh/</code>, o <em>scripts</em> en <code>/var/www/.</code></li></ul>
+<h2>4. Medios para Evitar la Escalada de Privilegios</h2>
+<p>La prevención de la escalada de privilegios se basa en una defensa en profundidad y una configuración estricta.</p>
+<h2>A. Actualización y Parcheo (La Defensa más Crítica)</h2>
+<ul><li><strong>Mantenimiento del Sistema Operativo y Kernel:</strong> Instala siempre los <strong>parches de seguridad</strong> y mantén el <em>kernel</em> y el <em>software</em> principal del sistema operativo al día. Esto mitiga las vulnerabilidades de tipo <strong>B</strong> (Fallas en el Kernel).</li><li><strong>Gestión de Paquetes:</strong> Utiliza herramientas como apt update &amp;&amp; apt upgrade (Debian/Ubuntu) o dnf upgrade (RHEL/Fedora) para garantizar que todas las aplicaciones críticas estén actualizadas.</li></ul>
+<h2>B. Gestión Estricta de Permisos</h2>
+<ul><li><strong>Minimizar SUID/SGID:</strong> Inspecciona el sistema regularmente y <strong>elimina el <em>bit</em> SUID/SGID</strong> de cualquier binario que no lo requiera absolutamente, especialmente comandos comunes como find o less.<ul><li><strong>Comando para remover:</strong></li></ul></li></ul>
+<pre><code>sudo chmod u-s /ruta/al/binario</code></pre>
+<ul><li><strong>Principio del Mínimo Privilegio (PoLP):</strong> Los usuarios y las aplicaciones deben tener <strong>solo los permisos estrictamente necesarios</strong> para realizar su trabajo.<ul><li><em>Ejemplo:</em> Un servidor web nunca debería ejecutarse como usuario root.</li></ul></li></ul>
+<h2>C. Configuración Segura de Sudo</h2>
+<ul><li><strong>Especificidad de Comandos:</strong> En el archivo <code>/etc/sudoers</code>, configura el acceso de <em>sudo</em> para que sea lo más específico posible. <strong>Nunca permitas a un usuario ejecutar <em>cualquier</em> comando (ALL)</strong> a menos que sea el administrador del sistema.</li><li><strong>Evitar <em>Shells</em>:</strong> Evita otorgar permisos de <em>sudo</em> a comandos que puedan ser abusados para abrir una <em>shell</em> de root (como vim, find, less, nmap con ciertas banderas, etc.).</li></ul>
+<h2>D. Endurecimiento del Sistema (Hardening)</h2>
+<ul><li><strong>SELinux/AppArmor:</strong> Habilita y configura un Módulo de Seguridad del Kernel (LSM) como <strong>SELinux</strong> (Security-Enhanced Linux) o <strong>AppArmor</strong>. Estos sistemas aplican <strong>control de acceso obligatorio (MAC)</strong> y restringen lo que incluso un proceso de root puede hacer, limitando el daño si ocurre una escalada.</li><li><strong>Contraseñas Fuertes:</strong> Aplica políticas de contraseñas complejas y asegúrate de que las credenciales no se almacenen en texto plano.</li><li><strong>Restricción de Historial:</strong> Configura el archivo <code>~/.bash_history</code> para evitar que se guarden ciertos comandos sensibles o que se limite su tamaño.</li></ul>
+<p>Configurar el archivo <strong><code>~/.bash_history</code></strong> para restringir o limitar los comandos guardados es crucial para la <strong>seguridad y la prevención de la escalada de privilegios</strong> en Linux.</p>
+<h2>Importancia de Restringir el Historial</h2>
+<p>El archivo <code>~/.bash_history</code> (o archivos similares para otras <em>shells</em> como <code>~/.zsh_history</code>) almacena una lista cronológica de todos los comandos que un usuario ha ejecutado.</p>
+<p>Su restricción es importante por las siguientes razones:</p>
+<ol><li><strong>Exposición de Credenciales y Datos Sensibles:</strong> Un atacante que logra acceder a una cuenta de bajo privilegio puede revisar el historial y encontrar comandos que revelen información confidencial, como:<ul><li>Contraseñas introducidas en la línea de comandos (aunque esto debe evitarse).</li><li>Claves de API, <em>tokens</em> o URLs con credenciales incrustadas.</li><li>Nombres de archivos sensibles, rutas ocultas, o IPs privadas.</li></ul></li><li><strong>Mapeo de la Red y el Sistema:</strong> El historial puede mostrarle a un atacante qué comandos de diagnóstico ejecutó el usuario (ip a, route, ls -la <code>/etc/</code>, etc.), lo que facilita al atacante el <strong>mapeo</strong> del sistema, encontrando puntos débiles o configuraciones incorrectas.</li><li><strong>Prevención de Pasos:</strong> Si un atacante no puede ver cómo se realizaron tareas administrativas específicas, se vuelve más difícil replicar la acción o revertir medidas de seguridad.</li></ol>
+<h2>Ejemplo Práctico de Configuración</h2>
+<p>Puedes limitar el tamaño y la duración del historial de <em>bash</em> modificando variables de entorno en el archivo <strong><code>~/.bashrc</code></strong>.</p>
+<h2>1. Limitar el Tamaño del Historial</h2>
+<p>Para reducir la cantidad de comandos que se almacenan (por defecto, suele ser 1000):</p>
+<div class="tabla"><table><thead><tr><th><strong>Variable</strong></th><th><strong>Valor Sugerido</strong></th><th><strong>Propósito</strong></th></tr></thead><tbody><tr><td><strong>HISTSIZE</strong></td><td>2000</td><td>Define el <strong>número máximo de comandos</strong> que se mantendrán en la memoria durante la sesión actual.</td></tr><tr><td><strong>HISTFILESIZE</strong></td><td>4000</td><td>Define el <strong>número máximo de líneas</strong> en el archivo <code>~/.bash_history</code> en disco.</td></tr></tbody></table></div>
+<h2>Ejemplo a añadir en ~/.bashrc:</h2>
+<p># Limita la memoria del historial de la sesión a 2000 comandos</p>
+<pre><code>export HISTSIZE=2000
+# Limita el archivo en disco a 4000 líneas
+export HISTFILESIZE=4000</code></pre>
+<h2>2. Evitar Guardar Comandos Sensibles</h2>
+<p>Puedes configurar bash para ignorar comandos que comienzan con un espacio, lo que te permite ejecutar comandos sensibles sin que queden registrados.</p>
+<div class="tabla"><table><thead><tr><th><strong>Variable</strong></th><th><strong>Valor</strong></th><th><strong>Propósito</strong></th></tr></thead><tbody><tr><td><strong>HISTCONTROL</strong></td><td>ignorespace</td><td>Evita que se guarden los comandos que empiezan con un espacio.</td></tr></tbody></table></div>
+<h2>Ejemplo a añadir en ~/.bashrc:</h2>
+<p># Permite al usuario iniciar comandos con un espacio para evitar registrarlos</p>
+<pre><code>export HISTCONTROL=ignorespace</code></pre>
+<h2>Uso práctico (para el usuario):</h2>
+<p>Si un usuario necesita cambiar una contraseña, puede escribir un espacio antes del comando para evitar que el <em>password</em> (si estuviera visible) se almacene en el historial:</p>
+<ul><li><strong>Comando visible en el historial:</strong></li></ul>
+<pre><code>ssh user@192.168.1.1</code></pre>
+<ul><li><strong>Comando NO visible en el historial:</strong></li></ul>
+<p><code>ssh user@192.168.1.1</code> (observa el espacio antes de ssh)</p>
+<p>Después de modificar <code>~/.bashrc</code>, el usuario debe ejecutar source <code>~/.bashrc</code> o iniciar una nueva sesión para que los cambios surtan efecto.</p>
+<h2>E. Monitorización y Detección</h2>
+<ul><li><strong>Auditoría de Registros (Logs):</strong> Configura y revisa regularmente los registros de auditoría del sistema (como <code>/var/log/auth.log</code> o journalctl). Busca intentos fallidos de su o sudo, o actividad inusual de archivos SUID.</li><li><strong>Herramientas de Detección:</strong> Utiliza herramientas de monitoreo como <strong>Tripwire</strong> o <strong>AIDE</strong> para monitorizar la integridad de los archivos. Estas herramientas alertan si archivos críticos del sistema (especialmente binarios con SUID) son modificados.</li></ul>

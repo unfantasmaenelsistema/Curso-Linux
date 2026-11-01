@@ -1,0 +1,195 @@
+<pre><code>cat , less , more , head , y tail</code></pre>
+<h2>Preparación del Entorno de Ejemplo</h2>
+<p>Antes de comenzar, vamos a simular que el usuario jose ha creado un archivo de texto llamado <strong>informe.log</strong> en su directorio personal (<code>/home/jose/</code>) con el siguiente contenido, el cual utilizaremos en todos los ejemplos.</p>
+<pre><code># Contenido del archivo /home/jose/informe.log
+nano /home/jose/informe.log</code></pre>
+<p>Inicio del sistema a las 08:00:00</p>
+<p>Carga de módulos de red exitosa.</p>
+<p>Conexión a la base de datos establecida.</p>
+<p>Tarea programada (backup.sh) iniciada.</p>
+<p>[ERROR] Fallo al escribir en disco: Permiso denegado.</p>
+<p>Reintentando la operación de escritura...</p>
+<p>Tarea programada (backup.sh) finalizada con errores.</p>
+<p>Uso de CPU: 45%.</p>
+<p>Uso de RAM: 60%.</p>
+<p>Limpieza de archivos temporales.</p>
+<p>Usuario 'maria' ha iniciado sesión.</p>
+<p>Usuario 'pedro' ha iniciado sesión.</p>
+<p>[AVISO] Memoria disponible baja (10%).</p>
+<p>Monitoreando el rendimiento del sistema.</p>
+<p>Fin del informe diario.</p>
+<h2>1. Comando cat (Concatenate)</h2>
+<p>El comando <strong>cat</strong> (de <em>concatenate</em>, concatenar) es la forma más simple y común de mostrar el contenido completo de uno o más archivos en la salida estándar (la pantalla).</p>
+<div class="tabla"><table><thead><tr><th><strong>Opción Común</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-n</td><td>Numera todas las líneas de salida.</td></tr><tr><td>&gt;</td><td>Redirige la salida a un nuevo archivo (crea o sobrescribe).</td></tr><tr><td>&gt;&gt;</td><td>Añade la salida al final de un archivo existente.</td></tr></tbody></table></div>
+<h2>Ejemplos Prácticos con cat</h2>
+<div class="tabla"><table><thead><tr><th><strong>Tarea</strong></th><th><strong>Comando Ejecutado por jose en Ubuntu 24.04</strong></th><th><strong>Explicación</strong></th></tr></thead><tbody><tr><td><strong>Ver todo el contenido</strong></td><td><code>cat informe.log</code></td><td>Muestra el contenido completo de informe.log de golpe.</td></tr><tr><td><strong>Ver contenido con numeración</strong></td><td><code>cat -n informe.log</code></td><td>Muestra el archivo informe.log, anteponiendo el número de línea a cada una.</td></tr><tr><td><strong>Crear un nuevo archivo</strong></td><td>cat &gt; nuevo_archivo.txt (y luego escribir y pulsar <strong>Ctrl+D</strong>)</td><td><strong>cat</strong> espera la entrada del teclado, y al pulsar <strong>Ctrl+D</strong> guarda lo escrito en nuevo_archivo.txt.</td></tr><tr><td><strong>Concatenar y añadir</strong></td><td><code>cat informe.log &gt;&gt; informe_completo.log</code></td><td>Agrega el contenido de informe.log al final de informe_completo.log (o lo crea si no existe).</td></tr></tbody></table></div>
+<h2>2. Comando less</h2>
+<p><strong>less</strong> es un paginador de archivos muy avanzado. Es la mejor opción para <strong>ver archivos grandes</strong>, ya que carga el archivo por partes, permitiendo navegar hacia adelante y hacia atrás, y buscar texto de forma eficiente.</p>
+<h2>Comandos de Navegación Clave en less</h2>
+<div class="tabla"><table><thead><tr><th><strong>Comando</strong></th><th><strong>Acción</strong></th></tr></thead><tbody><tr><td>(Arriba/Abajo)</td><td>Desplazamiento línea a línea.</td></tr><tr><td><strong>Espacio</strong> o <strong>f</strong></td><td>Avanza una pantalla (página) completa.</td></tr><tr><td><strong>b</strong> o <strong>Ctrl + B</strong></td><td>Retrocede una pantalla (página) completa.</td></tr><tr><td>g</td><td>Ir al inicio del archivo.</td></tr><tr><td>G</td><td>Ir al final del archivo.</td></tr><tr><td><code>/patrón</code></td><td>Buscar hacia adelante el texto "patrón". Pulsa para la siguiente coincidencia.</td></tr><tr><td>?patrón</td><td>Buscar hacia atrás el texto "patrón".</td></tr><tr><td>q</td><td>Salir de less.</td></tr></tbody></table></div>
+<h2>Ejemplo Práctico con less</h2>
+<div class="tabla"><table><thead><tr><th><strong>Tarea</strong></th><th><strong>Comando Ejecutado por jose</strong></th><th><strong>Resultado y Uso</strong></th></tr></thead><tbody><tr><td><strong>Visualizar un archivo grande</strong></td><td><code>less informe.log</code></td><td>Abre el archivo en el visor. Dentro de less, presiona / y escribe <strong><code>/ERROR</code></strong> para buscar el error, luego <strong>n</strong> para repetir la búsqueda, y finalmente <strong>q</strong> para salir.</td></tr></tbody></table></div>
+<h2>3. Comando more</h2>
+<p><strong>more</strong> es un paginador más antiguo y simple que less. Muestra el contenido del archivo pantalla por pantalla, pero <strong>no permite navegar hacia atrás</strong> de forma sencilla (una vez que pasas una pantalla, no puedes volver). Es menos flexible que less.</p>
+<h2>Comandos de Navegación Clave en more</h2>
+<div class="tabla"><table><thead><tr><th><strong>Comando</strong></th><th><strong>Acción</strong></th></tr></thead><tbody><tr><td>espacio</td><td>Avanza a la siguiente pantalla (página).</td></tr><tr><td>enter</td><td>Avanza una línea.</td></tr><tr><td>q</td><td>Salir de more.</td></tr></tbody></table></div>
+<h2>Ejemplo Práctico con more</h2>
+<div class="tabla"><table><thead><tr><th>Tarea</th><th>Comando Ejecutado por jose</th><th>Resultado y Uso</th></tr></thead><tbody><tr><td><strong>Visualizar el archivo (limitado)</strong></td><td><code>more informe.log</code></td><td>Muestra la primera pantalla del archivo. Presiona la <strong>barra espaciadora</strong> para ver la siguiente pantalla, y <strong>q</strong> para salir.</td></tr></tbody></table></div>
+<h2>4. Comando head</h2>
+<p>El comando <strong>head</strong> muestra, por defecto, las <strong>primeras 10 líneas</strong> de un archivo de texto. Es muy útil para hacer una inspección rápida del comienzo de un archivo, como un <em>log</em> o un archivo de configuración.</p>
+<div class="tabla"><table><thead><tr><th><strong>Opción Común</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-n K</td><td>Muestra las <strong>K</strong> primeras líneas del archivo.</td></tr><tr><td>-c K</td><td>Muestra los <strong>K</strong> primeros <em>bytes</em> del archivo.</td></tr></tbody></table></div>
+<h2>Ejemplos Prácticos con head</h2>
+<div class="tabla"><table><thead><tr><th><strong>Tarea</strong></th><th><strong>Comando Ejecutado por jose</strong></th><th><strong>Explicación</strong></th></tr></thead><tbody><tr><td><strong>Ver las 10 primeras líneas</strong></td><td><code>head informe.log</code></td><td>Muestra las líneas 1 a 10 del archivo.</td></tr><tr><td><strong>Ver las 5 primeras líneas</strong></td><td><code>head -n 5 informe.log</code></td><td>Muestra solo las líneas 1 a 5, para revisar el inicio de un <em>log</em>.</td></tr><tr><td><strong>Ver los primeros 50 bytes</strong></td><td><code>head -c 50 informe.log</code></td><td>Muestra los primeros 50 caracteres/bytes del archivo.</td></tr></tbody></table></div>
+<h2>5. Comando tail</h2>
+<p>El comando <strong>tail</strong> muestra, por defecto, las <strong>últimas 10 líneas</strong> de un archivo. Es crucial para ver la actividad más reciente en archivos de <em>log</em>.</p>
+<div class="tabla"><table><thead><tr><th><strong>Opción Común</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-n K</td><td>Muestra las <strong>K</strong> últimas líneas del archivo.</td></tr><tr><td>-f</td><td><strong>Modo de seguimiento</strong> (<em>follow</em>): Muestra las últimas líneas y se queda esperando a que se añadan nuevas líneas al archivo (ideal para logs en tiempo real).</td></tr><tr><td>-F</td><td>Similar a -f, pero también reabre el archivo si ha sido renombrado o rotado (más robusto para <em>logs</em>).</td></tr></tbody></table></div>
+<h2>Ejemplos Prácticos con tail</h2>
+<div class="tabla"><table><thead><tr><th><strong>Tarea</strong></th><th><strong>Comando Ejecutado por jose</strong></th><th><strong>Explicación</strong></th></tr></thead><tbody><tr><td><strong>Ver las 10 últimas líneas</strong></td><td><code>tail informe.log</code></td><td>Muestra las líneas 6 a 15 del archivo (las 10 últimas).</td></tr><tr><td><strong>Ver las 3 últimas líneas</strong></td><td><code>tail -n 3 informe.log</code></td><td>Muestra solo las líneas 13, 14 y 15 (las tres últimas).</td></tr><tr><td><strong>Monitoreo en tiempo real (Crucial)</strong></td><td><code>tail -f informe.log</code></td><td>Muestra las últimas líneas del log y se queda abierto, actualizando la pantalla cuando se escribe nueva información en el archivo. Usa <strong>Ctrl+C</strong> para detener el monitoreo.</td></tr><tr><td><strong>Combinar con head (Ver un rango)</strong></td><td><code>cat informe.log | head -n 10 | tail -n 3</code></td><td>Primero muestra todo el archivo (cat), luego toma las primeras 10 líneas (head), y de esas 10, muestra las últimas 3 (es decir, las líneas 8, 9 y 10 del archivo original).</td></tr></tbody></table></div>
+<pre><code>echo "Nueva entrada de log a las 10:45:00" &gt;&gt; /home/jose/informe.log</code></pre>
+<h2>Ejercicios:</h2>
+<h2>Guía práctica: Visualización y lectura de archivos en Linux</h2>
+<p>Usuario: jose</p>
+<p>Sistema operativo: Ubuntu 24.04</p>
+<p>Ruta base de trabajo: <code>/home/jose/documentos/</code></p>
+<h2>1. Comando cat — Concatenar y mostrar el contenido de archivos</h2>
+<p>El comando cat (de <em>concatenate</em>) se utiliza para <strong>mostrar el contenido de archivos</strong> de texto, <strong>unir varios archivos</strong>, o incluso <strong>crear nuevos</strong>.</p>
+<pre><code>cat &lt;&lt; EOF &gt; /home/jose/notas.txt</code></pre>
+<h2>==================================================</h2>
+<pre><code>DOCUMENTO DE PRUEBA Y NAVEGACIÓN</code></pre>
+<h2>==================================================</h2>
+<h2>Sección A: Introducción</h2>
+<h2>--------------------------------------------------</h2>
+<p><strong>Esta es la primera sección del archivo de notas. Es una línea corta.</strong></p>
+<p><strong>El término CLAVE-1 se repite aquí.</strong></p>
+<p><strong>La búsqueda de texto debe comenzar por el inicio de esta sección.</strong></p>
+<p><strong>Hay un total de 20 líneas vacías después de esta frase.</strong></p>
+<pre><code>&lt;AQUÍ HAY 20 LÍNEAS VACÍAS PARA SIMULAR UN DESPLAZAMIENTO DE PÁGINA&gt;</code></pre>
+<h2>Sección B: Tareas Pendientes (Clave)</h2>
+<h2>--------------------------------------------------</h2>
+<p><strong>NOTA: Recordatorio de la reunión a las 14:00.</strong></p>
+<p><strong>Pendiente: Revisar la configuración de seguridad del servidor web.</strong></p>
+<p><strong>El error de la CLAVE-1 fue corregido en el código.</strong></p>
+<p><strong>Otra tarea pendiente es documentar el proceso.</strong></p>
+<p><strong>Buscaremos CLAVE-2.</strong></p>
+<pre><code>&lt;AQUÍ HAY 5 LÍNEAS VACÍAS&gt;</code></pre>
+<h2>Sección C: Desarrollo y Errores</h2>
+<h2>--------------------------------------------------</h2>
+<p><strong>[ERROR] Fallo en la compilación del módulo X.</strong></p>
+<p><strong>Analizar el código para encontrar la CLAVE-2.</strong></p>
+<p><strong>La función de búsqueda debe ser probada.</strong></p>
+<p><strong>CLAVE-3.</strong></p>
+<p><strong>[AVISO] Rendimiento del servidor bajo.</strong></p>
+<p><strong>El texto CLAVE-1 sigue siendo importante.</strong></p>
+<p><strong>CLAVE-2 aparece de nuevo.</strong></p>
+<pre><code>&lt;AQUÍ HAY 10 LÍNEAS VACÍAS&gt;</code></pre>
+<p><strong>Fin del documento.</strong></p>
+<h2>==================================================</h2>
+<h2>EOF</h2>
+<h2>Sintaxis básica</h2>
+<pre><code>cat [opciones] [archivo...]</code></pre>
+<h2>Ejemplos prácticos</h2>
+<h2>1.1. Mostrar el contenido completo de un archivo</h2>
+<pre><code>cat notas.txt</code></pre>
+<p>Muestra el contenido de notas.txt directamente en la terminal.</p>
+<h2>1.2. Mostrar el contenido con numeración de líneas</h2>
+<pre><code>cat -n notas.txt</code></pre>
+<p>Numera cada línea del archivo, útil para depuración o revisión.</p>
+<h2>1.3. Unir varios archivos en uno solo</h2>
+<pre><code>nano /home/jose/parte1.txt
+
+# Archivo 1: parte1.txt</code></pre>
+<p>Título: Reporte de Pruebas Diarias</p>
+<p>Tareas completadas:</p>
+<p>- Configuración de la red.</p>
+<p>- Revisión de logs (sin errores críticos).</p>
+<pre><code>nano /home/jose/parte2.txt
+
+# Archivo 2: parte2.txt</code></pre>
+<p>Resultados Pendientes:</p>
+<p>- Falta la auditoría de seguridad.</p>
+<p>- Pendiente: parchear el servidor principal.</p>
+<p>Fin del reporte.</p>
+<pre><code>cat parte1.txt parte2.txt &gt; completo.txt</code></pre>
+<p>Combina parte1.txt y parte2.txt en un nuevo archivo completo.txt.</p>
+<h2>1.4. Agregar contenido al final de un archivo existente</h2>
+<pre><code>cat resumen.txt &gt;&gt; completo.txt</code></pre>
+<p>Añade el contenido de resumen.txt al final de completo.txt.</p>
+<h2>1.5. Crear un archivo de texto rápidamente</h2>
+<pre><code>cat &gt; lista.txt
+Pan
+Leche
+Huevos
+Ctrl+D</code></pre>
+<p>Crea lista.txt con el texto que escribas hasta pulsar <strong>Ctrl + D</strong>.</p>
+<h2>2. Comando less — Visualización paginada avanzada</h2>
+<p>less permite <strong>navegar por el contenido</strong> de archivos grandes de forma cómoda, sin cargarlos completamente en memoria.</p>
+<h2>Sintaxis</h2>
+<pre><code>less [opciones] [archivo]</code></pre>
+<h2>Ejemplos prácticos</h2>
+<h2>2.1. Leer un archivo largo</h2>
+<pre><code>less /var/log/syslog</code></pre>
+<p>Permite moverse por el archivo con las teclas:</p>
+<ul><li><strong>Espacio</strong> → página siguiente</li><li><strong>b</strong> → página anterior</li><li><strong>q</strong> → salir</li><li><strong><code>/palabra</code></strong> → buscar palabra hacia adelante</li><li><strong>n</strong> → siguiente coincidencia</li></ul>
+<h2>2.2. Mostrar numeración de líneas</h2>
+<pre><code>less -N /etc/passwd</code></pre>
+<p>Muestra el número de línea en el margen izquierdo.</p>
+<h2>2.3. Comprimir tuberías con otros comandos</h2>
+<pre><code>sudo dmesg | less</code></pre>
+<p>Visualiza la salida del comando dmesg de forma paginada.</p>
+<h2>3. Comando more — Visualización paginada simple</h2>
+<p>more fue el precursor de less. Sirve para <strong>leer archivos por páginas</strong>, aunque con menos funciones.</p>
+<h2>Sintaxis</h2>
+<pre><code>more [archivo]</code></pre>
+<h2>Ejemplos prácticos</h2>
+<h2>3.1. Leer un archivo con avance por pantalla</h2>
+<pre><code>more completo.txt</code></pre>
+<p>Avanza con la <strong>barra espaciadora</strong> y retrocede con <strong>b</strong> (limitado).</p>
+<h2>3.2. Mostrar el archivo con número de líneas</h2>
+<pre><code>more -d completo.txt</code></pre>
+<p>Muestra mensajes útiles como “—Más— (Espacio: siguiente, q: salir)”.</p>
+<h2>3.3. Usar more en una tubería</h2>
+<pre><code>cat /etc/services | more</code></pre>
+<p>Visualiza el contenido largo de cat con paginación.</p>
+<h2>4. Comando head — Ver las primeras líneas de un archivo</h2>
+<p>head se usa para mostrar <strong>las primeras líneas</strong> de un archivo de texto. Por defecto, muestra las <strong>10 primeras</strong>.</p>
+<h2>Sintaxis</h2>
+<pre><code>head [opciones] [archivo]</code></pre>
+<h2>Ejemplos prácticos</h2>
+<h2>4.1. Mostrar las 10 primeras líneas</h2>
+<pre><code>head informe.log</code></pre>
+<h2>4.2. Mostrar las primeras 5 líneas</h2>
+<pre><code>head -n 5 informe.log</code></pre>
+<h2>4.3. Usar con varios archivos</h2>
+<pre><code>head -n 3 parte1.txt parte2.txt</code></pre>
+<p>Indica el nombre del archivo antes de mostrar sus primeras líneas.</p>
+<h2>4.4. Ver las primeras líneas de un comando</h2>
+<pre><code>ps aux | head -n 10</code></pre>
+<p>Muestra solo las 10 primeras líneas de la lista de procesos activos.</p>
+<h2>5. Comando tail — Ver las últimas líneas de un archivo</h2>
+<p>tail permite ver <strong>las últimas líneas</strong> de un archivo o <strong>seguirlo en tiempo real</strong> (muy útil con logs).</p>
+<h2>Sintaxis</h2>
+<pre><code>tail [opciones] [archivo]</code></pre>
+<h2>Ejemplos prácticos</h2>
+<h2>5.1. Mostrar las últimas 10 líneas</h2>
+<pre><code>tail informe.log</code></pre>
+<h2>5.2. Mostrar las últimas 20 líneas</h2>
+<pre><code>tail -n 14 informe.log</code></pre>
+<h2>5.3. Seguir un archivo en tiempo real</h2>
+<pre><code>tail -f /var/log/syslog</code></pre>
+<p>Muestra nuevas líneas a medida que se agregan (útil para monitorear logs).</p>
+<h2>5.4. Seguir varios archivos a la vez</h2>
+<pre><code>tail -f /var/log/syslog /var/log/auth.log</code></pre>
+<p>Muestra en vivo los eventos de ambos archivos.</p>
+<h2>5.5. Ver las últimas líneas de un comando</h2>
+<pre><code>sudo dmesg | tail -n 15</code></pre>
+<p>Muestra solo las últimas 15 líneas del resultado del comando dmesg.</p>
+<h2>Resumen</h2>
+<div class="tabla"><table><thead><tr><th><strong>Comando</strong></th><th><strong>Propósito principal</strong></th><th><strong>Características clave</strong></th></tr></thead><tbody><tr><td><code>cat</code></td><td>Mostrar o unir archivos</td><td>Rápido, sin paginación</td></tr><tr><td><code>less</code></td><td>Leer archivos largos</td><td>Navegación avanzada, búsquedas</td></tr><tr><td><code>more</code></td><td>Leer archivos largos</td><td>Paginación básica</td></tr><tr><td><code>head</code></td><td>Ver inicio de un archivo</td><td>Muestra primeras líneas</td></tr><tr><td><code>tail</code></td><td>Ver final de un archivo</td><td>Muestra o sigue últimas líneas</td></tr></tbody></table></div>
+<h2>Ejercicio práctico sugerido</h2>
+<p>Crea una carpeta de práctica:</p>
+<pre><code>mkdir /home/usuario/documentos/lectura
+cd /home/usuario/documentos/lectura</code></pre>
+<p>Luego:</p>
+<ol><li>Crea tres archivos (cat &gt; archivo1.txt, etc.) con contenido diferente.</li><li>Usa cada comando (cat, less, more, head, tail) para explorarlos.</li><li>Prueba tuberías como:</li><li><code>cat archivo1.txt archivo2.txt | less</code></li></ol>
+<p>o</p>
+<pre><code>tail -f registro.log</code></pre>
