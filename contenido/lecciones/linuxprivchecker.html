@@ -1,0 +1,48 @@
+<h2>Un script de verificación de escalamiento de privilegios de Linux</h2>
+<p>Este script está destinado a ser ejecutado localmente en una caja Linux para enumerar información básica del sistema y Búsqueda de vectores de escalada de privilegios comunes como archivos de escritura mundial, configuraciones erróneas, texto claro Contraseñas y exploits aplicables.</p>
+<p>Linuxprivchecker está diseñado para identificar áreas potenciales para investigar más a fondo, no proporcionar acción directa o explotación. Esto es para ayudar a los usuarios a aprender más cómo funcionan estas escaladas de privilegios y mantenerlo en línea con las reglas, Para la explotación autodirigida, establecido para el OSCP, HTB y otros CTF/exámenes.</p>
+<h2>Ejecución en el sistema Legacy Python 2.6/2.7</h2>
+<p>Para ejecutar en los sistemas python &gt;2.6 heredados, solo tiene que obtener el script de Python todo en uno y ejecutarlo.</p>
+<pre><code>wget https://raw.githubusercontent.com/sleventyeleven/linuxprivchecker/master/linuxprivchecker.py
+python linuxprivchecker.py -w -o linuxprivchecker.log</code></pre>
+<h2>Ejecutar en Current Python 3. Sistema X (Beta)</h2>
+<p>En este momento Linuxprivchecker para python 3. X debe considerarse una versión beta estable. Los problemas pueden ocurrir con el script y ciertamente puede perder posibles vulnerabilidades</p>
+<h2>Paso 1: Instalar pipx</h2>
+<p>Si aún no lo tienes, instálalo:</p>
+<pre><code>sudo apt update
+sudo apt install pipx -y
+pipx ensurepath</code></pre>
+<h2>Paso 2: Instalar LinuxPrivChecker con pipx</h2>
+<p>Una vez que pipx esté configurado, puedes instalar la aplicación directamente. pipx se encargará de crear y gestionar el entorno virtual por ti.</p>
+<pre><code>pipx install linuxprivchecker</code></pre>
+<h2>Paso 3: Ejecutar la Herramienta</h2>
+<p>Una vez instalado, el comando linuxprivchecker debería estar disponible directamente en tu terminal.</p>
+<pre><code>source ~/.bashrc
+sudo linuxprivchecker</code></pre>
+<figure><img src="../media/linuxprivchecker/imagen1.webp" width="888" height="543" alt="Captura 1 de la lección «Linuxprivchecker»" loading="lazy" decoding="async"></figure>
+<h2>Opciones de comando y argumentos</h2>
+<p>Esta herramienta, aunque es un <em>script</em> simple de Python, es fundamental para la fase de <strong>enumeración local</strong> en un sistema Linux. Su objetivo principal es automatizar la búsqueda de los errores de configuración más comunes que permiten la <strong>escalada de privilegios</strong> (pasar de un usuario de bajo nivel a <em>root</em>).</p>
+<h2>1. Sintaxis Básica y Opciones</h2>
+<p>El uso más común (y recomendado) es ejecutarlo con sudo para que pueda acceder a archivos protegidos y obtener una vista completa del sistema:</p>
+<div class="tabla"><table><thead><tr><th><strong>Comando</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td><code>sudo linuxprivchecker</code></td><td><strong>Uso estándar.</strong> Ejecuta el escaneo completo en modo interactivo y genera la salida directamente en la terminal.</td></tr><tr><td>linuxprivchecker</td><td>Ejecuta el escaneo con los permisos del usuario actual. Solo devolverá información accesible por ese usuario, lo cual es útil para simular un atacante sin privilegios.</td></tr></tbody></table></div>
+<h2>2. Opciones Útiles (Parámetros)</h2>
+<p>Aunque LinuxPrivChecker es bastante simple y no tiene una gran cantidad de argumentos, puedes usar estas opciones básicas de Python para modificar la ejecución:</p>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Comando de Ejecución</strong></th><th><strong>Función</strong></th></tr></thead><tbody><tr><td><strong>Ayuda</strong></td><td>linuxprivchecker -h</td><td>Muestra un breve resumen de las opciones disponibles y la sintaxis.</td></tr><tr><td><strong>Redirección a Archivo</strong></td><td><em>sudo linuxprivchecker &gt; <code>/tmp/reporte.txt</code></em></td><td><strong>Crucial:</strong> Redirige toda la salida (el informe) a un archivo de texto para su análisis posterior. Esto es fundamental para el análisis forense y la documentación.</td></tr><tr><td><strong>Ejecución Lenta</strong></td><td><code>sudo python3 linuxprivchecker.py</code></td><td>Si la versión pipx da problemas, puedes ejecutar el archivo python directamente si lo clonaste, lo cual es útil para depuración.</td></tr></tbody></table></div>
+<p>La forma más segura y rápida de ejecutar una herramienta instalada por un usuario con sudo es decirle a sudo la <strong>ruta exacta</strong> donde se encuentra el ejecutable:</p>
+<pre><code>sudo /home/feval/.local/bin/linuxprivchecker &gt; /tmp/reporte.txt</code></pre>
+<h2>3. Flujo de Trabajo y Análisis del Informe</h2>
+<p>El informe generado por LinuxPrivChecker se divide en secciones que analizan diferentes vectores de ataque. El objetivo no es solo ver la salida, sino saber qué buscar.</p>
+<h2>A. Información del Sistema y del Kernel</h2>
+<ul><li><strong>Busca:</strong> Versión del Kernel (uname -a), Distribución, y Arquitectura.</li><li><strong>Significado:</strong> Si detecta un Kernel antiguo o una versión que ha sido marcada como vulnerable, indicará automáticamente el <strong>CVE</strong> (Common Vulnerabilities and Exposures) correspondiente, lo que sugiere un ataque conocido de explotación del Kernel.</li></ul>
+<h2>B. Usuarios, Grupos y Privilegios Sudo</h2>
+<ul><li><strong>Busca:</strong> Usuarios con UID 0 (root), miembros del grupo sudo o wheel, y configuraciones débiles en <code>/etc/sudoers</code>.</li><li><strong>Significado:</strong> Revela qué usuarios tienen más poder y qué comandos pueden ejecutar sin contraseña. La herramienta destaca especialmente las líneas en <code>/etc/sudoers</code> que permiten a un usuario ejecutar un comando peligroso como find, vim, o nmap con sudo, lo cual se puede explotar fácilmente para obtener un <em>shell</em> de <em>root</em>.</li></ul>
+<h2>C. Servicios y Procesos</h2>
+<ul><li><strong>Busca:</strong> Procesos en ejecución con privilegios de root (ps aux), servicios inusuales, y archivos de configuración sensibles.</li><li><strong>Significado:</strong> Un proceso ejecutándose como <em>root</em> que tiene una versión vulnerable o una configuración incorrecta es un objetivo directo para la explotación.</li></ul>
+<h2>D. Archivos y Permisos (El Punto Débil Común)</h2>
+<p>Esta es la sección más importante para la escalada de privilegios en Linux.</p>
+<div class="tabla"><table><thead><tr><th><strong>Vector de Ataque</strong></th><th><strong>Archivos a Revisar</strong></th><th><strong>Potencial de Escalada</strong></th></tr></thead><tbody><tr><td><strong>Archivos SUID/SGID</strong></td><td>Archivos con los <em>bits</em> SUID/SGID establecidos (ej. <code>/usr/bin/find</code>, <code>/usr/bin/nmap</code>).</td><td>Un binario con SUID permite a cualquier usuario ejecutarlo con los permisos del dueño (si el dueño es root, ¡el usuario se convierte en <em>root</em>!). La herramienta lista binarios SUID peligrosos.</td></tr><tr><td><strong>Archivos de Configuración Escribibles</strong></td><td><em>Scripts</em> de servicio (<code>/etc/init.d/</code>) o archivos de <em>cron</em> que el usuario actual puede modificar.</td><td>Si puedes modificar un <em>script</em> que se ejecuta como <em>root</em> (ej. al reiniciar un servicio), puedes añadir código malicioso para obtener un <em>shell</em> de <em>root</em>.</td></tr><tr><td><strong>Contraseñas Almacenadas</strong></td><td>Archivos de configuración o <em>scripts</em> que contienen contraseñas codificadas o en texto plano.</td><td>Permite saltarse la autenticación o acceder a otros servicios con los credenciales del administrador.</td></tr></tbody></table></div>
+<h2>E. Entorno y Variables</h2>
+<ul><li><strong>Busca:</strong> Variables de entorno sensibles (como LD_PRELOAD) y <em>paths</em> débiles.</li><li><strong>Significado:</strong> Algunas vulnerabilidades de escalada de privilegios se basan en manipular las librerías que carga un programa o las rutas de búsqueda para inyectar código malicioso.</li></ul>
+<h2>4. Estrategia de Hardening (Mejoras de Seguridad)</h2>
+<p>Una vez que tengas el informe, tu misión será corregir cada punto de riesgo.</p>
+<ol><li><strong>Vulnerabilidades del Kernel:</strong> Si se detecta un CVE, <strong>actualiza el sistema operativo inmediatamente</strong> (sudo apt update &amp;&amp; sudo apt upgrade).</li><li><strong>Archivos SUID/SGID:</strong> <strong>Elimina el <em>bit</em> SUID</strong> de binarios que no lo necesiten de forma crítica (ej. sudo chmod u-s <code>/usr/bin/find</code>).</li><li><strong>Archivos Escribibles:</strong> Restringe los permisos de escritura a archivos sensibles (<code>/etc/passwd</code>, <em>scripts</em> de <em>cron</em>, archivos de configuración de servicios) para que solo <em>root</em> pueda modificarlos (sudo chmod 600 &lt;archivo&gt;).</li><li><strong>Limpieza:</strong> Elimina cuentas de usuario innecesarias y cualquier <em>script</em> de <em>cron</em> que se ejecute como <em>root</em> pero que no sea esencial.</li><li><strong>Políticas Sudoers:</strong> Asegúrate de que las reglas de sudoers sean lo más estrictas posible, evitando la directiva NOPASSWD y permitiendo solo comandos específicos.</li></ol>

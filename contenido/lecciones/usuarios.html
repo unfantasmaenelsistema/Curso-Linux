@@ -1,0 +1,275 @@
+<h2>1) Conceptos clave</h2>
+<ul><li><strong>Usuarios</strong> → cada persona/proceso en el sistema necesita una cuenta.</li><li><strong>Grupos</strong> → conjunto de usuarios, útil para permisos compartidos.</li><li><strong>Permisos</strong> → controlan lectura/escritura/ejecución de archivos.</li><li><strong>Propietario y grupo</strong> → cada archivo pertenece a un usuario y a un grupo.</li><li><strong>sudo</strong> → permite a un usuario ejecutar comandos como root (administrador).</li></ul>
+<p>El comando principal es <strong>useradd</strong>, pero se recomienda usar <strong>adduser</strong> en sistemas basados en Debian/Ubuntu, ya que es una <em>envoltura</em> que realiza varias tareas automáticamente.</p>
+<pre><code>sudo adduser juan
+su - juan</code></pre>
+<h2>2) Crear usuarios y grupos</h2>
+<h2>Crear usuario básico</h2>
+<pre><code># crear usuario 'ana'
+sudo useradd -m ana
+# -m crea automáticamente su directorio /home/ana
+cat /etc/passwd</code></pre>
+<h2>Asignar contraseña</h2>
+<pre><code>sudo passwd ana</code></pre>
+<h2>Crear usuario con comentarios, shell y grupo inicial</h2>
+<pre><code>sudo useradd -m -c "Ana López" -s /bin/bash -g usuarios ana</code></pre>
+<p>La diferencia entre las dos formas de crear el usuario está en <strong>qué valores por defecto usa useradd</strong> cuando no le indicas opciones adicionales.</p>
+<h2>Comportamiento de useradd en Ubuntu</h2>
+<ul><li>Cuando ejecutas:</li></ul>
+<pre><code>sudo useradd -m ana</code></pre>
+<p>lo único que le estás diciendo es:</p>
+<ul><li><strong>-m</strong> → crea el directorio <code>/home/ana</code>.</li><li>El resto (shell, grupo, comentario, etc.) se toman de la configuración por defecto en <code>/etc/default/useradd</code> y <code>/etc/login.defs</code>.</li></ul>
+<p>En Ubuntu, el shell por defecto de useradd suele ser <code>/bin/sh</code> (que en realidad apunta a dash), no <code>/bin/bash</code>.</p>
+<p>Por eso, si luego haces:</p>
+<pre><code>getent passwd ana</code></pre>
+<p>verás algo como:</p>
+<pre><code>ana:x:1001:1001::/home/ana:/bin/sh</code></pre>
+<h2>Cómo darle bash desde el principio</h2>
+<p>Si quieres que el usuario tenga <strong>bash</strong> como shell de login, debes especificarlo con -s:</p>
+<pre><code>sudo useradd -m -s /bin/bash ana</code></pre>
+<h2>Si ya lo tenemos creado</h2>
+<p>Creaste el usuario <strong>ana</strong> correctamente con useradd -m ana.</p>
+<p>Para asignarle <strong>Bash</strong> como su <em>shell</em> predeterminado, tienes dos métodos principales, siendo el primero el más directo y común:</p>
+<h2>1. Usar el comando usermod</h2>
+<p>El comando usermod te permite modificar los atributos de un usuario existente. Usarás la opción -s (shell) para cambiar el intérprete de comandos.</p>
+<p>Asegúrate de ejecutar este comando con permisos de superusuario (sudo):</p>
+<pre><code>sudo usermod -s /bin/bash ana</code></pre>
+<h2>Explicación:</h2>
+<ul><li><code>sudo</code>: Ejecuta el comando con permisos de superusuario.</li><li><code>usermod</code>: El comando para modificar un usuario.</li><li>-s <code>/bin/bash</code>: Establece el <em>shell</em> de inicio de sesión del usuario <strong>ana</strong> a <code>/bin/bash</code>.</li><li>ana: El nombre del usuario a modificar.</li></ul>
+<h2>2. Editar el archivo /etc/passwd directamente (Avanzado)</h2>
+<p>Puedes editar manualmente la línea de usuario en el archivo <code>/etc/passwd</code>, donde se almacena la información de todos los usuarios.</p>
+<p><strong>¡Advertencia!</strong> Cualquier error de sintaxis en este archivo puede impedir que los usuarios inicien sesión. Si optas por esta vía, usa siempre vipw para editarlo de forma segura.</p>
+<ol><li>Ejecuta vipw (que bloquea el archivo para evitar que otros programas escriban en él):</li></ol>
+<pre><code>sudo vipw</code></pre>
+<ol><li>Busca la línea del usuario <strong>ana</strong>. Debería verse similar a esto (la última parte es probablemente <code>/bin/sh</code> o <code>/bin/false</code>):</li></ol>
+<pre><code>ana:x:1001:1001:,,,/home/ana:/bin/sh</code></pre>
+<ol><li>Cambia la última parte para que diga <code>/bin/bash</code>:</li></ol>
+<pre><code>ana:x:1001:1001:,,,/home/ana:/bin/bash</code></pre>
+<ol><li>Guarda y sal del editor.</li></ol>
+<h2>El segundo comando</h2>
+<pre><code>sudo useradd -m -c "Ana López" -s /bin/bash -g usuarios ana</code></pre>
+<ul><li><code>-c "Ana López"</code> → añade un comentario (aparece en <code>/etc/passwd</code>, normalmente usado para el nombre completo).</li><li><code>-s /bin/bash</code> → fuerza que el shell de login sea bash.</li><li><code>-g usuarios</code> → pone como grupo primario el grupo usuarios (debe existir previamente).</li></ul>
+<p>Cuando creas un usuario con:</p>
+<pre><code>sudo useradd -m -s /bin/bash ana</code></pre>
+<p>En este paso no se le asigna ninguna contraseña automáticamente.</p>
+<p>El usuario ana queda creado, con su home <code>/home/ana</code> y con bash como shell, pero no puede iniciar sesión todavía porque no tiene contraseña definida.</p>
+<h2>Qué hacer después</h2>
+<p>Para darle una contraseña debes ejecutar:</p>
+<pre><code>sudo passwd ana</code></pre>
+<p>Ahí te pedirá que escribas y confirmes la nueva contraseña.</p>
+<p>A partir de ese momento, ana ya podrá iniciar sesión en la máquina.</p>
+<figure><img src="../media/usuarios/imagen1.webp" width="795" height="217" alt="Captura 1 de la lección «Crear y administrar usuarios»" loading="lazy" decoding="async"></figure>
+<p>PassAnita091</p>
+<h2>Resumen</h2>
+<ul><li>useradd crea la cuenta, pero no asigna contraseña.</li><li>Hasta que no uses passwd, el usuario no puede loguearse.</li></ul>
+<p>Si quieres crear el usuario y asignarle contraseña en un solo paso, puedes hacerlo así:</p>
+<pre><code>sudo useradd -m -s /bin/bash ana
+echo "ana:contraseña123" | sudo chpasswd</code></pre>
+<h2>Crear grupo</h2>
+<pre><code>sudo groupadd marketing
+cat /etc/group</code></pre>
+<h2>Añadir usuario a un grupo</h2>
+<pre><code>sudo usermod -aG marketing ana</code></pre>
+<p>La opción -aG es importante → "append to group". Si solo usas -G, quitas al usuario de otros grupos.</p>
+<h2>Ejercicio 1</h2>
+<ol><li>Crea un usuario prueba1.</li><li>Crea un grupo curso.</li><li>Añade prueba1 al grupo curso.</li><li>Comprueba con:</li></ol>
+<pre><code>id prueba1
+groups prueba1</code></pre>
+<p>Vamos a <strong>crear un archivo en <code>/home/ana</code> pero que el propio usuario ana no pueda leerlo</strong>. Eso se hace jugando con los <strong>permisos y propietario</strong> del archivo.</p>
+<ol><li>Estás en <code>/root</code> (lo confirmas con pwd):</li></ol>
+<pre><code>pwd
+→ /root
+sudo -i</code></pre>
+<ol><li>Creas el archivo como root (con sudo):</li></ol>
+<pre><code>sudo sh -c 'echo "contenido secreto" &gt; /home/ana/secreto.txt'</code></pre>
+<ol><li>Cambias el propietario para que <strong>no sea de ana</strong>, por ejemplo root:</li></ol>
+<pre><code>sudo chown root:root /home/ana/secreto.txt</code></pre>
+<ol><li>Ajustas permisos para que <strong>solo root pueda leerlo</strong>:</li></ol>
+<pre><code>sudo chmod 600 /home/ana/secreto.txt</code></pre>
+<figure><img src="../media/usuarios/imagen2.webp" width="807" height="113" alt="Captura 2 de la lección «Crear y administrar usuarios»" loading="lazy" decoding="async"></figure>
+<pre><code>su - jose</code></pre>
+<p>Si intentamos acceder al directorio de ana nos dará un error:</p>
+<pre><code>-bash: cd: ana: Permiso denegado</code></pre>
+<figure><img src="../media/usuarios/imagen3.webp" width="389" height="135" alt="Captura 3 de la lección «Crear y administrar usuarios»" loading="lazy" decoding="async"></figure>
+<p>significa que el usuario jose <strong>no tiene permisos para entrar en el directorio <code>/home/ana</code></strong>.</p>
+<h2>¿Qué pasa?</h2>
+<ul><li>Cuando creamos a ana con useradd -m, su directorio <code>/home/ana</code> se generó con permisos por defecto:</li></ul>
+<pre><code>drwx------ 2 ana ana 4096 sep 30 11:00 /home/ana</code></pre>
+<p>Eso quiere decir:</p>
+<ul><li><code>drwx------ → solo el propietario (ana) puede leer, escribir y entrar.</code></li><li>Nadie más (ni siquiera otros usuarios normales) puede acceder.</li><li>Solo root puede entrar porque tiene privilegios totales.</li></ul>
+<h2>Entrar como root</h2>
+<p>Cambiamos a un usuario con privilegios</p>
+<pre><code>su - jose
+sudo -i
+cd /home/ana</code></pre>
+<p>(funciona porque root ignora los permisos).</p>
+<figure><img src="../media/usuarios/imagen4.webp" width="439" height="160" alt="Captura 4 de la lección «Crear y administrar usuarios»" loading="lazy" decoding="async"></figure>
+<p>Dar acceso a jose</p>
+<p>Si quieres que jose pueda entrar en <code>/home/ana</code>, cambia los permisos:</p>
+<pre><code>sudo chmod 750 /home/ana</code></pre>
+<p>→ ahora el propietario (ana) y los miembros de su grupo podrán entrar.</p>
+<p>Si además quieres que jose tenga acceso, añádelo al grupo de ana:</p>
+<pre><code>sudo usermod -aG ana jose</code></pre>
+<h2>Resultado</h2>
+<ul><li>El archivo existe en <code>/home/ana/secreto.txt</code>.</li><li>Propietario: root.</li><li>Permisos: rw------- (solo root puede leer y escribir).</li></ul>
+<figure><img src="../media/usuarios/imagen5.webp" width="511" height="65" alt="Captura 5 de la lección «Crear y administrar usuarios»" loading="lazy" decoding="async"></figure>
+<p>Si ana intenta leerlo:</p>
+<pre><code>su - ana
+cat /home/ana/secreto.txt
+obtendrá:
+cat: /home/ana/secreto.txt: Permiso denegado</code></pre>
+<figure><img src="../media/usuarios/imagen6.webp" width="513" height="134" alt="Captura 6 de la lección «Crear y administrar usuarios»" loading="lazy" decoding="async"></figure>
+<h2>3) Permisos de archivos (chmod)</h2>
+<p>Los permisos se muestran con ls -l:</p>
+<pre><code>-rw-r--r-- 1 ana curso 1234 sep 28 09:00 archivo.txt</code></pre>
+<p>Significado:</p>
+<ul><li>r → lectura</li><li><code>w → escritura</code></li><li>x → ejecución</li><li>primer bloque (rw-) propietario → usuario</li><li>segundo bloque (r--) grupo</li><li>tercer bloque (r--) otros</li></ul>
+<figure><img src="../media/usuarios/imagen7.webp" width="639" height="204" alt="Captura 7 de la lección «Crear y administrar usuarios»" loading="lazy" decoding="async"></figure>
+<h2>Modificar permisos</h2>
+<p>chmod u+x script.sh # dar permiso de ejecución al propietario</p>
+<pre><code>chmod g+w archivo.txt # dar escritura al grupo
+chmod o-r archivo.txt # quitar lectura a otros</code></pre>
+<h2>Usando notación numérica</h2>
+<pre><code>chmod 755 script.sh
+# 7 = rwx (propietario)
+# 5 = r-x (grupo)
+# 5 = r-x (otros)</code></pre>
+<h2>Ejercicio 2</h2>
+<ol><li>Crea el archivo ejemplo.sh con nano y pon echo "Hola mundo".</li><li>Comprueba permisos con ls -l ejemplo.sh.</li><li>Asigna permisos de ejecución al propietario</li></ol>
+<pre><code>chmod u+x ejemplo.sh</code></pre>
+<ol><li>Ejecútalo con</li></ol>
+<pre><code>sudo ./ejemplo.sh</code></pre>
+<h2>4) Cambiar propietario y grupo (chown, chgrp)</h2>
+<h2>Cambiar propietario</h2>
+<h2>Cambiamos a un usuario con privilegios:</h2>
+<pre><code>ana@VM:~$ sudo -i
+[sudo] password for ana:
+ana is not in the sudoers file .
+su – jose</code></pre>
+<h2>Entrar como root</h2>
+<pre><code>sudo -i
+cd /home/ana
+sudo chown ana secreto.txt</code></pre>
+<figure><img src="../media/usuarios/imagen8.webp" width="748" height="92" alt="Captura 8 de la lección «Crear y administrar usuarios»" loading="lazy" decoding="async"></figure>
+<h2>Qué hace</h2>
+<ul><li><strong>chown</strong> = <em>change owner</em> → cambia el propietario de un archivo o directorio.</li><li><strong>ana</strong> = el nuevo propietario (usuario).</li><li><strong>secreto.txt</strong> = el archivo al que se le cambia el dueño.</li><li><strong>sudo</strong> = lo ejecutas como administrador, porque normalmente solo root puede cambiar propietarios.</li></ul>
+<h2>Resultado</h2>
+<ul><li>Antes: secreto.txt podía ser propiedad de root o de otro usuario.</li><li>Después: el propietario pasa a ser ana.</li><li>El grupo <strong>no cambia</strong> (a menos que lo indiques con :).</li></ul>
+<p>Ejemplo:</p>
+<pre><code>ls -l archivo.txt</code></pre>
+<p>Antes:</p>
+<pre><code>-rw-r--r-- 1 root root 42 sep 30 11:20 archivo.txt</code></pre>
+<p>Después de sudo chown ana archivo.txt:</p>
+<pre><code>-rw-r--r-- 1 ana root 42 sep 30 11:20 archivo.txt</code></pre>
+<figure><img src="../media/usuarios/imagen9.webp" width="518" height="134" alt="Captura 9 de la lección «Crear y administrar usuarios»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/usuarios/imagen10.webp" width="649" height="201" alt="Captura 10 de la lección «Crear y administrar usuarios»" loading="lazy" decoding="async"></figure>
+<pre><code>-rw------- 1 ana root 18 sep 30 11:12 secreto.txt</code></pre>
+<h2>Desglose</h2>
+<ul><li><code>-rw------- → permisos:</code><ul><li>rw- para el <strong>propietario</strong> (usuario ana).</li><li>--- para el <strong>grupo</strong> (root).</li><li>--- para <strong>otros</strong>.</li></ul></li><li>Propietario: ana.</li><li>Grupo: root.</li></ul>
+<h2>¿Qué significa en la práctica?</h2>
+<ul><li><strong>ana (propietario)</strong> → puede leer y escribir el archivo.</li><li><strong>Usuarios del grupo root</strong> → no tienen permisos (aunque root como superusuario puede ignorar esto).</li><li><strong>Otros usuarios</strong> → tampoco tienen permisos.</li></ul>
+<p>Por eso, ahora mismo ana sí puede leer el archivo, porque es la propietaria.</p>
+<p>El hecho de que el grupo sea root no cambia nada: los permisos efectivos se miran primero en el propietario, y ana tiene rw.</p>
+<h2>Variantes útiles</h2>
+<ul><li>Cambiar <strong>usuario y grupo</strong> a la vez:</li><li><code>sudo chown ana:usuarios archivo.txt</code></li><li>Cambiar de forma recursiva (para carpetas enteras):</li><li><code>sudo chown -R ana:usuarios /home/ana</code></li></ul>
+<h2>Cambiar grupo</h2>
+<pre><code>sudo chgrp marketing secreto.txt</code></pre>
+<h2>Cambiar ambos</h2>
+<pre><code>sudo chown ana:marketing secreto.txt</code></pre>
+<h2>Ejercicio 3</h2>
+<ol><li>Crea el archivo notas.txt como root (sudo touch notas.txt).</li><li>Asigna como propietario a ana y grupo curso.</li><li>Verifica con ls -l notas.txt.</li></ol>
+<h2>5) Configurar sudoers</h2>
+<p>El archivo de configuración es <code>/etc/sudoers</code>. <strong>Nunca lo edites directo</strong>, usa:</p>
+<pre><code>sudo visudo</code></pre>
+<p>Esto evita errores de sintaxis.</p>
+<h2>Dar acceso sudo a un usuario</h2>
+<p>En visudo agrega:</p>
+<pre><code># User privilege specification
+root ALL=(ALL:ALL) ALL
+ana ALL=(ALL:ALL) ALL</code></pre>
+<h2>Dar acceso a un grupo</h2>
+<pre><code>%curso ALL=(ALL:ALL) ALL</code></pre>
+<p>Así todos los usuarios del grupo curso pueden usar sudo.</p>
+<h2>Ejemplo de restricciones</h2>
+<ul><li>Solo permitir reinicio:</li></ul>
+<pre><code>ana ALL=(ALL) /sbin/reboot</code></pre>
+<ul><li>Permitir sin pedir contraseña:</li></ul>
+<pre><code>ana ALL=(ALL) NOPASSWD: ALL</code></pre>
+<h2>Ejercicio 4</h2>
+<ol><li>Añade a ana al grupo sudo (Ubuntu/Debian):</li></ol>
+<pre><code>sudo usermod -aG sudo ana</code></pre>
+<ol><li>Conéctate como ana y prueba:</li></ol>
+<pre><code>sudo whoami
+→ debería responder root.</code></pre>
+<p>El comando principal para ver los permisos de archivos y directorios en Linux es <strong>ls</strong> con la opción <strong>-l</strong> (formato largo).</p>
+<h2>Uso Básico para Ver Permisos (ls -l)</h2>
+<p>Para ver los permisos de los archivos y directorios en tu ubicación actual, usa:</p>
+<pre><code>ls -l</code></pre>
+<h2>Ejemplo de Salida:</h2>
+<pre><code>-rw-rw-r-- 1 jose jose 1245 Oct 8 09:30 archivo.txt
+drwxr-xr-x 2 jose jose 4096 Sep 20 15:10 mis_documentos/</code></pre>
+<div class="tabla"><table><thead><tr><th>Parte</th><th>Significado</th></tr></thead><tbody><tr><td><strong>drwxr-xr-x</strong></td><td><strong>Permisos</strong> (los primeros 10 caracteres)</td></tr><tr><td>2</td><td>Número de enlaces duros</td></tr><tr><td>jose</td><td>Propietario del archivo/directorio</td></tr><tr><td>jose</td><td>Grupo propietario</td></tr><tr><td>4096</td><td>Tamaño en bytes</td></tr><tr><td>Sep 20 15:10</td><td>Fecha y hora de modificación</td></tr><tr><td>mis_documentos/</td><td>Nombre del archivo/directorio</td></tr></tbody></table></div>
+<h2>Búsqueda de Archivos por Permisos Especiales (find)</h2>
+<p>Puedes usar el comando <strong>find</strong> para buscar archivos que tengan <strong>permisos especiales</strong> o <strong>UIDs/GIDs especiales</strong>.</p>
+<p>El comando <strong>find</strong> te permite buscar archivos por su tipo, nombre, fecha y, crucialmente, por sus permisos.</p>
+<p>El número <strong>4000</strong> (por ejemplo) hace referencia al <em>bit</em> <strong>SetUID (SUID)</strong>.</p>
+<h2>Comando para buscar archivos con el bit SUID (4000):</h2>
+<p>Para buscar todos los archivos en el sistema (/) que tengan el <em>bit</em> SUID activado:</p>
+<pre><code>sudo find / -perm /4000 2&gt;/dev/null</code></pre>
+<div class="tabla"><table><thead><tr><th>Parte</th><th>Significado</th></tr></thead><tbody><tr><td><strong>find /</strong></td><td>Busca archivos, comenzando desde el directorio raíz (/).</td></tr><tr><td><strong>-perm <code>/4000</code></strong></td><td>Filtra los resultados para buscar archivos que tengan el permiso especial <strong>SUID (4)</strong>. Esto se utiliza a menudo por razones de seguridad para identificar binarios que se ejecutan con permisos de <em>root</em>.</td></tr><tr><td><strong>2&gt;/dev/null</strong></td><td>Esto redirige el <strong>Error Estándar (2)</strong> a <code>/dev/null</code>. Se utiliza para <strong>ocultar</strong> todos los mensajes de "Permiso denegado" que aparecen cuando find intenta acceder a directorios a los que no tiene acceso como usuario normal, dejando visible solo la lista de archivos encontrados.</td></tr></tbody></table></div>
+<p>Aparte del permiso especial <strong>4000 (SetUID)</strong>, existen otros dos bits de permisos especiales importantes en Linux que se usan para propósitos de seguridad y gestión:</p>
+<ul><li><strong>2000 (SetGID - Set Group ID)</strong></li></ul>
+<p>El bit <strong>SetGID</strong> se representa con el valor octal <strong>2000</strong>.</p>
+<div class="tabla"><table><thead><tr><th><strong>Característica</strong></th><th><strong>Detalle</strong></th></tr></thead><tbody><tr><td><strong>Valor Octal</strong></td><td><strong>2000</strong></td></tr><tr><td><strong>En ls -l</strong></td><td>Reemplaza la x (ejecución) por una <strong>s</strong> en el campo del <strong>grupo</strong>. Si el grupo no tiene permiso de ejecución, se muestra como una <strong>S</strong> mayúscula.</td></tr><tr><td><strong>En Archivos Binarios</strong></td><td>Un programa que tiene SetGID activo se ejecuta con los permisos del <strong>grupo propietario</strong> del archivo, en lugar de con los permisos del grupo del usuario que lo ejecuta.</td></tr><tr><td><strong>En Directorios (Uso Principal)</strong></td><td>Cuando se crea un nuevo archivo o subdirectorio dentro de un directorio con SetGID, ese nuevo objeto <strong>hereda el grupo propietario del directorio padre</strong>, en lugar de tomar el grupo primario del usuario que lo creó. Esto es muy útil para directorios de trabajo compartidos.</td></tr></tbody></table></div>
+<h2>2. 1000 (Sticky Bit)</h2>
+<p>El <strong>Sticky Bit</strong> (Bit Pegajoso) se representa con el valor octal <strong>1000</strong>.</p>
+<div class="tabla"><table><thead><tr><th>Característica</th><th>Detalle</th></tr></thead><tbody><tr><td><strong>Valor Octal</strong></td><td><strong>1000</strong></td></tr><tr><td><strong>En ls -l</strong></td><td>Reemplaza la x (ejecución) por una <strong>t</strong> en el campo de <strong>"otros"</strong>. Si "otros" no tienen permiso de ejecución, se muestra como una <strong>T</strong> mayúscula.</td></tr><tr><td><strong>Uso Principal</strong></td><td>Se usa casi exclusivamente en <strong>directorios</strong> (nunca en archivos binarios en sistemas modernos). Un directorio con el Sticky Bit activado permite que <strong>cualquier usuario pueda crear archivos</strong> dentro de él, pero <strong>solo el propietario del archivo o el <em>root</em></strong> pueden renombrar, mover o borrar ese archivo.</td></tr><tr><td><strong>Ejemplo Famoso</strong></td><td>El directorio <code>/tmp</code> (donde todos los usuarios necesitan escribir) tiene el Sticky Bit activado para evitar que los usuarios borren los archivos de otros.</td></tr></tbody></table></div>
+<h2>Combinación de Permisos Especiales</h2>
+<p>Los permisos especiales se suman a los permisos octales estándar (que van del 000 al 777).</p>
+<p>Para establecer los tres bits especiales a la vez (algo inusual), usarías:</p>
+<p>Un permiso octal completo tiene cuatro dígitos: [bits especiales][propietario][grupo][otros].</p>
+<h2>Ejemplo Práctico:</h2>
+<p>Para aplicar permisos de lectura/escritura/ejecución (777) y el Sticky Bit (1000) a un directorio:</p>
+<pre><code>chmod 1777 /mi/directorio/compartido</code></pre>
+<ul><li><strong>1</strong>777: Sticky Bit activado.</li><li>El resultado en ls -l se vería así: drwxrwxrwt.</li></ul>
+<h2>6) Ejercicio integrador</h2>
+<p><strong>Escenario:</strong> la empresa necesita un usuario nuevo juan en el área de marketing. Este usuario debe:</p>
+<ul><li>Tener su directorio <code>/home/juan</code>.</li><li>Formar parte del grupo marketing.</li><li>Poder usar sudo para instalar programas, pero <strong>solo</strong> apt.</li></ul>
+<h2>Pasos esperados del alumno:</h2>
+<ol><li>Crear usuario juan.</li><li>Crear grupo marketing si no existe y añadir a juan.</li><li>Darle permisos de sudo específicos en visudo:</li></ol>
+<pre><code>juan ALL=(ALL) NOPASSWD: /usr/bin/apt, /usr/bin/apt-get</code></pre>
+<ul><li>juan → el usuario al que le das permisos.</li><li><code>ALL=(ALL)</code> → puede ejecutar como cualquier usuario (root incluido).</li><li>NOPASSWD: → opcional, evita que pida contraseña cada vez (puedes quitarlo si quieres que la pida).</li><li><code>/usr/bin/apt</code>, <code>/usr/bin/apt-get</code> → <strong>únicos comandos permitidos</strong> con sudo.</li></ul>
+<p>Guarda y cierra.</p>
+<ol><li>Verificar iniciando sesión como juan y ejecutando sudo apt update.</li></ol>
+<h2>7) Cheatsheet rápido</h2>
+<pre><code># usuarios y grupos
+sudo useradd -m usuario
+sudo passwd usuario
+sudo groupadd grupo
+sudo usermod -aG grupo usuario
+id usuario
+groups usuario
+# permisos
+ls -l
+chmod 755 archivo
+chmod u+x archivo
+chown usuario:grupo archivo
+# sudo
+sudo visudo
+# añadir usuario o grupo con permisos
+usuario ALL=(ALL:ALL) ALL
+%grupo ALL=(ALL:ALL) ALL</code></pre>
+<h2>drwxrwxrwt</h2>
+<p>La <strong>t</strong> al final de los permisos en un directorio como <code>/tmp</code> (drwxrwxrwt) significa que el <strong>Sticky Bit</strong> (Bit Pegajoso) está activado.</p>
+<h2>Significado del Sticky Bit (t) en Directorios</h2>
+<p>El Sticky Bit es un <strong>permiso especial</strong> que se aplica a directorios y tiene un propósito de seguridad crucial en entornos multiusuario, especialmente en directorios de acceso público como <code>/tmp</code> y <code>/var/tmp</code>.</p>
+<h2>Función Específica</h2>
+<p>Cuando el Sticky Bit está activo en un directorio, <strong>solo el propietario del archivo o el usuario root pueden renombrar o eliminar los archivos</strong> dentro de ese directorio, incluso si otros usuarios tienen permisos de escritura (w) sobre el directorio.</p>
+<h2>Contexto de /tmp</h2>
+<p>El directorio <code>/tmp</code> se utiliza para archivos temporales que pueden ser creados por cualquier usuario. Si no tuviera el Sticky Bit activado, cualquier usuario podría:</p>
+<ol><li>Crear un archivo en <code>/tmp</code>.</li><li>Eliminar o renombrar los archivos creados por <em>otros</em> usuarios, simplemente porque tienen el permiso de escritura (w) en el directorio.</li></ol>
+<p>Al tener la <strong>t</strong> (Sticky Bit) activada, se garantiza que:</p>
+<ul><li>Cualquier usuario puede crear un archivo.</li><li><strong>Solo el creador</strong> (propietario) o root pueden borrar ese archivo, protegiendo así los archivos temporales de un usuario de ser manipulados por otro.</li></ul>
+<h2>La diferencia entre t y T</h2>
+<ul><li><strong>t (minúscula):</strong> Indica que el Sticky Bit está activado <strong>Y</strong> la terna de permisos para "otros" <strong>tiene</strong> el permiso de ejecución (x) activo. (Como en el ejemplo: drwxrwxrwt).</li><li><strong>T (mayúscula):</strong> Indica que el Sticky Bit está activado <strong>PERO</strong> la terna de permisos para "otros" <strong>NO tiene</strong> el permiso de ejecución (x) activo.</li></ul>
+<div class="tabla"><table><thead><tr><th><strong>Permiso</strong></th><th><strong>Significado</strong></th></tr></thead><tbody><tr><td>d</td><td>Es un <strong>directorio</strong>.</td></tr><tr><td>rwx</td><td>Permisos del <strong>propietario</strong> (root).</td></tr><tr><td>rwx</td><td>Permisos del <strong>grupo</strong> (root).</td></tr><tr><td>rwt</td><td>Permisos para <strong>otros</strong> (el resto de usuarios).</td></tr><tr><td><strong>t</strong></td><td>Indica que el <strong>Sticky Bit</strong> está activo y previene que los archivos sean borrados por usuarios que no sean sus propietarios, aunque tengan permiso de escritura (w).</td></tr></tbody></table></div>

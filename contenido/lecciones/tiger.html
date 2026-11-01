@@ -1,0 +1,50 @@
+<p><strong>Tiger</strong> es una de las herramientas de auditoría de seguridad y detección de intrusiones más antiguas y respetadas para sistemas tipo Unix. Genera reportes de configuraciones inseguras, <em>exploits</em> conocidos y problemas de permisos.</p>
+<h2>1. Instalación de Tiger en Ubuntu 24.04</h2>
+<p>A diferencia de otras herramientas que requieren compilación, Tiger está disponible directamente en los repositorios de paquetes de Ubuntu, lo que simplifica mucho el proceso.</p>
+<ol><li><strong>Actualizar el índice de paquetes:</strong></li></ol>
+<pre><code>sudo apt update</code></pre>
+<ol><li><strong>Instalar Tiger:</strong></li></ol>
+<pre><code>sudo apt install tiger -y
+sí a todo
+dingdong
+dingdong
+dingdong
+dingdong
+dingdong
+dingdong</code></pre>
+<h2>Ubicación Clave</h2>
+<p>La instalación coloca los archivos de configuración en <code>/etc/tiger/</code> y los binarios principales en <code>/usr/sbin/.</code></p>
+<h2>2. Configuración Inicial y Puesta en Marcha</h2>
+<p>Una vez instalado, Tiger está listo para ejecutarse. Lo ejecutará como root o con sudo para que pueda acceder a todos los archivos y configuraciones del sistema.</p>
+<h2>Ejecución de la Auditoría</h2>
+<p>Ejecute Tiger para realizar el escaneo completo de seguridad del sistema. Esto puede tomar unos minutos dependiendo de la velocidad de su máquina.</p>
+<pre><code>sudo tiger</code></pre>
+<h2>Notas Importantes Durante la Ejecución</h2>
+<ul><li><strong>Preguntas Interactivas:</strong> Durante el escaneo, Tiger puede hacerle preguntas sobre su configuración (ej. si su servidor es una <em>workstation</em> o un servidor de red). Responda y (yes) o n (no) según corresponda.</li><li><strong>Reporte Generado:</strong> Tiger genera un archivo de reporte con el formato hostname.timestamp. La ubicación del reporte final se mostrará al final de la ejecución. Por defecto, los reportes se guardan en el directorio <code>/var/log/tiger/.</code></li></ul>
+<p>Tiger realiza una <strong>auditoría estática y dinámica profunda</strong> de tu sistema, lo cual consume <strong>tiempo</strong>, especialmente en máquinas virtuales o sistemas con muchos archivos.</p>
+<figure><img src="../media/tiger/imagen1.webp" width="1235" height="808" alt="Captura 1 de la lección «Tiger»" loading="lazy" decoding="async"></figure>
+<h2>3. Análisis de Resultados (El Reporte)</h2>
+<p>El valor de Tiger reside en la interpretación de su reporte.</p>
+<h2>Localizar el Reporte</h2>
+<p>Busque el archivo de reporte más reciente. El nombre será similar a jose-VirtualBox.2025-10-17.16:30:00.log.</p>
+<pre><code>ls -l /var/log/tiger/</code></pre>
+<h2>Visualización del Reporte</h2>
+<p>Abra el archivo de <em>log</em> con su editor de texto favorito (ej. less o nano):</p>
+<pre><code>sudo less /var/log/tiger/&lt;nombre_del_reporte&gt;.log</code></pre>
+<h2>Estructura del Reporte</h2>
+<p>El reporte está organizado por módulos de verificación. Busque las líneas que comienzan con --- o que incluyen la palabra clave <strong>FAIL</strong> (fallo) o <strong>WARN</strong> (advertencia).</p>
+<h2>Ejemplos de Problemas Comunes que Detecta Tiger:</h2>
+<ol><li><strong>Archivos de Configuración Inseguros (CRON):</strong><ul><li><strong>Línea de Reporte Típica:</strong> WARN [cron003w] <code>/etc/crontab</code>: <code>file permissions are too lax (0644 expected 0600 or less)</code></li><li><strong>Significado:</strong> Los permisos del archivo crontab son demasiado abiertos, permitiendo a usuarios no autorizados leer o modificar tareas programadas.</li></ul></li><li><strong>Archivos de Usuario con Permisos Peligrosos (PATH):</strong><ul><li><strong>Línea de Reporte Típica:</strong> FAIL [path001f] The default PATH for user 'root' contains potentially unsafe directories.</li><li><strong>Significado:</strong> Su variable de entorno $PATH para el usuario <em>root</em> incluye directorios donde los usuarios normales podrían escribir o ejecutar scripts, lo cual es un riesgo de <em>hijacking</em>.</li></ul></li><li><strong>Puertos de Red Abiertos:</strong><ul><li><strong>Línea de Reporte Típica:</strong> WARN [port001w] Listening on port 61208 TCP (Glances web service).</li><li><strong>Significado:</strong> Tiger le advierte sobre el puerto de Glances que abrimos previamente, recordándole que es un punto de entrada que debe estar protegido por un <em>firewall</em>.</li></ul></li></ol>
+<h2>4. Auditorías Periódicas (Programación)</h2>
+<p>La verdadera utilidad de Tiger, como herramienta de detección de intrusiones, es realizar auditorías de forma periódica.</p>
+<h2>Ejecutar la Auditoría Semanalmente (Recomendado)</h2>
+<p>Puede añadir una entrada a la tabla cron de <em>root</em> para ejecutar la auditoría semanalmente.</p>
+<ol><li><strong>Abrir el Crontab de root:</strong></li></ol>
+<pre><code>sudo crontab -e</code></pre>
+<ol><li>Añadir la línea de programación:</li></ol>
+<p>Pegue esta línea al final del archivo. Esto ejecutará Tiger todos los domingos a la 1:00 AM y el output se enviará por correo electrónico a root (si tiene un MTA configurado, de lo contrario se guarda en el log).</p>
+<pre><code>Fragmento de código
+# Ejecutar Tiger los domingos a la 1:00 AM
+0 1 * * 0 /usr/sbin/tiger</code></pre>
+<h2>Detección de Intrusión</h2>
+<p>Al programar esta auditoría, si un atacante consigue comprometer el sistema a mitad de semana, la auditoría de Tiger del domingo siguiente detectará <strong>todos los archivos modificados, añadidos o eliminados</strong>, actuando como su sistema de detección de intrusiones a nivel de configuración.</p>

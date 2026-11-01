@@ -1,0 +1,80 @@
+<h2>Objetivo</h2>
+<ul><li>Crear un <strong>script de respaldo automático</strong>.</li><li>Convertirlo en un <strong>servicio systemd</strong>.</li><li>Configurar <strong>logs y reinicios automáticos</strong>.</li></ul>
+<h2>1. Preparar el script de respaldo</h2>
+<p>Creamos un script en <code>/usr/local/bin/respaldo.sh</code>:</p>
+<pre><code>sudo nano /usr/local/bin/respaldo.sh
+
+#!/bin/bash
+# Script simple de respaldo
+FECHA=$(date +%Y-%m-%d_%H-%M-%S)
+ORIGEN="/home"
+DESTINO="/var/backups/home_$FECHA.tar.gz"
+echo "[$(date)] Iniciando respaldo de $ORIGEN a $DESTINO" &gt;&gt; /var/log/respaldo.log
+tar -czf $DESTINO $ORIGEN 2&gt;&gt; /var/log/respaldo.log
+if [ $? -eq 0 ]; then
+echo "[$(date)] Respaldo completado con éxito." &gt;&gt; /var/log/respaldo.log
+else
+echo "[$(date)] Error durante el respaldo." &gt;&gt; /var/log/respaldo.log
+fi</code></pre>
+<p>Dar permisos de ejecución:</p>
+<pre><code>sudo chmod +x /usr/local/bin/respaldo.sh</code></pre>
+<h2>2. Crear la unidad systemd</h2>
+<p>Archivo de servicio: <code>/etc/systemd/system/respaldo.service</code></p>
+<pre><code>sudo nano /etc/systemd/system/respaldo.service
+
+[Unit]
+Description=Servicio de respaldo automático
+After=network.target
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/respaldo.sh
+Restart=on-failure
+RestartSec=30
+StandardOutput=append:/var/log/respaldo.log
+StandardError=append:/var/log/respaldo.log
+[Install]
+WantedBy=multi-user.target</code></pre>
+<p>Explicación:</p>
+<ul><li><strong>ExecStart</strong>: comando que se ejecuta (nuestro script).</li><li><strong>Restart=on-failure</strong>: reinicia el servicio si falla.</li><li><strong>RestartSec=30</strong>: espera 30s antes de reiniciar.</li><li><strong>StandardOutput/Error=append</strong>: redirige logs al archivo <code>/var/log/respaldo.log</code>.</li></ul>
+<h2>3. Recargar systemd y probar</h2>
+<pre><code>sudo systemctl daemon-reload
+sudo systemctl start respaldo.service
+sudo systemctl status respaldo.service</code></pre>
+<figure><img src="../media/systemd/imagen1.webp" width="1062" height="334" alt="Captura 1 de la lección «systemd: servicio propio con temporizador»" loading="lazy" decoding="async"></figure>
+<p>Para habilitar en arranque:</p>
+<pre><code>sudo systemctl enable respaldo.service</code></pre>
+<figure><img src="../media/systemd/imagen2.webp" width="1191" height="71" alt="Captura 2 de la lección «systemd: servicio propio con temporizador»" loading="lazy" decoding="async"></figure>
+<h2>4. Automatizar con un timer (opcional)</h2>
+<p>En lugar de arrancar el servicio manualmente, se puede usar un <strong>timer</strong> (como cron pero integrado en systemd).</p>
+<p>Crear <code>/etc/systemd/system/respaldo.timer</code>:</p>
+<pre><code>[Unit]
+Description=Ejecutar respaldo automáticamente cada día
+[Timer]
+OnCalendar=daily
+Persistent=true
+[Install]
+WantedBy=timers.target</code></pre>
+<p>Activar el timer:</p>
+<pre><code>sudo systemctl enable --now respaldo.timer</code></pre>
+<p>Comprobar timers activos:</p>
+<pre><code>systemctl list-timers</code></pre>
+<h2>5. Verificación de logs</h2>
+<p>Logs vía journal:</p>
+<pre><code>journalctl -u respaldo.service</code></pre>
+<p>O bien revisar el archivo:</p>
+<pre><code>tail -f /var/log/respaldo.log</code></pre>
+<h2>En Resumen:</h2>
+<p>Con todo lo que hemos hecho, hemos conseguido <strong>implementar un sistema completo de respaldo automático bajo systemd</strong>, con varias ventajas clave:</p>
+<h2>1️ Script de respaldo funcional</h2>
+<ul><li>Has creado <code>/usr/local/bin/respaldo.sh</code> que <strong>comprime la carpeta <code>/home</code></strong> y la guarda en <code>/var/backups</code> con <strong>nombre basado en la fecha</strong>.</li><li>El script también registra cada paso en <code>/var/log/respaldo.log</code> (inicio, éxito, errores).</li><li>Resultado: un script que puede ejecutar respaldos de manera autónoma y documentar su actividad.</li></ul>
+<h2>2️ Servicio systemd (respaldo.service)</h2>
+<ul><li>Convertiste el script en un <strong>servicio systemd</strong>, lo que significa que ahora <strong>systemd controla su ejecución</strong>.</li><li>Configuración lograda:<ul><li>ExecStart → ejecuta el script.</li><li><code>Restart=on-failure → reinicia automáticamente si falla.</code></li><li>StandardOutput/Error=append → todos los logs van al archivo de log.</li><li><code>After=network.target → se asegura de que arranque después de la red</code> (útil si más adelante incluyes respaldos remotos)</li></ul></li><li>Resultado: respaldo confiable, con reinicios automáticos y logging centralizado.</li></ul>
+<h2>3️ Habilitación en arranque</h2>
+<ul><li>Con systemctl enable respaldo.service → el servicio se ejecuta automáticamente cada vez que se inicia el sistema.</li><li>Resultado: <strong>no necesitas iniciar manualmente el script</strong>; funciona desde el arranque.</li></ul>
+<h2>4️ Timer systemd (respaldo.timer)</h2>
+<ul><li>Crear un timer permite que el servicio <strong>se ejecute automáticamente a intervalos programados</strong>, en este caso <strong>diario</strong> (OnCalendar=daily).</li><li><code>Persistent=true asegura que, si el sistema estaba apagado, al arrancar se ejecutará el respaldo pendiente.</code></li><li>Resultado: automatización completa sin depender de cron, control total desde systemd.</li></ul>
+<h2>5️ Logs y verificación</h2>
+<ul><li>Toda la actividad queda registrada en <code>/var/log/respaldo.log</code> y también es accesible desde journalctl -u respaldo.service.</li><li>Esto permite:<ul><li>Revisar rápidamente errores.</li><li>Confirmar que los respaldos se están ejecutando correctamente.</li><li>Auditar historial de respaldos.</li></ul></li></ul>
+<h2>Conclusión</h2>
+<p>Con todo esto, hemos conseguido:</p>
+<ol><li><strong>Un respaldo automático y confiable</strong> de <code>/home</code>.</li><li><strong>Servicio controlado por systemd</strong>, con reinicios automáticos si falla.</li><li><strong>Automatización diaria</strong> con respaldo.timer.</li><li><strong>Registro centralizado de logs</strong>, fácil de auditar.</li><li><strong>Integración completa en Linux moderno</strong>, sin depender de cron, usando únicamente herramientas de systemd.</li></ol>

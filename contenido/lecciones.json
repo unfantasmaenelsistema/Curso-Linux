@@ -1,0 +1,480 @@
+{
+  "bloques": [
+    {
+      "id": "terminal",
+      "titulo": "Primeros pasos en la terminal",
+      "icono": "terminal",
+      "lecciones": [
+        {
+          "slug": "navegacion-y-gestion-de-archivos",
+          "titulo": "Comandos de navegación y gestión de archivos",
+          "origen": "05 Comandos de navegación y gestión de archivos.html",
+          "lpic": [
+            "103",
+            "104"
+          ]
+        },
+        {
+          "slug": "redireccion-y-texto-1",
+          "titulo": "Redirección y procesamiento de texto I",
+          "origen": "01 Redirección y procesamiento de texto I.html",
+          "lpic": [
+            "103"
+          ]
+        },
+        {
+          "slug": "redireccion-y-texto-2",
+          "titulo": "Redirección y procesamiento de texto II",
+          "origen": "02 Redirección y procesamiento de texto II.html",
+          "lpic": [
+            "103"
+          ]
+        },
+        {
+          "slug": "redireccion-y-texto-3",
+          "titulo": "Redirección y procesamiento de texto III",
+          "origen": "03 Redirección y procesamiento de texto III.html",
+          "lpic": [
+            "103"
+          ]
+        },
+        {
+          "slug": "archivos-y-compresion",
+          "titulo": "Archivos y compresión",
+          "origen": "04 Archivos y compresión.html",
+          "lpic": [
+            "103"
+          ]
+        },
+        {
+          "slug": "comandos-varios-1",
+          "titulo": "Comandos varios I",
+          "origen": "18 Comandos_Varios I.html",
+          "lpic": [
+            "103"
+          ]
+        },
+        {
+          "slug": "comandos-varios-2",
+          "titulo": "Comandos varios II",
+          "origen": "19 Comandos_Varios II.html",
+          "lpic": [
+            "103"
+          ]
+        },
+        {
+          "slug": "compartir-estructuras-con-tree",
+          "titulo": "Compartir estructuras con tree",
+          "origen": "20 Compartir estructuras con tree.html",
+          "lpic": [
+            "104"
+          ]
+        },
+        {
+          "slug": "comandos-divertidos",
+          "titulo": "Comandos divertidos",
+          "origen": "06 Comandos divertidos.html",
+          "lpic": []
+        }
+      ],
+      "titulo_en": "First steps in the terminal"
+    },
+    {
+      "id": "sistema",
+      "titulo": "Usuarios, procesos y servicios",
+      "icono": "engranaje",
+      "lecciones": [
+        {
+          "slug": "usuarios",
+          "titulo": "Crear y administrar usuarios",
+          "origen": "00 Crear y administrar usuarios.html",
+          "lpic": [
+            "107",
+            "104"
+          ]
+        },
+        {
+          "slug": "procesos-y-gestion-del-sistema",
+          "titulo": "Procesos y gestión del sistema",
+          "origen": "14 Procesos y gestión del sistema.html",
+          "lpic": [
+            "103"
+          ]
+        },
+        {
+          "slug": "procesos-y-servicios",
+          "titulo": "Administración de procesos y servicios",
+          "origen": "15 Administración de Procesos y Servicios.html",
+          "lpic": [
+            "103",
+            "101"
+          ]
+        },
+        {
+          "slug": "systemd",
+          "titulo": "systemd: servicio propio con temporizador",
+          "origen": "16 Systemd.html",
+          "lpic": [
+            "101",
+            "107"
+          ]
+        },
+        {
+          "slug": "monitorizacion-basica",
+          "titulo": "Monitorización básica",
+          "origen": "17 Monitorización básica.html",
+          "lpic": [
+            "103"
+          ]
+        },
+        {
+          "slug": "administrar-y-monitorear-servidores",
+          "titulo": "Comandos para administrar y monitorizar servidores",
+          "origen": "29 Comandos para administrar y monitorear Servers.html",
+          "lpic": [
+            "103",
+            "108"
+          ]
+        },
+        {
+          "slug": "system-monitor",
+          "titulo": "System-Monitor: script de monitorización",
+          "origen": "38 System-Monitor.html",
+          "lpic": [
+            "105"
+          ]
+        }
+      ],
+      "titulo_en": "Users, processes and services"
+    },
+    {
+      "id": "discos",
+      "titulo": "Discos, montaje, clonado e imágenes",
+      "icono": "disco",
+      "lecciones": [
+        {
+          "slug": "montaje-de-sistemas-de-archivos",
+          "titulo": "Montaje de sistemas de archivos",
+          "origen": "07 Montaje de sistemas de archivos.html",
+          "lpic": [
+            "104"
+          ]
+        },
+        {
+          "slug": "clonar-un-disco",
+          "titulo": "Clonar un disco en Linux",
+          "origen": "09 Clonar un disco en Linux.html",
+          "lpic": [
+            "104"
+          ]
+        },
+        {
+          "slug": "clonar-un-pendrive-booteable",
+          "titulo": "Clonar un pendrive arrancable",
+          "origen": "10 Clonar un pendrive booteable en Linux.html",
+          "lpic": [
+            "104"
+          ]
+        },
+        {
+          "slug": "clonado-con-clonezilla-y-ssh",
+          "titulo": "Clonado y restauración con Clonezilla y SSH",
+          "origen": "12 Clonado.html",
+          "lpic": [
+            "104",
+            "110"
+          ]
+        },
+        {
+          "slug": "clonezilla",
+          "titulo": "Clonezilla",
+          "origen": "13 Clonezilla.html",
+          "lpic": [
+            "104"
+          ]
+        },
+        {
+          "slug": "imagen-del-sistema-con-distroshare",
+          "titulo": "Imagen de tu sistema con distroshare",
+          "origen": "11 Creando una imagen de tu sistema con distroshare.html",
+          "lpic": []
+        },
+        {
+          "slug": "cubic",
+          "titulo": "Cubic: ISO personalizada de Ubuntu",
+          "origen": "08 Cubic.html",
+          "lpic": []
+        },
+        {
+          "slug": "ubuntu-mini",
+          "titulo": "Ubuntu Mini ISO",
+          "origen": "27 Ubuntu Mini.html",
+          "lpic": [
+            "102"
+          ]
+        }
+      ],
+      "titulo_en": "Disks, mounting, cloning and images"
+    },
+    {
+      "id": "automatizacion",
+      "titulo": "Automatización y tareas programadas",
+      "icono": "reloj",
+      "lecciones": [
+        {
+          "slug": "cron",
+          "titulo": "Cron",
+          "origen": "24 Cron.html",
+          "lpic": [
+            "107"
+          ]
+        },
+        {
+          "slug": "crontab",
+          "titulo": "Crontab: programar tareas en Linux",
+          "origen": "25 Crontab programando tareas en Linux.html",
+          "lpic": [
+            "107"
+          ]
+        },
+        {
+          "slug": "personalizar-el-servidor",
+          "titulo": "Personalizar los mensajes de entrada al servidor",
+          "origen": "26 Personalizacion Server.html",
+          "lpic": [
+            "105",
+            "110"
+          ]
+        }
+      ],
+      "titulo_en": "Automation and scheduled tasks"
+    },
+    {
+      "id": "redes",
+      "titulo": "Redes",
+      "icono": "red",
+      "lecciones": [
+        {
+          "slug": "configuracion-de-red",
+          "titulo": "Configuración de red",
+          "origen": "43 Configuración de red.html",
+          "lpic": [
+            "109"
+          ]
+        },
+        {
+          "slug": "comandos-de-red-1",
+          "titulo": "Comandos de red I",
+          "origen": "21 Comandos de red I.html",
+          "lpic": [
+            "109"
+          ]
+        },
+        {
+          "slug": "comandos-de-red-2",
+          "titulo": "Comandos de red II",
+          "origen": "22 Comandos de red II.html",
+          "lpic": [
+            "109"
+          ]
+        },
+        {
+          "slug": "gping",
+          "titulo": "gping: ping con gráfica",
+          "origen": "23 gping.html",
+          "lpic": [
+            "109"
+          ]
+        },
+        {
+          "slug": "compartir-archivos-en-red",
+          "titulo": "Compartir archivos en red",
+          "origen": "47 Compartir archivos en red.html",
+          "lpic": [
+            "109"
+          ]
+        }
+      ],
+      "titulo_en": "Networking"
+    },
+    {
+      "id": "servidores",
+      "titulo": "Servidores y servicios",
+      "icono": "servidor",
+      "lecciones": [
+        {
+          "slug": "webmin",
+          "titulo": "Webmin",
+          "origen": "32 Webmin.html",
+          "lpic": []
+        },
+        {
+          "slug": "wordpress",
+          "titulo": "WordPress en un servidor Linux",
+          "origen": "33 Wordpress.html",
+          "lpic": []
+        },
+        {
+          "slug": "docker",
+          "titulo": "Docker",
+          "origen": "35 docker.html",
+          "lpic": [
+            "102"
+          ]
+        },
+        {
+          "slug": "nagios",
+          "titulo": "Nagios",
+          "origen": "44 Nagios.html",
+          "lpic": []
+        },
+        {
+          "slug": "servidor-de-correo",
+          "titulo": "Servidor de correo",
+          "origen": "50 Servidor de correo.html",
+          "lpic": [
+            "108"
+          ]
+        }
+      ],
+      "titulo_en": "Servers and services"
+    },
+    {
+      "id": "seguridad",
+      "titulo": "Seguridad y bastionado",
+      "icono": "escudo",
+      "lecciones": [
+        {
+          "slug": "seguridad",
+          "titulo": "Herramientas esenciales de seguridad",
+          "origen": "31 Seguridad.html",
+          "lpic": [
+            "110"
+          ]
+        },
+        {
+          "slug": "configurar-el-firewall",
+          "titulo": "Cómo configurar el firewall",
+          "origen": "45 Cómo configurar el firewall.html",
+          "lpic": [
+            "110"
+          ]
+        },
+        {
+          "slug": "ufw",
+          "titulo": "UFW",
+          "origen": "46 UFW.html",
+          "lpic": [
+            "110"
+          ]
+        },
+        {
+          "slug": "fail2ban",
+          "titulo": "Fail2Ban",
+          "origen": "49 Fail2Ban.html",
+          "lpic": [
+            "110"
+          ]
+        },
+        {
+          "slug": "clamav",
+          "titulo": "Antivirus ClamAV",
+          "origen": "34 ANTIVIRUS CLAMAV.html",
+          "lpic": []
+        },
+        {
+          "slug": "auditoria",
+          "titulo": "Auditorías básicas en Linux",
+          "origen": "30 Auditoria.html",
+          "lpic": [
+            "110",
+            "108"
+          ]
+        },
+        {
+          "slug": "tiger",
+          "titulo": "Tiger",
+          "origen": "39 Tiger.html",
+          "lpic": [
+            "110"
+          ]
+        },
+        {
+          "slug": "auditorias-con-bash",
+          "titulo": "Automatización de auditorías de seguridad con Bash",
+          "origen": "36 Automatización de Auditorías de Seguridad con Bash.html",
+          "lpic": [
+            "105",
+            "110"
+          ]
+        }
+      ],
+      "titulo_en": "Security and hardening"
+    },
+    {
+      "id": "ofensiva",
+      "titulo": "Seguridad ofensiva en laboratorio",
+      "icono": "objetivo",
+      "aviso": true,
+      "lecciones": [
+        {
+          "slug": "nmap-en-red-local",
+          "titulo": "Escaneo y enumeración de una red local con Nmap",
+          "origen": "28 Escaneo y Enumeración de una red local con Nmap en Kali Linux.html",
+          "lpic": [
+            "110"
+          ]
+        },
+        {
+          "slug": "tshark",
+          "titulo": "tshark",
+          "origen": "42 tshark.html",
+          "lpic": [
+            "109"
+          ]
+        },
+        {
+          "slug": "http-inseguro",
+          "titulo": "Tráfico HTTP inseguro",
+          "origen": "41 HTTP Inseguro.html",
+          "lpic": []
+        },
+        {
+          "slug": "dsniff",
+          "titulo": "Dsniff",
+          "origen": "48 Dsniff.html",
+          "lpic": []
+        },
+        {
+          "slug": "bypass-login",
+          "titulo": "Bypass del login desde GRUB",
+          "origen": "40 Bypass login Linux.html",
+          "lpic": [
+            "101"
+          ]
+        },
+        {
+          "slug": "linuxprivchecker",
+          "titulo": "Linuxprivchecker",
+          "origen": "37 Linuxprivchecker.html",
+          "lpic": []
+        },
+        {
+          "slug": "linpwn",
+          "titulo": "LinPwn",
+          "origen": "51 LinPwn.html",
+          "lpic": []
+        },
+        {
+          "slug": "escalada-de-privilegios",
+          "titulo": "Escalada de privilegios",
+          "origen": "52 Escalada de Privilegios.html",
+          "lpic": [
+            "110"
+          ]
+        }
+      ],
+      "titulo_en": "Offensive security in the lab"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+<p>Para una instalación limpia y fiable, se recomienda instalar Docker directamente desde los repositorios oficiales de Docker, en lugar de usar la versión predeterminada de Kali/Debian, ya que suele estar desactualizada.</p>
+<h2>Pasos de Instalación Recomendados</h2>
+<ol><li><strong>Actualizar el sistema e instalar dependencias:</strong></li></ol>
+<pre><code>sudo apt update</code></pre>
+<p>Instalar Docker (desde los repositorios de Kali):</p>
+<pre><code>sudo apt install -y docker.io</code></pre>
+<p>Aunque algunos prefieren el método del repositorio oficial de Docker por ser más reciente, docker.io funciona perfectamente para estos laboratorios.</p>
+<h2>Habilitar e iniciar el servicio Docker:</h2>
+<pre><code>sudo systemctl enable docker --now
+(--now 🡨 Doble guión)</code></pre>
+<h2>Recordatorio Importante (Post-instalación)</h2>
+<p>Si no quieres usar sudo antes de cada comando docker (lo cual es muy recomendable en Kali para la comodidad de uso), debes <strong>añadir tu usuario al grupo docker</strong> y luego <strong>reiniciar tu sesión</strong> o el terminal:</p>
+<pre><code>sudo usermod -aG docker $USER</code></pre>
+<p>Después de esto, el comando para cargar tu laboratorio, por ejemplo, <strong>Psycho</strong>, será tan simple como:</p>
+<pre><code>docker pull dockerlabs/psycho
+docker run -d -p 80:80 dockerlabs/psycho</code></pre>
+<h2>Si prefieres instalarlo desde Docker:</h2>
+<p>&lt;&lt;&lt;hihih<strong>Añadir la clave GPG oficial de Docker:</strong></p>
+<pre><code>curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg</code></pre>
+<ol><li><strong>Configurar el repositorio estable de Docker:</strong></li></ol>
+<pre><code>echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null</code></pre>
+<ol><li><strong>Instalar Docker Engine:</strong></li></ol>
+<pre><code>sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io</code></pre>
+<ol><li><strong>Verificar la instalación:</strong></li></ol>
+<pre><code>sudo service docker start
+sudo docker run hello-world</code></pre>
+<p>Si ves el mensaje de bienvenida, la instalación es correcta.</p>
+<ol><li>Opcional (Recomendado): Usar Docker sin sudo</li></ol>
+<p>Para evitar tener que escribir sudo antes de cada comando docker, añade tu usuario al grupo docker. Cierra sesión y vuelve a iniciarla para que el cambio surta efecto.</p>
+<pre><code>sudo usermod -aG docker $USER</code></pre>
+<h2>2. Cargar una Máquina de DockerLabs</h2>
+<p>Las "máquinas" de DockerLabs son imágenes Docker preconfiguradas para funcionar como laboratorios de seguridad o CTF. Una vez que Docker está instalado, el proceso para cargar y ejecutar una de estas máquinas es el siguiente:</p>
+<h2>Pasos para Cargar una Máquina</h2>
+<p>Los archivos —<strong>auto_deploy.sh</strong> e <strong>injection.tar</strong>—nos dicen exactamente cómo poner en marcha el laboratorio "Injection". No necesitas usar el comando docker pull ya que ya tienes el archivo de imagen.</p>
+<h2>1. Archivos en la Descarga</h2>
+<ol><li><strong>injection.tar</strong>: Este es el archivo clave. Contiene la <strong>imagen Docker</strong> de la máquina Injection en un formato archivado (.tar). Es lo que la mayoría de los usuarios descargan manualmente cuando no quieren usar Docker Hub directamente.</li><li><strong>auto_deploy.sh</strong>: Este es un <strong>script de <em>shell</em></strong> (un archivo ejecutable) que el creador del laboratorio ha incluido para automatizar los pasos de carga y ejecución de la imagen. Es el método más sencillo y recomendado.</li></ol>
+<pre><code>unzip injection.zip</code></pre>
+<h2>2. Pasos para Desplegar la Máquina Injection</h2>
+<p>Debido a que tienes el script de despliegue, el proceso es muy rápido.</p>
+<h2>Paso A: Navegar a la Carpeta</h2>
+<p>Abre tu terminal de Kali y navega hasta la carpeta donde descomprimiste los archivos.</p>
+<pre><code>cd /ruta/a/la/carpeta/donde/estan/los/archivos</code></pre>
+<h2>Paso B: Dar Permisos de Ejecución al Script</h2>
+<p>Por seguridad, los archivos de <em>shell</em> no suelen tener permisos de ejecución por defecto. Debes dárselos:</p>
+<pre><code>chmod +x auto_deploy.sh</code></pre>
+<h2>Paso C: Ejecutar el Despliegue</h2>
+<p>Ejecuta el script. Este script se encargará automáticamente de dos cosas:</p>
+<ol><li><strong>Cargar</strong> la imagen injection.tar en tu sistema Docker (el comando docker load).</li><li><strong>Ejecutar</strong> la imagen como un contenedor, mapeando los puertos necesarios (el comando docker run).</li></ol>
+<pre><code>sudo ./auto_deploy.sh &lt;archivo.tar&gt;
+sudo ./auto_deploy.sh injection.tar</code></pre>
+<p>El script te mostrará mensajes de que está cargando la imagen y luego te confirmará el comando docker run que está utilizando.</p>

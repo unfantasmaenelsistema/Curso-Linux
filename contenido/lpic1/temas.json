@@ -1,0 +1,19 @@
+{
+  "_nota": "Temas del examen LPIC-1 versión 5.0 (101-500 y 102-500) con su peso oficial: el simulacro reparte las 60 preguntas de cada examen según estos pesos.",
+  "examenes": [
+    {"id": "101", "titulo": "Examen 101-500", "preguntas": 60, "minutos": 90, "temas": ["101", "102", "103", "104"]},
+    {"id": "102", "titulo": "Examen 102-500", "preguntas": 60, "minutos": 90, "temas": ["105", "106", "107", "108", "109", "110"]}
+  ],
+  "temas": [
+    {"id": "101", "peso": 8,  "es": "Arquitectura del sistema", "en": "System architecture"},
+    {"id": "102", "peso": 12, "es": "Instalación de Linux y gestión de paquetes", "en": "Linux installation and package management"},
+    {"id": "103", "peso": 26, "es": "Comandos GNU y Unix", "en": "GNU and Unix commands"},
+    {"id": "104", "peso": 14, "es": "Dispositivos, sistemas de archivos y FHS", "en": "Devices, Linux filesystems, FHS"},
+    {"id": "105", "peso": 8,  "es": "Shells y scripts", "en": "Shells and shell scripting"},
+    {"id": "106", "peso": 4,  "es": "Interfaces de usuario y escritorios", "en": "User interfaces and desktops"},
+    {"id": "107", "peso": 12, "es": "Tareas administrativas", "en": "Administrative tasks"},
+    {"id": "108", "peso": 12, "es": "Servicios esenciales del sistema", "en": "Essential system services"},
+    {"id": "109", "peso": 14, "es": "Fundamentos de redes", "en": "Networking fundamentals"},
+    {"id": "110", "peso": 10, "es": "Seguridad", "en": "Security"}
+  ]
+}

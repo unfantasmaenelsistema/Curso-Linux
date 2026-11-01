@@ -1,0 +1,66 @@
+<p>Clonar un disco con dd es muy potente, pero también <strong>muy peligroso</strong> si te equivocas de dispositivo (puedes sobrescribir datos irreversiblemente).</p>
+<h2>Pasos para clonar un disco con dd</h2>
+<h2>1. Identificar los discos</h2>
+<p>Primero, lista los discos conectados:</p>
+<pre><code>lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT
+o
+sudo fdisk -l</code></pre>
+<ul><li>Ejemplo:<ul><li>Disco origen: <code>/dev/sda</code> (el que quieres clonar).</li><li>Disco destino: <code>/dev/sdb</code> (el que recibirá la copia).</li></ul></li></ul>
+<p><strong>Asegúrate al 100% de cuál es cuál</strong>. El destino será sobrescrito.</p>
+<h2>2. Ejecutar la clonación</h2>
+<p>El comando básico es:</p>
+<pre><code>sudo dd if=/dev/sdX of=/dev/sdY bs=64K status=progress</code></pre>
+<ul><li>if= → <em>input file</em> (disco origen).</li><li>of= → <em>output file</em> (disco destino).</li><li><code>bs=64K → tamaño de bloque (mejora velocidad).</code></li><li><code>status=progress</code> → muestra progreso en tiempo real.</li></ul>
+<p>Ejemplo:</p>
+<pre><code>sudo dd if=/dev/sda of=/dev/sdb bs=64K status=progress</code></pre>
+<h2>3. Sincronizar buffers</h2>
+<p>Al terminar, fuerza a que se escriba todo en disco:</p>
+<pre><code>sync</code></pre>
+<h2>4. Verificar la clonación</h2>
+<p>Puedes comparar con cmp o sha256sum en bloques:</p>
+<pre><code>sudo cmp -n 1G /dev/sda /dev/sdb</code></pre>
+<p>(si no devuelve nada, los primeros 1 GB son idénticos).</p>
+<h2>Variantes útiles</h2>
+<ul><li><strong>Clonar a un archivo de imagen</strong> (en vez de a otro disco):</li></ul>
+<pre><code>sudo dd if=/dev/sda of=/ruta/backup.img bs=64K status=progress</code></pre>
+<ul><li><strong>Restaurar desde la imagen</strong>:</li></ul>
+<pre><code>sudo dd if=/ruta/backup.img of=/dev/sdb bs=64K status=progress</code></pre>
+<ul><li><strong>Comprimir al vuelo</strong>:</li></ul>
+<pre><code>sudo dd if=/dev/sda bs=64K | gzip &gt; backup.img.gz</code></pre>
+<h2>Advertencias</h2>
+<ul><li>Nunca ejecutes dd sin revisar dos veces los dispositivos (if y of).</li><li>El disco destino debe ser <strong>igual o mayor tamaño</strong> que el origen.</li><li>Haz pruebas primero con discos/USB pequeños en tu laboratorio antes de usarlo en producción.</li></ul>
+<h2>El parámetro bs (Block Size)</h2>
+<p>El parámetro <strong>bs</strong> (Block Size) en el comando dd es crucial porque define la cantidad de datos que se leen del origen (if) y se escriben al destino (of) en una sola operación de E/S (Input/Output).</p>
+<p>La elección de bs afecta directamente la <strong>velocidad de la copia</strong>. Un valor demasiado pequeño (como el predeterminado de 512 bytes) es muy ineficiente en hardware moderno.</p>
+<h2>1. Recomendación General y Estándar</h2>
+<p>En la gran mayoría de los escenarios de clonación de discos o USB en hardware moderno (SSD, NVMe, o HDD recientes), el mejor rendimiento se obtiene con valores grandes.</p>
+<div class="tabla"><table><thead><tr><th><strong>Escenario</strong></th><th><strong>Valor de bs Recomendado</strong></th><th><strong>Razón</strong></th></tr></thead><tbody><tr><td><strong>Copia rápida de un disco o imagen completa</strong> (Uso más común)</td><td><strong>bs=1M</strong> o <strong>bs=4M</strong></td><td>Estos valores grandes minimizan la sobrecarga de E/S del sistema operativo, permitiendo que la caché del disco duro (si existe) y el controlador se optimicen.</td></tr><tr><td><strong>Buena opción predeterminada y rápida</strong></td><td><strong>bs=64K</strong> (El valor del ejemplo)</td><td>Es un buen equilibrio y casi siempre ofrece una mejora masiva respecto al valor predeterminado de 512 bytes.</td></tr></tbody></table></div>
+<h2>2. Escenarios Específicos</h2>
+<p>La configuración óptima de bs puede variar ligeramente dependiendo de lo que estés haciendo:</p>
+<div class="tabla"><table><thead><tr><th><strong>Escenario</strong></th><th><strong>Configuración de bs</strong></th><th><strong>Razón</strong></th></tr></thead><tbody><tr><td><strong>Máximo rendimiento (Sistemas con mucha RAM)</strong></td><td><strong>bs=16M</strong>, <strong>bs=32M</strong>, o <strong>bs=64M</strong></td><td>Si tienes mucha memoria RAM disponible, aumentar el bs a estos valores puede mejorar la velocidad al permitir que el sistema bufferice grandes bloques de datos antes de escribirlos. Sin embargo, en la práctica, las mejoras sobre 1M o 4M suelen ser mínimas o nulas.</td></tr><tr><td><strong>Recuperación de datos de un disco defectuoso</strong></td><td><strong>bs=4K</strong> o <strong>bs=8K</strong></td><td>Si el disco de origen (<code>/dev/sdX</code>) tiene <strong>sectores dañados</strong>, es mejor usar un tamaño de bloque pequeño que sea un múltiplo del tamaño del sector físico (generalmente 4096 bytes o <strong>4K</strong>). Esto, combinado con conv=noerror,sync, minimiza la pérdida de datos alrededor de los sectores fallidos, aunque el proceso es mucho más lento.</td></tr><tr><td><strong>Copia de cargadores de arranque (MBR/GPT)</strong></td><td><strong>bs=512</strong></td><td>Si solo quieres copiar una parte muy específica como el <strong>Master Boot Record (MBR)</strong>, necesitas un bs pequeño (el tamaño de un sector antiguo) junto con el parámetro count. Ejemplo: bs=512 count=1.</td></tr></tbody></table></div>
+<h2>Principio Clave</h2>
+<p>El principio general es:</p>
+<p><strong>Aumentar bs para aumentar la velocidad (rendimiento), y reducir bs para aumentar la precisión (recuperación de errores).</strong></p>
+<p>Para la mayoría de las operaciones de clonación, <strong>bs=1M</strong> o <strong>bs=4M</strong> es el valor más utilizado y práctico para optimizar la velocidad sin exagerar el uso de memoria.</p>
+<h2>Copiar la tabla de particiones</h2>
+<p>Para copiar solo la <strong>tabla de particiones</strong> (el esquema de particionamiento, generalmente las primeras 512 bytes del disco) y no todos los datos del disco, la mejor opción es usar el comando dd con un tamaño de bloque (bs) y un contador (count) muy específicos.</p>
+<h2>Comando Óptimo para Copiar la Tabla de Particiones</h2>
+<p>Asumiendo que quieres copiar el <strong>Master Boot Record (MBR)</strong> completo (que incluye el cargador de arranque y la tabla de particiones en los primeros 512 bytes):</p>
+<pre><code>sudo dd if=/dev/sdX of=/ruta/a/backup.mbr bs=512 count=1</code></pre>
+<div class="tabla"><table><thead><tr><th><strong>Parámetro</strong></th><th><strong>Valor</strong></th><th><strong>Propósito</strong></th></tr></thead><tbody><tr><td><strong>bs=512</strong></td><td>Bytes</td><td>Establece el tamaño del bloque a <strong>512 bytes</strong>, que es el tamaño tradicional y estándar del MBR (incluida la tabla de particiones).</td></tr><tr><td><strong>count=1</strong></td><td>Bloque</td><td>Indica a dd que copie <strong>solo un bloque</strong>. Al ser bs=512, esto significa que solo se copian los primeros 512 bytes del disco de origen (<code>/dev/sdX</code>).</td></tr></tbody></table></div>
+<h2>Escenario Adicional: Copiar Solo la Tabla de Particiones (sin el Código de Arranque)</h2>
+<p>Si tu objetivo es ser <em>extremadamente</em> preciso y copiar <strong>solo la tabla de particiones</strong> (que comienza en el byte 446 del MBR y tiene 64 bytes de longitud), el comando sería más complejo, utilizando skip para omitir el código de arranque:</p>
+<pre><code>sudo dd if=/dev/sdX of=/ruta/a/tabla.bin bs=1 skip=446 count=64</code></pre>
+<p>Sin embargo, para la mayoría de las necesidades de <strong>copia de la estructura de particionamiento</strong>, el primer comando (bs=512 count=1) es el más sencillo, seguro y cubre todo lo necesario para restaurar el esquema de particiones del disco.</p>
+<p>Establecer bs=400 para copiar la tabla de particiones <strong>no es la opción ideal</strong> y podría llevar a un resultado incompleto o incorrecto para la mayoría de los formatos de disco.</p>
+<h2>La Tabla de Particiones Necesita 512 Bytes</h2>
+<p>La razón es que la <strong>Tabla de Particiones Principal</strong> (en el caso de MBR) reside dentro del primer sector del disco, que es de <strong>512 bytes</strong>.</p>
+<div class="tabla"><table><thead><tr><th><strong>Parámetro</strong></th><th><strong>Valor</strong></th><th><strong>Resultado con bs=400</strong></th></tr></thead><tbody><tr><td><strong>bs=400</strong></td><td>400 bytes</td><td>dd leerá y escribirá bloques de 400 bytes.</td></tr><tr><td><strong>count=1</strong> (asumido)</td><td>1 bloque</td><td>Solo copiaría los <strong>primeros 400 bytes</strong> del disco.</td></tr></tbody></table></div>
+<p><strong>Problema:</strong> Si solo copias 400 bytes, <strong>te faltarían los últimos 112 bytes</strong> del sector, que contienen información vital, incluyendo:</p>
+<ol><li>Parte de la <strong>Tabla de Particiones</strong>.</li><li>La <strong>Firma del Final del MBR</strong> (0x55AA), que el sistema necesita para validar el sector de arranque.</li></ol>
+<h2>La Opción Correcta (MBR)</h2>
+<p>Para copiar la estructura de particiones de un disco MBR, debes asegurarte de copiar el sector de arranque completo (512 bytes):</p>
+<pre><code>sudo dd if=/dev/sdX of=/ruta/a/backup.mbr bs=512 count=1</code></pre>
+<ul><li><strong>bs=512</strong> garantiza que copias el <strong>sector lógico completo</strong> de la forma más precisa y universal para esta tarea.</li></ul>
+<h2>Nota sobre Discos Modernos (GPT/4K Sectores)</h2>
+<p>Aunque los discos modernos utilizan a menudo sectores físicos de 4096 bytes (4K) y el esquema GPT, la interfaz que presenta el sistema operativo (sector lógico) es, por compatibilidad, todavía de <strong>512 bytes</strong>. Por lo tanto, bs=512 sigue siendo la mejor práctica para copiar solo la tabla de particiones.</p>

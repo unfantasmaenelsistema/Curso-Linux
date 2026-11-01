@@ -1,0 +1,167 @@
+<h2>Comandos Linux para Administrar y Monitorear Servidores</h2>
+<h2>1. Información del Sistema</h2>
+<ul><li><strong>Versión del SO (método 1):</strong></li></ul>
+<pre><code>cat /etc/*release</code></pre>
+<ul><li><strong>Versión del SO (método 2):</strong></li></ul>
+<pre><code>lsb_release -a</code></pre>
+<ul><li><strong>Arquitectura</strong> (32 o 64 bits):</li></ul>
+<pre><code>uname -m</code></pre>
+<ul><li><strong>Versión de Centos:</strong></li></ul>
+<pre><code>cat /etc/centos-release</code></pre>
+<ul><li><strong>Versión del Kernel:</strong></li></ul>
+<pre><code>uname -r</code></pre>
+<h2>2. Historial de Comandos</h2>
+<ul><li><strong>Listar todos</strong> los comandos:</li></ul>
+<p>History</p>
+<ul><li>Listar los <strong>últimos N</strong> comandos (ej. 20):</li></ul>
+<pre><code>history 20</code></pre>
+<ul><li><strong>Re-ejecutar</strong> un comando por su número (ej. 77):</li></ul>
+<pre><code>!77</code></pre>
+<ul><li><strong>Borrar historial:</strong></li></ul>
+<pre><code>history -c</code></pre>
+<ul><li><strong>Archivo del historial</strong> por usuario:</li></ul>
+<p>. _history</p>
+<h2>3. Gestión de Archivos y Directorios</h2>
+<h2>Rutas y Listado</h2>
+<ul><li>Indicar la <strong>ruta actual</strong>:</li></ul>
+<pre><code>pwd</code></pre>
+<ul><li><strong>Listar archivos</strong> y sus tamaños:</li></ul>
+<pre><code>ls -sh</code></pre>
+<ul><li>Listar archivos y <strong>ordenar por fecha</strong> de modificación:</li></ul>
+<pre><code>ls -t</code></pre>
+<ul><li>Mostrar <strong>permisos</strong> de un archivo en formato numérico (ej. 777):</li></ul>
+<pre><code>stat -c %a nombre_archivo</code></pre>
+<ul><li><strong>Borrar una carpeta</strong> y todas sus subcarpetas:</li></ul>
+<pre><code>rm -rf nombre_carpeta</code></pre>
+<h2>Búsqueda de Archivos</h2>
+<ul><li>Buscar en <strong>todo el sistema</strong> por nombre:</li></ul>
+<pre><code>find / -name nombre_archivo</code></pre>
+<ul><li>Buscar en la <strong>carpeta actual</strong> por nombre:</li></ul>
+<pre><code>find -name nombre_archivo</code></pre>
+<ul><li>Buscar solo <strong>carpetas</strong>:</li></ul>
+<pre><code>find / -type d -name carpeta_que_busco*</code></pre>
+<ul><li>Buscar solo <strong>archivos</strong>:</li></ul>
+<pre><code>find / -type f -name archivo_que_busco*</code></pre>
+<ul><li>Buscar por <strong>permisos</strong> (ej. 777):</li></ul>
+<pre><code>find / -type d -perm 777</code></pre>
+<ul><li>Buscar archivos que estén <strong>vacíos</strong>:</li></ul>
+<pre><code>find . -type f -empty</code></pre>
+<ul><li>Buscar por <strong>tamaño</strong> (ej. 21KB o 5MB):</li></ul>
+<pre><code>find . -size 21k
+find . -size 5M</code></pre>
+<ul><li>Archivos <strong>modificados</strong> en las últimas 48h:</li></ul>
+<pre><code>find . -tipe f -dtime 2</code></pre>
+<ul><li><strong>Localizar</strong> un binario, fuente o manual:</li></ul>
+<pre><code>whereis grep</code></pre>
+<ul><li>Instalar locate (si no es nativo)</li></ul>
+<pre><code>apt-get install mlocate</code></pre>
+<ul><li>Crear la <strong>base de datos</strong> de locate:</li></ul>
+<p>Updatedb</p>
+<ul><li>Buscar con locate:</li></ul>
+<pre><code>locate nombre_paquete</code></pre>
+<h2>4. Gestión de Usuarios y Grupos</h2>
+<ul><li><strong>Listar usuarios</strong> (Ubuntu):</li></ul>
+<pre><code>compgen -u</code></pre>
+<ul><li><strong>Listar grupos</strong>:</li></ul>
+<pre><code>compgen -g</code></pre>
+<ul><li><strong>Agregar grupo</strong>:</li></ul>
+<p>group add nombre_grupo</p>
+<ul><li><strong>Borrar grupo</strong>:</li></ul>
+<p>group del nombre_grupo</p>
+<ul><li><strong>Agregar usuario</strong>:</li></ul>
+<p>Adduser</p>
+<ul><li>Mostrar a <strong>qué grupos pertenece</strong> un usuario:</li></ul>
+<pre><code>groups nombre_user</code></pre>
+<ul><li><strong>Agregar usuario a un grupo</strong> (ej. sudo):</li></ul>
+<pre><code>usermod -aG nombre_grupo nombre_usuario
+usermod -aG sudo nombre_usuario</code></pre>
+<ul><li><strong>Borrar usuario</strong> y todos sus archivos:</li></ul>
+<pre><code>deluser --remove-home nomre_usuario</code></pre>
+<ul><li><strong>Cambiar contraseña</strong> del usuario actual:</li></ul>
+<p>Passwd</p>
+<ul><li><strong>Cambiar contraseña</strong> de un usuario específico:</li></ul>
+<pre><code>passwd nombre_user</code></pre>
+<h2>5. Monitoreo de Recursos y Procesos</h2>
+<ul><li><strong>Tiempo encendido</strong> del servidor:</li></ul>
+<pre><code>uptime</code></pre>
+<ul><li><strong>Espacio en disco</strong> (Formato legible):</li></ul>
+<pre><code>df -h</code></pre>
+<ul><li>Listar <strong>espacio ocupado</strong> por carpetas (Nivel 1):</li></ul>
+<pre><code>du -h --max-depth=1 | sort -hr</code></pre>
+<ul><li><strong>Memoria RAM</strong> disponible:</li></ul>
+<pre><code>free -h</code></pre>
+<ul><li><strong>Verificación de procesos</strong> (interactivo):</li></ul>
+<pre><code>top</code></pre>
+<ul><li>Listar <strong>todos los procesos</strong>:</li></ul>
+<pre><code>ps -a</code></pre>
+<ul><li>Listar procesos (versión completa):</li></ul>
+<pre><code>ps -axF</code></pre>
+<ul><li><strong>Matar proceso</strong> por PID:</li></ul>
+<pre><code>kill -9 numero_proceso</code></pre>
+<ul><li><strong>Matar proceso</strong> por nombre:</li></ul>
+<pre><code>pkill nombre_proceso</code></pre>
+<ul><li><strong>Verificación de puertos</strong> y conexiones:</li></ul>
+<pre><code>netstat -atun</code></pre>
+<ul><li>Verificar <strong>qué proceso tiene tomado un puerto</strong>:</li></ul>
+<pre><code>netstat -tulpn</code></pre>
+<ul><li>Tiempos de respuesta (I/O):</li></ul>
+<pre><code>iostat</code></pre>
+<h2>6. Logs del Sistema y Servicios</h2>
+<ul><li>Mostrar <strong>log en tiempo real</strong>:</li></ul>
+<pre><code>tail -f</code></pre>
+<ul><li>Mostrar últimas N líneas de un log:</li></ul>
+<pre><code>tail -n ruta_archivo</code></pre>
+<ul><li><strong>Intentos de acceso</strong> como root (últimos 10):</li></ul>
+<pre><code>grep root /var/log/auth.log | tail -10</code></pre>
+<ul><li>Estado del <strong>servicio de logs</strong> (rsyslog):</li></ul>
+<pre><code>service rsyslog status</code></pre>
+<ul><li>Logs de <strong>instalaciones</strong>:</li></ul>
+<pre><code>/var/log/apt/history.log</code></pre>
+<ul><li>Logs de <strong>login/autenticación</strong>:</li></ul>
+<pre><code>/var/log/auth.log</code></pre>
+<ul><li>Logs de <strong>Errores de Apache</strong>:</li></ul>
+<pre><code>cat /var/log/apache2/error.log</code></pre>
+<ul><li>Logs de <strong>Errores de Nginx</strong>:</li></ul>
+<pre><code>cat /var/log/nginx/error.log</code></pre>
+<ul><li>Logs de <strong>Errores de MySQL</strong>:</li></ul>
+<pre><code>cat /var/log/mysql/error.log</code></pre>
+<h2>7. Gestión de Paquetes</h2>
+<ul><li><strong>Ver paquetes instalados</strong>:</li></ul>
+<pre><code>dpkg -l</code></pre>
+<ul><li>Listar paquetes según su peso:</li></ul>
+<pre><code>dpkg-query --show --showformat='${Package;-50}\t${Installed-Size}\n' | sort -k 2 -n</code></pre>
+<ul><li><strong>Desinstalar paquete</strong>:</li></ul>
+<pre><code>apt-get remove nombre_paquete</code></pre>
+<ul><li><strong>Desinstalar y purgar</strong> configuración:</li></ul>
+<pre><code>apt-get purge nombre_paquete</code></pre>
+<ul><li><strong>Limpiar caché</strong> de paquetes:</li></ul>
+<pre><code>apt-get clean nombre_paquete</code></pre>
+<h2>8. Configuración de Zona Horaria</h2>
+<ul><li>Instalar paquete tzdata:</li></ul>
+<pre><code>apt-get install tzdata</code></pre>
+<ul><li>Listar <strong>zona horaria actual</strong>:</li></ul>
+<pre><code>timedatectl</code></pre>
+<ul><li>Listar todas las <strong>zonas horarias</strong>:</li></ul>
+<pre><code>timedatectl list-timezones</code></pre>
+<ul><li><strong>Setear zona horaria</strong> (ej. Buenos Aires):</li></ul>
+<pre><code>timedatectl set-timezone America/Argentina/Buenos_Aires</code></pre>
+<h2>9. Montar Unidades de Discos</h2>
+<ul><li>Listar unidades de discos:</li></ul>
+<pre><code>sudo fdisk -l</code></pre>
+<ul><li>Crear carpeta para montaje (ej. USB):</li></ul>
+<pre><code>sudo mkdir /media/usb</code></pre>
+<ul><li>Montar unidad (ej. <code>/dev/sdb1</code>):</li></ul>
+<pre><code>sudo mount /dev/sdb1 /media/usb</code></pre>
+<ul><li>Desmontar unidad:</li></ul>
+<pre><code>sudo umount /media/usb</code></pre>
+<h2>10. Scripts y Docker</h2>
+<ul><li>Dar <strong>permisos de ejecución</strong> a un script:</li></ul>
+<pre><code>chmod +x nombre_archivo.sh</code></pre>
+<ul><li><strong>Ejecutar script</strong>:</li></ul>
+<pre><code>./nomhre_script.sh</code></pre>
+<ul><li><strong>Ejecutar comando en Docker</strong> como root:</li></ul>
+<pre><code>docker exec -u 0 -i -t --privileged 204a5d5419b2 /bin/</code></pre>
+<ul><li><strong>Restablecer el escritorio</strong> de Ubuntu:</li></ul>
+<pre><code>dconf reset -f /</code></pre>
+<ul><li>Localizar dónde está instalado git:</li></ul>
+<pre><code>whereis git</code></pre>

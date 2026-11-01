@@ -1,0 +1,31 @@
+<p>El <em>script</em> <strong>System-Monitor</strong> es una herramienta <strong>Bash</strong> diseñada para sistemas Linux/Unix que proporciona una monitorización en <strong>tiempo real</strong> del uso de la <strong>CPU</strong>, <strong>memoria</strong> y <strong>disco</strong>. El <em>script</em> se actualiza automáticamente cada pocos segundos y ofrece varias opciones de configuración.</p>
+<div class="tabla"><table><thead><tr><th>Característica</th><th>Descripción</th></tr></thead><tbody><tr><td><strong>Función Principal</strong></td><td>Monitoriza y muestra el uso de recursos principales del sistema (CPU, RAM, Disco) en tiempo real.</td></tr><tr><td><strong>Tecnología</strong></td><td>Es un <em>script</em> de <em>Shell</em> (Bash) que utiliza comandos nativos de Linux.</td></tr><tr><td><strong>Actualización</strong></td><td>El <em>script</em> se refresca por defecto cada 5 segundos.</td></tr><tr><td><strong>Ventajas</strong></td><td>Fácil de usar, configurable (intervalo, puntos de montaje de disco) y cuenta con un instalador/desinstalador simple.</td></tr></tbody></table></div>
+<h2>Instalación Paso a Paso</h2>
+<p>El proceso es muy sencillo ya que el repositorio incluye un <em>script</em> de instalación (install.sh).</p>
+<h2>Paso 1: Clonar el Repositorio</h2>
+<p>Abre tu terminal y descarga el código fuente:</p>
+<pre><code>git clone https://github.com/elliotsecops/System-Monitor.git
+cd System-Monitor</code></pre>
+<h2>Paso 2: Dar Permiso de Ejecución</h2>
+<p>Es necesario otorgar permiso de ejecución al <em>script</em> principal y al <em>script</em> de instalación:</p>
+<pre><code>chmod u+x system_monitor.sh
+chmod u+x install.sh</code></pre>
+<figure><img src="../media/system-monitor/imagen1.webp" width="732" height="260" alt="Captura 1 de la lección «System-Monitor: script de monitorización»" loading="lazy" decoding="async"></figure>
+<h2>Paso 3: Instalar el Script</h2>
+<p>Ejecuta el <em>script</em> de instalación. Este paso moverá el archivo ejecutable a una ubicación accesible en tu sistema (probablemente a <code>/usr/local/bin</code>) para que puedas llamarlo directamente desde cualquier directorio.</p>
+<pre><code>./install.sh</code></pre>
+<p>Una vez completada la instalación, ya no es necesario estar en el directorio System-Monitor para ejecutar la herramienta.</p>
+<figure><img src="../media/system-monitor/imagen2.webp" width="728" height="100" alt="Captura 2 de la lección «System-Monitor: script de monitorización»" loading="lazy" decoding="async"></figure>
+<h2>Ejecución y Uso</h2>
+<h2>Uso Básico</h2>
+<p>Para ejecutar el monitor con la configuración predeterminada (actualización cada 5 segundos y monitoreo del disco raíz), simplemente escribe el nombre del <em>script</em>:</p>
+<p>system_monitor</p>
+<h2>Opciones de la Línea de Comandos</h2>
+<p>Puedes usar las siguientes banderas para configurar el comportamiento del monitor:</p>
+<div class="tabla"><table><thead><tr><th>Opción</th><th>Comando de Ejemplo</th><th>Descripción</th></tr></thead><tbody><tr><td><strong>Establecer Intervalo</strong></td><td>system_monitor -i 10</td><td>Configura el intervalo de actualización a 10 segundos.</td></tr><tr><td><strong>Añadir Discos</strong></td><td>system_monitor -d <code>/mnt/data</code></td><td>Añade puntos de montaje de disco para monitorizar (puedes usar -d múltiples veces).</td></tr><tr><td><strong>Cargar Configuración</strong></td><td>system_monitor -c config.sh</td><td>Carga las configuraciones predeterminadas desde un archivo externo.</td></tr><tr><td><strong>Ayuda</strong></td><td>system_monitor -h</td><td>Muestra el mensaje de ayuda.</td></tr></tbody></table></div>
+<h2>Detener el Monitoreo</h2>
+<p>Para detener el <em>script</em> de monitorización y volver al <em>prompt</em> de tu terminal, simplemente presiona:</p>
+<p>Ctrl+C</p>
+<h2>Desinstalación</h2>
+<p>Si deseas eliminar el <em>script</em> del sistema, puedes usar el <em>script</em> de desinstalación incluido:</p>
+<pre><code>./uninstall.sh</code></pre>

@@ -1,0 +1,78 @@
+<h2>1. Conceptos Fundamentales</h2>
+<h2>Proceso (Process)</h2>
+<p>Un <strong>proceso</strong> es una instancia de un programa en ejecución. Cuando inicias cualquier programa (desde el <em>shell</em> de comandos hasta un navegador web), el sistema operativo lo convierte en uno o varios procesos.</p>
+<ul><li><strong>PID (Process ID)</strong>: Un número único asignado a cada proceso, utilizado por el sistema para identificarlo.</li><li><strong>PPID (Parent Process ID)</strong>: El PID del proceso que inició el proceso actual. Todos los procesos tienen un padre (excepto el primero, init o systemd).</li></ul>
+<h2>Servicio (Service)</h2>
+<p>Un <strong>servicio</strong> (o <strong>daemon</strong>) es un tipo especial de proceso que se ejecuta en segundo plano, a menudo sin interacción directa del usuario, y generalmente se inicia al arrancar el sistema. Los servicios proporcionan funcionalidad esencial al sistema (ej. servidor web Nginx, servidor SSH, gestor de red).</p>
+<h2>El Sistema Init/Systemd</h2>
+<p>El primer proceso que arranca en Linux es tradicionalmente el proceso <strong>init</strong> (PID 1). En las distribuciones modernas (como Fedora, Ubuntu, Debian, RHEL), <strong>systemd</strong> ha reemplazado a init como el gestor de arranque y de servicios predeterminado.</p>
+<ul><li><strong>systemd</strong>: Es el <strong>sistema de inicialización</strong> y el <strong>gestor de servicios</strong>. Controla el inicio, la detención, el reinicio y el estado de casi todos los <em>servicios</em> en el sistema.</li></ul>
+<h2>2. Administración de Procesos</h2>
+<p>La administración de procesos se centra en monitorear, controlar y finalizar tareas en tiempo real.</p>
+<h2>Monitoreo de Procesos</h2>
+<div class="tabla"><table><thead><tr><th><strong>Comando</strong></th><th><strong>Función</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td><strong>ps</strong></td><td>Mostrar lista estática de procesos</td><td>Muestra los procesos que se ejecutan en el momento que se ejecuta el comando.</td></tr><tr><td><strong>ps aux</strong></td><td>Ver todos los procesos</td><td>Muestra todos los procesos, incluyendo los que no están asociados a una terminal (la combinación de opciones más común).</td></tr><tr><td><strong>top</strong></td><td>Monitoreo interactivo</td><td>Muestra una lista dinámica y ordenada de procesos, actualizándose en tiempo real. Ideal para ver el consumo de CPU y memoria.</td></tr><tr><td><strong>htop</strong></td><td><code>top mejorado</code></td><td>Es una versión más avanzada y fácil de usar de top, con barras de progreso de CPU/Memoria y navegación por teclado.</td></tr></tbody></table></div>
+<h2>Ejemplo de ps</h2>
+<p>Para buscar procesos que contengan una palabra clave específica (ej. nginx):</p>
+<pre><code>ps aux | grep nginx</code></pre>
+<h2>Control de Procesos (Señales)</h2>
+<p>Linux utiliza <strong>señales</strong> para comunicarse con los procesos. El comando clave para enviar señales es <strong>kill</strong> (o killall para matar todos los procesos con un nombre específico).</p>
+<div class="tabla"><table><thead><tr><th><strong>Señal</strong></th><th><strong>Número</strong></th><th><strong>Comando</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td><strong>TERM</strong></td><td>15</td><td><code>kill &lt;PID&gt;</code></td><td><strong>Terminar</strong> (Por defecto). Pide al proceso que finalice de forma ordenada, guardando su trabajo.</td></tr><tr><td><strong>KILL</strong></td><td>9</td><td><code>kill -9 &lt;PID&gt;</code></td><td><strong>Matar</strong>. Fuerza la terminación inmediata del proceso. <strong>Usar como último recurso</strong>, ya que no permite al proceso limpiarse.</td></tr><tr><td><strong>HUP</strong></td><td>1</td><td><code>kill -1 &lt;PID&gt;</code></td><td><strong>Colgar/Recargar</strong>. Se usa comúnmente para indicarle a un servicio que <strong>recargue su archivo de configuración</strong> sin detenerse.</td></tr></tbody></table></div>
+<h2>Ejemplos de kill</h2>
+<pre><code># 1. Encontrar el PID de un proceso
+pgrep Firefox</code></pre>
+<figure><img src="../media/procesos-y-servicios/imagen1.webp" width="467" height="50" alt="Captura 1 de la lección «Administración de procesos y servicios»" loading="lazy" decoding="async"></figure>
+<pre><code># 2. Enviar la señal TERM (suave)
+kill 22664
+# 3. Enviar la señal KILL (forzosa)
+kill -9 22664
+# Usar killall (por nombre)
+killall firefox</code></pre>
+<h2>Tareas en Primer Plano y Segundo Plano</h2>
+<p>Cuando ejecutas un programa desde la terminal:</p>
+<ul><li><strong>Primer Plano (Foreground)</strong>: El programa toma el control de la terminal y no puedes ejecutar más comandos hasta que finalice.</li><li><strong>Segundo Plano (Background)</strong>: El programa se ejecuta "detrás de escena", liberando la terminal para que puedas seguir trabajando.</li></ul>
+<div class="tabla"><table><thead><tr><th><strong>Comando</strong></th><th><strong>Función</strong></th></tr></thead><tbody><tr><td><strong>&amp;</strong></td><td>Ejecutar un comando en segundo plano: comando &amp;</td></tr><tr><td><strong>Ctrl + Z</strong></td><td>Suspender un trabajo en primer plano y enviarlo a segundo plano.</td></tr><tr><td><strong>jobs</strong></td><td>Listar los trabajos suspendidos o en segundo plano.</td></tr><tr><td><strong>fg</strong></td><td>Traer el último trabajo de segundo plano al primer plano.</td></tr><tr><td><strong>bg</strong></td><td>Reanudar un trabajo suspendido en segundo plano.</td></tr></tbody></table></div>
+<h2>3. Administración de Servicios (Systemd)</h2>
+<p>En casi todas las distribuciones modernas (Debian, Ubuntu, Fedora, RHEL), se utiliza el comando <strong>systemctl</strong> para controlar los servicios gestionados por <strong>Systemd</strong>.</p>
+<h2>Comandos Básicos de systemctl</h2>
+<div class="tabla"><table><thead><tr><th><strong>Tarea</strong></th><th><strong>Comando systemctl</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td><strong>Verificar Estado</strong></td><td><code>systemctl status &lt;servicio&gt;</code></td><td>Muestra si el servicio está activo, su estado actual y las últimas entradas de registro.</td></tr><tr><td><strong>Iniciar</strong></td><td><code>sudo systemctl start &lt;servicio&gt;</code></td><td>Arranca un servicio que está detenido.</td></tr><tr><td><strong>Detener</strong></td><td><code>sudo systemctl stop &lt;servicio&gt;</code></td><td>Finaliza la ejecución de un servicio.</td></tr><tr><td><strong>Reiniciar</strong></td><td><code>sudo systemctl restart &lt;servicio&gt;</code></td><td>Detiene y luego vuelve a iniciar el servicio.</td></tr><tr><td><strong>Recargar</strong></td><td><code>sudo systemctl reload &lt;servicio&gt;</code></td><td>Indica al servicio que relea su configuración sin detener el proceso principal (si el servicio lo soporta).</td></tr></tbody></table></div>
+<h2>Ejemplo de Uso</h2>
+<pre><code># Verificar el estado del servidor SSH</code></pre>
+<p>Deberíamos tenerlo instalado en el sistema pero si no:</p>
+<pre><code>sudo apt update
+sudo apt install openssh-server
+systemctl status sshd
+o
+systemctl status ssh</code></pre>
+<p>Usa el comando start para iniciar el servicio en tu sesión actual:</p>
+<pre><code>sudo systemctl start ssh</code></pre>
+<h5>¿Por qué usar ssh en lugar de sshd?</h5>
+<p>El comando systemctl busca archivos de configuración llamados unidades (terminados en .service). En muchas distribuciones, el archivo se llama <code>/lib/systemd/system/ssh.service</code>. El comando systemctl status ssh usa este archivo para interactuar con el demonio que sí se llama sshd.</p>
+<figure><img src="../media/procesos-y-servicios/imagen2.webp" width="743" height="444" alt="Captura 2 de la lección «Administración de procesos y servicios»" loading="lazy" decoding="async"></figure>
+<h2>Control de Inicio Automático (Enable/Disable)</h2>
+<p>Para que un servicio se inicie automáticamente cada vez que el sistema arranca, debes habilitarlo (<strong>enable</strong>). Para que no se inicie automáticamente, debes deshabilitarlo (<strong>disable</strong>).</p>
+<div class="tabla"><table><thead><tr><th><strong>Tarea</strong></th><th><strong>Comando systemctl</strong></th></tr></thead><tbody><tr><td><strong>Habilitar Inicio</strong></td><td><code>sudo systemctl enable &lt;servicio&gt;</code></td></tr><tr><td><strong>Deshabilitar Inicio</strong></td><td><code>sudo systemctl disable &lt;servicio&gt;</code></td></tr><tr><td><strong>Verificar Habilitación</strong></td><td><code>systemctl is-enabled &lt;servicio&gt;</code></td></tr></tbody></table></div>
+<h2>Ejemplo</h2>
+<pre><code># Habilitar el servidor web Apache</code></pre>
+<p>Si no lo tenemos instalado lo podemos hacer con:</p>
+<pre><code>sudo apt update
+sudo apt install apache2
+sudo systemctl enable apache2
+# Deshabilitar el servidor de impresión (si no se necesita)
+sudo systemctl disable cups</code></pre>
+<p>Para volver a habilitar el servicio CUPS y configurar que se inicie automáticamente en el arranque, debes usar el comando systemctl enable:</p>
+<pre><code>sudo systemctl enable cups.service</code></pre>
+<h2>Listar Servicios</h2>
+<pre><code># Listar todas las unidades (servicios, sockets, etc.) activas
+systemctl list-units --type=service
+# Listar todas las unidades instaladas, activas o inactivas
+systemctl list-unit-files --type=service</code></pre>
+<h2>Archivos Unit (Unidad de Servicio)</h2>
+<p>Cada servicio está definido por un <strong>archivo de unidad</strong> (Unit File) con la extensión <strong>.service</strong>. Estos archivos especifican cómo Systemd debe gestionar el servicio (qué comando ejecutar, qué dependencias tiene, dónde escribir los logs, etc.).</p>
+<ul><li><strong>Ubicación Principal:</strong> <code>/etc/systemd/system/</code> (para archivos creados/modificados por el administrador).</li><li><strong>Ubicación de Distribución:</strong> <code>/lib/systemd/system/</code> (para archivos provistos por los paquetes de software).</li></ul>
+<pre><code>cd /etc/systemd/system/
+ls
+cd /lib/systemd/system/
+ls</code></pre>
+<figure><img src="../media/procesos-y-servicios/imagen3.webp" width="569" height="466" alt="Captura 3 de la lección «Administración de procesos y servicios»" loading="lazy" decoding="async"></figure>
+<p>Si modificas un archivo de unidad, <strong>siempre</strong> debes notificar a Systemd para que relea los archivos antes de usar el servicio:</p>
+<pre><code>sudo systemctl daemon-reload</code></pre>

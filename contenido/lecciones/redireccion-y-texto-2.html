@@ -1,0 +1,206 @@
+<pre><code>cut, sort, uniq, wc, y tee</code></pre>
+<p>Utilizaremos los siguientes archivos de ejemplo simulando el entorno de jose en Ubuntu 24.04:</p>
+<h3>Archivo de Ejemplo: datos_ventas.csv</h3>
+<pre><code>cat &lt;&lt; EOF &gt; /home/jose/datos_ventas.csv
+Nombre,Producto,Cantidad,Precio,Ciudad
+Ana,Laptop,2,1200,Madrid
+Pedro,Mouse,5,25,Barcelona
+Maria,Teclado,1,70,Madrid
+Jose,Laptop,1,1200,Sevilla
+Ana,Monitor,3,300,Barcelona
+Maria,Mouse,2,25,Sevilla
+Pedro,Laptop,3,1200,Madrid
+EOF</code></pre>
+<h3>Archivo de Ejemplo: lista_productos.txt</h3>
+<pre><code>cat &lt;&lt; EOF &gt; /home/jose/lista_productos.txt
+Laptop
+Mouse
+Teclado
+Monitor
+Laptop
+Mouse
+Teclado
+Laptop
+EOF</code></pre>
+<h3>6. Comando cut (Cortar)</h3>
+<p>El comando <strong>cut</strong> se utiliza para extraer secciones o columnas de cada línea de un archivo. Es fundamental para trabajar con archivos de datos delimitados (como CSV).</p>
+<div class="tabla"><table><thead><tr><th>Opción Común</th><th>Descripción</th></tr></thead><tbody><tr><td>-d 'DELIMITADOR'</td><td>Especifica el carácter delimitador de campos (ej: ,, , |).</td></tr><tr><td>-f LISTA_CAMPOS</td><td>Especifica los campos (columnas) a cortar. Puede ser un solo número (ej: 2), un rango (ej: 1-3), o una lista separada por comas (ej: 1,5).</td></tr></tbody></table></div>
+<h3>Ejemplos Prácticos con cut</h3>
+<div class="tabla"><table><thead><tr><th><strong>Tarea</strong></th><th><strong>Comando Ejecutado por jose</strong></th><th><strong>Resultado y Explicación</strong></th></tr></thead><tbody><tr><td><strong>Extraer nombres y ciudades</strong></td><td><code>cut -d ',' -f 1,5 datos_ventas.csv</code></td><td>Extrae el primer campo (Nombre) y el quinto campo (Ciudad), usando la coma (,) como delimitador.</td></tr><tr><td><strong>Extraer precios</strong></td><td><code>cut -d ',' -f 4 datos_ventas.csv</code></td><td>Muestra solo los valores de la columna Precio.</td></tr><tr><td><strong>Extraer desde el campo 3 en adelante</strong></td><td><code>cut -d ',' -f 3- datos_ventas.csv</code></td><td>Muestra los campos Cantidad, Precio y Ciudad.</td></tr></tbody></table></div>
+<h3>7. Comando sort (Ordenar)</h3>
+<p>El comando <strong>sort</strong> ordena las líneas de un archivo de texto. Por defecto, ordena alfabéticamente (orden lexicográfico).</p>
+<div class="tabla"><table><thead><tr><th><strong>Opción Común</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-r</td><td>Ordena en <strong>orden inverso</strong> (descendente).</td></tr><tr><td>-n</td><td>Ordena por el <strong>valor numérico</strong> de la línea o campo.</td></tr><tr><td>-k N</td><td>Ordena por el <strong>campo (columna) número N</strong>. Requiere usar -t si el archivo no está separado por espacios.</td></tr><tr><td>-t 'DELIMITADOR'</td><td>Especifica el delimitador de campos.</td></tr></tbody></table></div>
+<h3>Ejemplos Prácticos con sort</h3>
+<div class="tabla"><table><thead><tr><th><strong>Tarea</strong></th><th><strong>Comando Ejecutado por jose</strong></th><th><strong>Resultado y Explicación</strong></th></tr></thead><tbody><tr><td><strong>Ordenar alfabéticamente (por defecto)</strong></td><td><code>sort lista_productos.txt</code></td><td>Ordena las líneas de lista_productos.txt alfabéticamente (A-Z).</td></tr><tr><td><strong>Ordenar por Precio (numérico)</strong></td><td><code>sort -t ',' -k 4 -n datos_ventas.csv</code></td><td>Ordena el archivo datos_ventas.csv numéricamente (-n) basándose en el campo 4 (-k 4), usando la coma como separador (-t ',').</td></tr><tr><td><strong>Ordenar por Nombre (inverso)</strong></td><td><code>sort -t ',' -k 1 -r datos_ventas.csv</code></td><td>Ordena por el campo 1 (Nombre) en orden alfabético inverso (Z-A).</td></tr></tbody></table></div>
+<h3>8. Comando uniq (Único)</h3>
+<p>El comando <strong>uniq</strong> filtra o reporta líneas repetidas en un archivo. <strong>Importante:</strong> uniq <strong>solo detecta y opera sobre líneas que son idénticas y están adyacentes (juntas).</strong> Por lo tanto, casi siempre se usa inmediatamente después de sort.</p>
+<div class="tabla"><table><thead><tr><th><strong>Opción Común</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-c</td><td>Cuenta el número de ocurrencias de cada línea única.</td></tr><tr><td>-d</td><td>Muestra solo las líneas que están duplicadas.</td></tr><tr><td>-u</td><td>Muestra solo las líneas que son únicas (no se repiten).</td></tr></tbody></table></div>
+<h3>Ejemplos Prácticos con uniq</h3>
+<div class="tabla"><table><thead><tr><th><strong>Tarea</strong></th><th><strong>Comando Ejecutado por jose</strong></th><th><strong>Resultado y Explicación</strong></th></tr></thead><tbody><tr><td><strong>Mostrar productos únicos</strong></td><td><code>sort lista_productos.txt | uniq</code></td><td>Primero ordena el archivo para agrupar duplicados, luego uniq muestra solo una instancia de cada producto (Laptop, Mouse, Teclado, Monitor).</td></tr><tr><td><strong>Contar ocurrencias</strong></td><td><code>sort lista_productos.txt | uniq -c</code></td><td>Muestra el recuento de cuántas veces aparece cada producto único.</td></tr><tr><td><strong>Listar solo los duplicados</strong></td><td><code>sort lista_productos.txt | uniq -d</code></td><td>Muestra solo los productos que se repiten (Laptop, Mouse, Teclado).</td></tr></tbody></table></div>
+<h3>9. Comando wc (Word Count)</h3>
+<p>El comando <strong>wc</strong> se utiliza para contar el número de líneas, palabras y caracteres/bytes de un archivo. Es útil para obtener métricas rápidas de los archivos.</p>
+<div class="tabla"><table><thead><tr><th><strong>Opción Común</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-l</td><td>Muestra solo el <strong>número de líneas</strong>.</td></tr><tr><td>-w</td><td>Muestra solo el <strong>número de palabras</strong>.</td></tr><tr><td>-c</td><td>Muestra solo el <strong>número de bytes</strong> (caracteres).</td></tr></tbody></table></div>
+<h3>Ejemplos Prácticos con wc</h3>
+<div class="tabla"><table><thead><tr><th><strong>Tarea</strong></th><th><strong>Comando Ejecutado por jose</strong></th><th><strong>Resultado y Explicación</strong></th></tr></thead><tbody><tr><td><strong>Contar líneas, palabras y bytes</strong></td><td><code>wc datos_ventas.csv</code></td><td>Muestra las tres estadísticas (líneas, palabras, bytes) para el archivo datos_ventas.csv.</td></tr><tr><td><strong>Contar solo el número de líneas</strong></td><td><code>wc -l lista_productos.txt</code></td><td>Muestra que el archivo tiene 8 líneas.</td></tr><tr><td><strong>Contar palabras en una columna</strong></td><td><code>cut -d ',' -f 2 datos_ventas.csv | wc -w</code></td><td>Extrae la columna de productos y luego cuenta cuántas "palabras" (productos) hay en esa lista (incluyendo la cabecera).</td></tr></tbody></table></div>
+<h3>10. Comando tee (T de tubería)</h3>
+<p>El comando <strong>tee</strong> lee la entrada estándar y la <strong>escribe tanto a la salida estándar (pantalla) como a uno o más archivos</strong> simultáneamente. Su nombre viene de la forma de la letra 'T', ya que divide el flujo de datos.</p>
+<div class="tabla"><table><thead><tr><th><strong>Opción Común</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-a</td><td><strong>Añade</strong> la salida al archivo en lugar de sobrescribirlo (por defecto, sobrescribe).</td></tr></tbody></table></div>
+<h3>Ejemplos Prácticos con tee</h3>
+<div class="tabla"><table><thead><tr><th><strong>Tarea</strong></th><th><strong>Comando Ejecutado por jose</strong></th><th><strong>Resultado y Explicación</strong></th></tr></thead><tbody><tr><td><strong>Guardar y mostrar simultáneamente</strong></td><td><code>cat informe.log | tee salida_cat.txt</code></td><td>Muestra el contenido de informe.log en la pantalla Y lo guarda en salida_cat.txt (sobrescribiendo el archivo si existe).</td></tr><tr><td><strong>Añadir al archivo y mostrar</strong></td><td><code>echo "Tarea finalizada con éxito." | tee -a informe.log</code></td><td>Muestra el mensaje en la pantalla Y añade (-a) el mensaje al final de informe.log.</td></tr><tr><td><strong>Guardar resultado de un comando</strong></td><td><code>head -n 5 informe.log | tee primeras_lineas.txt</code></td><td>Muestra las primeras 5 líneas en la pantalla Y guarda esas mismas 5 líneas en el archivo primeras_lineas.txt.</td></tr></tbody></table></div>
+<h3>Ejercicios:</h3>
+<h3>Guía práctica: Manipulación y análisis de texto en Linux</h3>
+<p>Usuario: jose</p>
+<p>Sistema operativo: Ubuntu 24.04</p>
+<p>Ruta base: <code>/home/jose/documentos/</code></p>
+<h3>1. Comando cut — Extraer columnas o secciones de texto</h3>
+<p>El comando cut sirve para <strong>extraer columnas o fragmentos</strong> específicos de texto de un archivo o de la salida de otro comando.</p>
+<h3>Sintaxis</h3>
+<pre><code>cut [opciones] [archivo]</code></pre>
+<h3>Opciones más comunes</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-d</td><td>Define el <strong>delimitador</strong> (por defecto es tabulador).</td></tr><tr><td>-f</td><td>Indica el <strong>campo o columna</strong> a mostrar.</td></tr><tr><td>-c</td><td>Extrae <strong>caracteres específicos</strong> por posición.</td></tr></tbody></table></div>
+<h3>Ejemplos prácticos</h3>
+<h3>1.1. Extraer la primera columna de un archivo CSV</h3>
+<p>Supón que tienes usuarios.csv:</p>
+<pre><code>cat &lt;&lt; EOF &gt; /home/jose/Documentos/usuarios.csv
+nombre,correo,edad
+Ana,ana@example.com,28
+José,jose@example.com,33
+Laura,laura@example.com,25
+EOF
+cut -d ',' -f 1 usuarios.csv</code></pre>
+<p>Muestra solo los nombres.</p>
+<h3>1.2. Extraer la segunda y tercera columna</h3>
+<pre><code>cut -d ',' -f 2,3 usuarios.csv</code></pre>
+<p>Muestra el correo y la edad.</p>
+<h3>1.3. Extraer caracteres del 1 al 10 de cada línea</h3>
+<pre><code>cut -c 1-10 notas.txt</code></pre>
+<p>Muestra los primeros 10 caracteres de cada línea.</p>
+<h3>1.4. Usar cut con la salida de otro comando</h3>
+<pre><code>ls -l | cut -d ' ' -f 1,3,9</code></pre>
+<p>Extrae el tipo de archivo, propietario y nombre del archivo.</p>
+<p>No nos muestra el nombre del archivo correctamente porque <strong>ls -l usa múltiples espacios</strong> (y a veces tabulaciones) como separadores, no solo uno.</p>
+<p>Cuando usas cut -d ' ', le indicas que un <strong>único espacio</strong> es el delimitador, lo cual confunde a cut y resulta en la salida desordenada que ves. Los campos que estás seleccionando (1, 3, y 9) se están mezclando con la columna de tamaño (total) y las marcas de tiempo.</p>
+<h3>La Solución Correcta: Usar awk</h3>
+<p>Para analizar la salida de ls -l, que es inconsistente con sus espacios, la herramienta más robusta es <strong>awk</strong>, ya que <strong>trata cualquier secuencia de espacios como un único separador por defecto</strong>.</p>
+<p>El comando correcto es:</p>
+<pre><code>ls -l | awk '{print $1, $3, $9}'</code></pre>
+<h4></h4>
+<div class="tabla"><table><thead><tr><th><strong>Comando/Argumento</strong></th><th><strong>Propósito</strong></th><th><strong>Columna de ls -l</strong></th></tr></thead><tbody><tr><td><strong>ls -l</strong></td><td>Lista el contenido del directorio en formato largo.</td><td></td></tr><tr><td>|</td><td>|</td><td>Pasa la salida de ls -l a la entrada de awk.</td></tr><tr><td><strong>awk</strong></td><td>Utiliza esta herramienta de procesamiento de texto.</td><td></td></tr><tr><td><strong>'{print $1, $3, $9}'</strong></td><td>Le dice a awk que imprima los campos:</td><td></td></tr><tr><td><strong>$1</strong></td><td>El primer campo: <strong>Tipo de archivo y Permisos</strong> (-rw-rw-r--).</td><td>1</td></tr><tr><td><strong>$3</strong></td><td>El tercer campo: <strong>Propietario</strong> (jose).</td><td>3</td></tr><tr><td><strong>$9</strong></td><td>El noveno campo: <strong>Nombre del Archivo</strong> (ej: usuarios.csv).</td><td>9</td></tr></tbody></table></div>
+<h3>2. Comando sort — Ordenar texto o datos</h3>
+<p>sort se usa para <strong>ordenar líneas de texto</strong> de un archivo o de la salida de otro comando. Es ideal para trabajar con listas o informes.</p>
+<h3>Sintaxis</h3>
+<pre><code>sort [opciones] [archivo]</code></pre>
+<h3>Opciones comunes</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-r</td><td>Orden inverso (descendente).</td></tr><tr><td>-n</td><td>Orden numérico.</td></tr><tr><td>-k</td><td>Especifica la <strong>columna</strong> de ordenación.</td></tr><tr><td>-u</td><td>Elimina duplicados (como uniq).</td></tr><tr><td>-t</td><td>Define el <strong>delimitador</strong>.</td></tr></tbody></table></div>
+<h3>Ejemplos prácticos</h3>
+<pre><code>cat &lt;&lt; EOF &gt; /home/jose/Documentos/nombres.txt
+Ana
+Pedro
+Luis
+María
+Carlos
+Sofía
+Javier
+Elena
+EOF</code></pre>
+<h3>2.1. Ordenar un archivo alfabéticamente</h3>
+<pre><code>sort nombres.txt</code></pre>
+<h3>2.2. Ordenar de forma inversa</h3>
+<pre><code>sort -r nombres.txt</code></pre>
+<h3>2.3. Ordenar por edad en un archivo CSV</h3>
+<p>Archivo usuarios.csv</p>
+<pre><code>sort -t ',' -k3 -n usuarios.csv</code></pre>
+<p>Ordena por la <strong>tercera columna</strong> (edad) de forma <strong>numérica</strong>.</p>
+<h3>2.4. Eliminar duplicados automáticamente</h3>
+<pre><code>sort -u nombres.txt</code></pre>
+<h3>3. Comando uniq — Eliminar líneas duplicadas</h3>
+<p>uniq se utiliza para <strong>filtrar líneas duplicadas consecutivas</strong> en un archivo ordenado.</p>
+<p>Para que funcione correctamente, el archivo debe estar <strong>ordenado previamente</strong> (usa sort antes si no lo está).</p>
+<h3>Sintaxis</h3>
+<pre><code>uniq [opciones] [archivo]</code></pre>
+<h3>Opciones comunes</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-c</td><td>Muestra el número de repeticiones.</td></tr><tr><td>-d</td><td>Muestra solo las líneas duplicadas.</td></tr><tr><td>-u</td><td>Muestra solo las líneas únicas.</td></tr></tbody></table></div>
+<h3>Ejemplos prácticos</h3>
+<pre><code>cat &lt;&lt; EOF &gt; /home/jose/Documentos/frutas.txt
+Manzana
+Pera
+Plátano
+Manzana
+Naranja
+Kiwi
+Fresa
+Pera
+Manzana
+Mango
+Naranja
+EOF</code></pre>
+<h3>3.1. Eliminar duplicados consecutivos</h3>
+<pre><code>uniq frutas.txt</code></pre>
+<h3>3.2. Contar cuántas veces se repite cada línea</h3>
+<pre><code>uniq -c frutas.txt</code></pre>
+<p>Salida:</p>
+<p>1 Fresa</p>
+<p>2 Manzana</p>
+<p>3 Pera</p>
+<h3>3.3. Combinar sort y uniq</h3>
+<pre><code>sort frutas.txt | uniq</code></pre>
+<p>Elimina duplicados aunque no estén consecutivos.</p>
+<h3>3.4. Mostrar solo las líneas duplicadas consecutivas</h3>
+<pre><code>uniq -d frutas.txt</code></pre>
+<h3>4. Comando wc — Contar líneas, palabras y caracteres</h3>
+<p>wc (word count) sirve para <strong>contar líneas, palabras, caracteres o bytes</strong> de uno o varios archivos.</p>
+<h3>Sintaxis</h3>
+<pre><code>wc [opciones] [archivo]</code></pre>
+<h3>Opciones comunes</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-l</td><td>Cuenta líneas.</td></tr><tr><td>-w</td><td>Cuenta palabras.</td></tr><tr><td>-c</td><td>Cuenta bytes (tamaño).</td></tr><tr><td>-m</td><td>Cuenta caracteres.</td></tr></tbody></table></div>
+<h3>Ejemplos prácticos</h3>
+<h3>4.1. Contar líneas, palabras y bytes de un archivo</h3>
+<pre><code>wc notas.txt</code></pre>
+<p>Salida típica:</p>
+<p>61 164 1344 notas.txt 12 líneas, 84 palabras, 560 bytes.</p>
+<h3>4.2. Contar solo las líneas</h3>
+<pre><code>wc -l notas.txt</code></pre>
+<h3>4.3. Contar palabras en varios archivos</h3>
+<pre><code>wc -w *.txt</code></pre>
+<p>Muestra el conteo individual y el total.</p>
+<h3>4.4. Usar con otros comandos</h3>
+<pre><code>ls | wc -l</code></pre>
+<p>Muestra cuántos archivos hay en el directorio actual.</p>
+<h3>5. Comando tee — Guardar y mostrar al mismo tiempo</h3>
+<p>tee permite guardar la salida de un comando en un archivo mientras la muestra por pantalla.</p>
+<p>Es muy útil en tuberías (pipes).</p>
+<h3>Sintaxis</h3>
+<pre><code>comando | tee [opciones] [archivo]</code></pre>
+<h3>Opciones comunes</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-a</td><td>Añade (append) al final del archivo sin sobrescribirlo.</td></tr></tbody></table></div>
+<h3>Ejemplos prácticos</h3>
+<h3>5.1. Guardar la salida de un comando y mostrarla</h3>
+<pre><code>ls -l | tee notas.txt</code></pre>
+<p>Muestra la lista de archivos y la guarda en notas.txt.</p>
+<h3>5.2. Añadir sin sobrescribir</h3>
+<pre><code>df -h | tee -a nombres.txt</code></pre>
+<p>Añade el resultado del comando df -h al final de nombres.txt.</p>
+<h3>5.3. Usar tee con varios comandos encadenados</h3>
+<pre><code>cat usuarios.csv | sort | tee ordenado.csv | wc -l</code></pre>
+<p>Ordena el archivo, guarda el resultado en ordenado.csv y muestra cuántas líneas tiene.</p>
+<h3>5.4. Guardar logs de ejecución</h3>
+<pre><code>./script.sh | tee /home/jose/logs/ejecucion.log</code></pre>
+<p>Guarda la salida del script en un archivo de log y la muestra en pantalla.</p>
+<h3>Resumen</h3>
+<div class="tabla"><table><thead><tr><th><strong>Comando</strong></th><th><strong>Propósito principal</strong></th><th><strong>Ejemplo típico</strong></th></tr></thead><tbody><tr><td><code>cut</code></td><td>Extraer columnas o caracteres</td><td><code>cut -d ',' -f 1 archivo.csv</code></td></tr><tr><td><code>sort</code></td><td>Ordenar líneas</td><td><code>sort -n archivo.txt</code></td></tr><tr><td><code>uniq</code></td><td>Eliminar duplicados</td><td>`sort archivo.txt</td></tr><tr><td><code>wc</code></td><td>Contar líneas, palabras o bytes</td><td><code>wc -l archivo.txt</code></td></tr><tr><td><code>tee</code></td><td>Mostrar y guardar simultáneamente</td><td>`ls</td></tr></tbody></table></div>
+<h3>Ejercicio práctico sugerido</h3>
+<ol><li>Crea un archivo llamado alumnos.csv:</li></ol>
+<pre><code>cat &gt; alumnos.csv
+Ana,8
+Luis,7
+Marta,9
+Luis,7
+Ana,8
+Ctrl+D</code></pre>
+<ol><li>Realiza las siguientes operaciones:</li></ol>
+<pre><code>cut -d ',' -f 1 alumnos.csv | sort | uniq -c</code></pre>
+<p>Muestra cuántas veces aparece cada alumno.</p>
+<ol><li>Guarda el resultado:</li></ol>
+<pre><code>cut -d ',' -f 1 alumnos.csv | sort | uniq -c | tee resumen.txt</code></pre>
+<ol><li>Verifica cuántas líneas tiene el resumen:</li></ol>
+<pre><code>wc -l resumen.txt</code></pre>

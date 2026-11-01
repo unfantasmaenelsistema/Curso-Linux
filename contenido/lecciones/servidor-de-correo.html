@@ -1,0 +1,127 @@
+<h2>Objetivo</h2>
+<ul><li>Instalar y configurar Postfix como MTA (Mail Transfer Agent).</li><li>Usar Dovecot como MDA (Mail Delivery Agent) e IMAP/POP3.</li><li>Probar envío y recepción de correos <strong>locales</strong> (dentro de la máquina o entre usuarios del mismo sistema).</li></ul>
+<h2>1. Preparación</h2>
+<ul><li>Sistema base: Ubuntu/Debian (recomendado) o CentOS.</li><li>Paquetes necesarios:</li></ul>
+<pre><code>sudo apt update
+sudo apt install postfix dovecot-imapd dovecot-pop3d mailutils -y</code></pre>
+<p>Durante la instalación de <strong>Postfix</strong> aparecerá un asistente:</p>
+<ul><li>Tipo de configuración: Internet Site.</li><li>Nombre de correo del sistema: usar el hostname (ejemplo: mail.local).</li></ul>
+<figure><img src="../media/servidor-de-correo/imagen1.webp" width="1089" height="545" alt="Captura 1 de la lección «Servidor de correo»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/servidor-de-correo/imagen2.webp" width="428" height="336" alt="Captura 2 de la lección «Servidor de correo»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/servidor-de-correo/imagen3.webp" width="1262" height="400" alt="Captura 3 de la lección «Servidor de correo»" loading="lazy" decoding="async"></figure>
+<h2>2. Configuración básica de Postfix</h2>
+<p>Archivo principal:</p>
+<pre><code>sudo nano /etc/postfix/main.cf</code></pre>
+<p>Asegúrate de que tenga algo como esto (ajustar hostname):</p>
+<pre><code>myhostname = mail.local
+mydomain = local
+myorigin = /etc/mailname
+inet_interfaces = all
+inet_protocols = ipv4
+mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+home_mailbox = Maildir/</code></pre>
+<figure><img src="../media/servidor-de-correo/imagen4.webp" width="1003" height="496" alt="Captura 4 de la lección «Servidor de correo»" loading="lazy" decoding="async"></figure>
+<p>mydomain → Define el “dominio” que usará tu servidor.</p>
+<p>Si no lo pones, Postfix lo deduce de myhostname (por ejemplo, si myhostname=mail.local, entonces mydomain=local).</p>
+<p>No es obligatorio ponerlo, pero ayuda a que sea claro.</p>
+<p><code>home_mailbox = Maildir/</code> → Define <strong>dónde se guardará el correo de cada usuario</strong>.</p>
+<ul><li>Si lo añades, los mensajes irán a <code>~/Maildir/</code> (directorio dentro del home de cada usuario).</li><li>Si no lo pones, por defecto los mensajes van a <code>/var/mail/usuario</code> en formato mbox.</li></ul>
+<p>Luego reinicia:</p>
+<pre><code>sudo systemctl restart postfix
+sudo systemctl enable postfix</code></pre>
+<h2>3. Configuración básica de Dovecot</h2>
+<p>Edita</p>
+<pre><code>sudo nano /etc/dovecot/dovecot.conf</code></pre>
+<p>Añade esta línea (si no existe):</p>
+<pre><code>protocols = imap pop3</code></pre>
+<p>Mejor no la pongas "al final de todo" si el archivo ya tiene bloques !include o configuraciones específicas. Lo más limpio es ponerla en la parte global (antes de cualquier bloque protocol { }).</p>
+<p>Si el archivo está casi vacío (muchas distros dejan solo includes), puedes añadirla arriba del todo.</p>
+<figure><img src="../media/servidor-de-correo/imagen5.webp" width="841" height="527" alt="Captura 5 de la lección «Servidor de correo»" loading="lazy" decoding="async"></figure>
+<p>En el fichero:</p>
+<pre><code>sudo nano /etc/dovecot/conf.d/10-mail.conf</code></pre>
+<p>Verifica:</p>
+<pre><code>mail_location = maildir:~/Maildir</code></pre>
+<figure><img src="../media/servidor-de-correo/imagen6.webp" width="870" height="497" alt="Captura 6 de la lección «Servidor de correo»" loading="lazy" decoding="async"></figure>
+<p>En el fichero:</p>
+<pre><code>sudo nano /etc/dovecot/conf.d/10-auth.conf
+
+descomenta:
+disable_plaintext_auth = no
+auth_mechanisms = plain login</code></pre>
+<figure><img src="../media/servidor-de-correo/imagen7.webp" width="859" height="180" alt="Captura 7 de la lección «Servidor de correo»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/servidor-de-correo/imagen8.webp" width="874" height="172" alt="Captura 8 de la lección «Servidor de correo»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/servidor-de-correo/imagen9.webp" width="861" height="396" alt="Captura 9 de la lección «Servidor de correo»" loading="lazy" decoding="async"></figure>
+<p>En el fichero:</p>
+<pre><code>sudo nano /etc/dovecot/conf.d/10-master.conf</code></pre>
+<p>en la sección service imap-login:</p>
+<pre><code>service imap-login {
+inet_listener imap {
+port = 143
+}
+inet_listener imaps {
+port = 993
+ssl = no
+}
+}</code></pre>
+<figure><img src="../media/servidor-de-correo/imagen10.webp" width="813" height="298" alt="Captura 10 de la lección «Servidor de correo»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/servidor-de-correo/imagen11.webp" width="816" height="337" alt="Captura 11 de la lección «Servidor de correo»" loading="lazy" decoding="async"></figure>
+<p>Reinicia:</p>
+<pre><code>sudo systemctl restart dovecot
+sudo systemctl enable dovecot</code></pre>
+<h2>4. Crear usuarios de prueba</h2>
+<pre><code>sudo adduser usuario1
+sudo adduser usuario2</code></pre>
+<p>Cada uno tendrá su carpeta <code>~/Maildir</code> cuando reciba el primer correo.</p>
+<h2>5. Pruebas de envío local</h2>
+<h2>Usando mail (paquete mailutils):</h2>
+<pre><code>echo "Hola Ana" | mail -s "Prueba local" ana</code></pre>
+<p>Luego, iniciar sesión como ana y comprobar:</p>
+<pre><code>mail</code></pre>
+<p>o leer el archivo en <code>~/Maildir/new/.</code></p>
+<pre><code>echo "Hola Jose" | mail -s "Prueba local" jose</code></pre>
+<p>Postfix/Dovecot debería crear <code>~/Maildir</code> al recibir el primer correo, pero algunas veces no lo hace con el comando mail. Puedes crear la estructura tú mismo:</p>
+<pre><code>mkdir -p ~/Maildir/{cur,new,tmp}
+chmod -R 700 ~/Maildir
+echo "Hola Jose" | sendmail -v jose
+sudo chown -R jose:jose /home/jose/Maildir
+chmod -R 700 /home/jose/Maildir</code></pre>
+<p>Comprueba si home_mailbox = Maildir/ está activo con:</p>
+<pre><code>postconf | grep home_mailbox
+Debería mostrar: home_mailbox = Maildir/</code></pre>
+<p>De lo contrario revisa:</p>
+<pre><code>sudo nano /etc/postfix/main.cf</code></pre>
+<p>Asegúrate que <code>/etc/mailname</code> contenga tu hostname o dominio local, por ejemplo:</p>
+<p>mail.local</p>
+<pre><code>sudo nano /etc/mailname</code></pre>
+<figure><img src="../media/servidor-de-correo/imagen12.webp" width="832" height="116" alt="Captura 12 de la lección «Servidor de correo»" loading="lazy" decoding="async"></figure>
+<p>Reinicia Postfix:</p>
+<pre><code>sudo systemctl restart postfix
+echo "Hola Jose" | sendmail -v jose</code></pre>
+<figure><img src="../media/servidor-de-correo/imagen13.webp" width="973" height="116" alt="Captura 13 de la lección «Servidor de correo»" loading="lazy" decoding="async"></figure>
+<p>Ahora sí los correos <strong>están llegando a Maildir</strong>.</p>
+<ul><li>Cada archivo que ves en <code>~/Maildir/new/</code> corresponde a un mensaje recibido.</li><li>El nombre largo (1759309203.V802I1e0b23M288677.jose-VirtualBox) es normal en <strong>Maildir</strong>, cada correo es un archivo individual.</li><li>Cuando lo abras con un cliente compatible (como <strong>mutt</strong> o Thunderbird vía IMAP), podrás leerlos.</li></ul>
+<h2>Probar lectura con mutt</h2>
+<p>Usa <strong>mutt</strong> (más fácil con Maildir):</p>
+<pre><code>sudo apt install mutt -y
+mutt -f ~/Maildir</code></pre>
+<figure><img src="../media/servidor-de-correo/imagen14.webp" width="924" height="97" alt="Captura 14 de la lección «Servidor de correo»" loading="lazy" decoding="async"></figure>
+<ul><li>La línea con jose (0,1K) es el correo de prueba que envié yo mismo.</li><li>La línea Mail Delivery Status Report es un <strong>bounce</strong> o notificación de error, porque Postfix intentó entregar a jose@local antes de que arreglase myorigin.</li></ul>
+<h2>Cómo leer el correo en mutt</h2>
+<ol><li><strong>Moverte entre mensajes</strong><ul><li>Flechas ↑ ↓ o j / k para subir y bajar en la lista.</li></ul></li><li><strong>Abrir un mensaje</strong></li></ol>
+<ul><li>Presiona <strong>Enter</strong> sobre la línea del mensaje que quieras leer.</li><li>Verás el contenido completo del correo.</li></ul>
+<ol><li><strong>Responder</strong></li></ol>
+<ul><li>Presiona r para responder al correo.</li></ul>
+<ol><li><strong>Salir de mutt</strong></li></ol>
+<ul><li>Presiona q varias veces hasta salir del programa.</li></ul>
+<p>Nota sobre Mail Delivery Status Report</p>
+<ul><li>Ese correo es solo la notificación de entrega fallida que quedó en Maildir de envíos anteriores.</li><li>Para limpiar la bandeja de “bounces”, puedes eliminarlo con mutt o directamente borrar el archivo en <code>~/Maildir/new/.</code></li><li>Cada vez que abras un correo, Maildir moverá automáticamente el archivo de new/ a cur/.</li></ul>
+<ul><li>Ahí verás el correo “Hola Jose”.</li></ul>
+<figure><img src="../media/servidor-de-correo/imagen15.webp" width="911" height="137" alt="Captura 15 de la lección «Servidor de correo»" loading="lazy" decoding="async"></figure>
+<h2>6. Pruebas de recepción con IMAP/POP3</h2>
+<p>Puedes instalar un cliente de correo (ejemplo: Thunderbird en otra máquina o mismo host) y configurar:</p>
+<ul><li>Servidor entrante: localhost, puerto 143 (IMAP) o 110 (POP3).</li><li>Usuario: usuario1 o usuario2.</li><li>Contraseña: la que creaste.</li></ul>
+<h2>7. Verificación de logs</h2>
+<p>Revisar logs en:</p>
+<pre><code>sudo tail -f /var/log/mail.log</code></pre>
+<h2>8. Extensiones opcionales (si se quiere complicar más)</h2>
+<ul><li>Habilitar <strong>TLS</strong> en Postfix/Dovecot (autofirmado).</li><li>Añadir <strong>alias de correo</strong>.</li><li>Configurar <strong>cuotas de buzón</strong>.</li><li>Integrar con <strong>SpamAssassin</strong> para filtrado básico.</li></ul>

@@ -1,0 +1,24 @@
+<figure><img src="../media/bypass-login/imagen1.webp" width="1600" height="914" alt="Captura 1 de la lección «Bypass del login desde GRUB»" loading="lazy" decoding="async"></figure>
+<p>El «bypass» del login mediante el GRUB implica acceder a un sistema Linux sin pasar por el proceso habitual de inicio de sesión. Esto se logra mediante la manipulación del cargador de arranque GRUB, que es responsable de iniciar el sistema operativo. Al realizar ciertos cambios en la configuración del GRUB, se puede ingresar directamente al sistema sin requerir credenciales de inicio de sesión, lo cual puede representar un riesgo de seguridad si no se protege adecuadamente</p>
+<p>Para ello, lo que haremos será modificar unas líneas en grub para que, en lugar de realizar un arranque convencional, se ejecute una Shell con los privilegios de un super usuario.</p>
+<p>Primero enciende la máquina y espera hasta que muestre el cargador de arranque grub en la pantalla.</p>
+<figure><img src="../media/bypass-login/imagen2.webp" width="497" height="372" alt="Captura 2 de la lección «Bypass del login desde GRUB»" loading="lazy" decoding="async"></figure>
+<p>Para abrir la terminal de grub, debemos pulsar la tecla <strong>e</strong> en la pantalla de selección de OS a arrancar.</p>
+<figure><img src="../media/bypass-login/imagen3.webp" width="637" height="478" alt="Captura 3 de la lección «Bypass del login desde GRUB»" loading="lazy" decoding="async"></figure>
+<p>En la línea que empieza por <code>linux</code> hay que hacer dos cambios: sustituir <strong>ro</strong> (solo lectura) por <strong>rw</strong> (lectura y escritura) y añadir al final de la línea <strong>init=/bin/bash</strong>.</p>
+<figure><img src="../media/bypass-login/imagen4.webp" width="639" height="369" alt="Captura 4 de la lección «Bypass del login desde GRUB»" loading="lazy" decoding="async"></figure>
+<p>Con los cambios hechos, pulsa <strong>Ctrl+X</strong> (o <strong>F10</strong>) para arrancar con esa configuración. Los cambios no se guardan: solo valen para este arranque.</p>
+<figure><img src="../media/bypass-login/imagen5.webp" width="642" height="384" alt="Captura 5 de la lección «Bypass del login desde GRUB»" loading="lazy" decoding="async"></figure>
+<p>Arrancamos directamente en una shell de root, con acceso a todos los archivos. Ya podemos cambiar la contraseña del usuario que necesitemos; en este caso, la del usuario kali:</p>
+<pre><code>passwd kali</code></pre>
+<figure><img src="../media/bypass-login/imagen6.webp" width="684" height="251" alt="Captura 6 de la lección «Bypass del login desde GRUB»" loading="lazy" decoding="async"></figure>
+<p>Nos pedirá que repitamos la nueva contraseña.</p>
+<figure><img src="../media/bypass-login/imagen7.webp" width="690" height="225" alt="Captura 7 de la lección «Bypass del login desde GRUB»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/bypass-login/imagen8.webp" width="706" height="272" alt="Captura 8 de la lección «Bypass del login desde GRUB»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/bypass-login/imagen9.webp" width="754" height="288" alt="Captura 9 de la lección «Bypass del login desde GRUB»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/bypass-login/imagen10.webp" width="750" height="299" alt="Captura 10 de la lección «Bypass del login desde GRUB»" loading="lazy" decoding="async"></figure>
+<p>Una vez cambiada la contraseña reiniciaremos mediante <strong>reboot -f</strong> e iniciaremos sesión con la contraseña que hayamos modificado.</p>
+<figure><img src="../media/bypass-login/imagen11.webp" width="400" height="245" alt="Captura 11 de la lección «Bypass del login desde GRUB»" loading="lazy" decoding="async"></figure>
+<h2>Cómo protegerse</h2>
+<p>Este ataque solo requiere acceso físico al equipo y un GRUB sin proteger. Para evitarlo:</p>
+<ul><li><strong>Contraseña en GRUB</strong>: con <code>grub-mkpasswd-pbkdf2</code> se genera el hash y se declara con <code>set superusers</code> y <code>password_pbkdf2</code> en <code>/etc/grub.d/40_custom</code>; después, <code>update-grub</code>. Así nadie puede editar las entradas de arranque.</li><li><strong>Cifrado de disco</strong> (LUKS): sin la frase de paso, la shell de root no puede leer el sistema de archivos.</li><li><strong>Contraseña en la BIOS/UEFI</strong> y arranque solo desde el disco interno, para que no se pueda arrancar desde un USB.</li></ul>

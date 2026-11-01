@@ -1,0 +1,321 @@
+<h3>1. Comandos de Monitoreo y Estado de Procesos</h3>
+<p>Estos comandos te permiten ver qué está haciendo tu sistema y cómo se están utilizando los recursos.</p>
+<h3>ps: Reportar una Instantánea de los Procesos</h3>
+<p>El comando ps (<strong>p</strong>rocess <strong>s</strong>tatus) muestra los procesos que se están ejecutando en el momento en que se ejecuta el comando.</p>
+<div class="tabla"><table><thead><tr><th>Opción</th><th>Descripción</th></tr></thead><tbody><tr><td>aux</td><td>Muestra todos los procesos (a), incluyendo los que no tienen terminal de control (x), con formato de usuario estándar (u).</td></tr><tr><td>ef</td><td>Muestra todos los procesos (e) con formato completo (f), útil para ver la línea de comandos completa y la jerarquía de procesos.</td></tr></tbody></table></div>
+<h3>Ejemplo Práctico: Ver los procesos</h3>
+<p>Para ver todos los procesos que pertenecen al usuario <strong>jose</strong>:</p>
+<pre><code>ps aux | grep jose
+jose 1234 0.0 0.1 123456 4568 ? Ss 07:08 0:00 /usr/bin/gnome-shell
+jose 5678 0.0 0.0 12300 1024 pts/0 R+ 07:08 0:00 grep --color=auto jose</code></pre>
+<h3>Ejemplo Práctico: Ver la jerarquía (árbol) de procesos</h3>
+<pre><code>ps ef
+UID PID PPID C STIME TTY TIME CMD
+...
+root 654 2 0 07:05 ? 00:00:00 /usr/lib/systemd/systemd --user
+jose 1234 654 0 07:06 ? 00:00:01 \_ /usr/bin/gnome-shell
+...</code></pre>
+<h3>top: Monitor de Procesos Dinámico</h3>
+<p>El comando top proporciona una vista dinámica y en tiempo real de la actividad del sistema, incluyendo el uso de CPU, memoria y los procesos que más consumen. Es interactivo.</p>
+<h3>Ejemplo Práctico: Ejecutar y utilizar top</h3>
+<pre><code>top</code></pre>
+<p>Una vez dentro de top:</p>
+<ul><li>Presiona <strong>M</strong> para ordenar por uso de memoria.</li><li>Presiona <strong>P</strong> para ordenar por uso de CPU (es el predeterminado).</li><li>Presiona <strong>k</strong> (kill) para terminar un proceso (te pedirá el PID).</li><li>Presiona <strong>q</strong> para salir.</li></ul>
+<h3>htop: Monitor de Procesos Interactivo (Mejorado)</h3>
+<p>htop es una alternativa a top más moderna y visualmente amigable, que permite desplazarse horizontal y verticalmente, e interactuar con los procesos de forma más intuitiva.</p>
+<p><strong>Nota:</strong> En Ubuntu 24.04, podría necesitar instalación:</p>
+<pre><code>sudo apt install htop</code></pre>
+<h3>Ejemplo Práctico: Navegar en htop</h3>
+<pre><code>htop</code></pre>
+<p>Una vez dentro de htop:</p>
+<ul><li>Las barras de CPU y Memoria están claramente visibles en la parte superior.</li><li>Utiliza las flechas de dirección.</li><li>Presiona <strong>F6</strong> para ordenar los procesos por cualquier columna.</li><li>Presiona <strong>F9</strong> para enviar una señal de terminación (<strong>kill</strong>).</li><li>Presiona <strong>F10</strong> o <strong>q</strong> para salir.</li></ul>
+<h3>2. Comandos de Control de Trabajos (Job Control)</h3>
+<p>Estos comandos gestionan procesos que has iniciado en tu shell y que se han movido a segundo plano o se han detenido.</p>
+<h3>jobs: Listar Trabajos de la Sesión</h3>
+<p>El comando jobs muestra una lista de los trabajos (comandos) que están actualmente activos y asociados a tu sesión de terminal.</p>
+<h3>Pasos de Ejemplo: Crear y listar trabajos</h3>
+<p>Puedes usar el comando sleep con un tiempo mucho más largo o un bucle infinito para simular un proceso que no termina hasta que lo detienes. Luego, puedes usar los comandos para gestionar trabajos (jobs, fg, bg).</p>
+<h3>1. Iniciar un Proceso en Segundo Plano (&amp;)</h3>
+<p>Inicia un proceso que tardará mucho tiempo en ejecutarse y envíalo inmediatamente a <strong>segundo plano (background)</strong> usando el símbolo &amp;.</p>
+<ol><li><strong>Comando:</strong></li></ol>
+<pre><code>sleep 3600 &amp;</code></pre>
+<ol><li><strong>Explicación:</strong> Esto inicia el comando sleep para que espere <strong>3600 segundos (1 hora)</strong>. La &amp; al final hace que el shell no espere a que termine y te dé el control de la terminal de inmediato.</li><li><strong>Salida Típica (ejemplo):</strong></li></ol>
+<pre><code>[1] 12345</code></pre>
+<ul><li>[1] es el <strong>número de trabajo</strong> (Job ID).</li><li>12345 es el <strong>ID de proceso</strong> (PID).</li></ul>
+<h3>Si le pedimos que muestre los trabajos:</h3>
+<pre><code>jobs</code></pre>
+<h3>sleep 3600 (Running / Ejecutándose)</h3>
+<h3>2. Iniciar un Proceso en Primer Plano y Detenerlo (Ctrl+Z)</h3>
+<p>Inicia un proceso interactivo que se ejecute en <strong>primer plano (foreground)</strong>, y luego detenlo. Usaremos nano como ejemplo.</p>
+<ol><li><strong>Comando:</strong></li></ol>
+<pre><code>nano prueba.txt</code></pre>
+<ol><li><strong>Acción:</strong> <code>nano se abrirá</code></li><li><strong>Detener Proceso:</strong> <strong>Presiona las teclas Ctrl + Z</strong> (mantén Ctrl presionado y luego presiona Z). Esto enviará una señal <strong>SIGTSTP</strong> al proceso, deteniéndolo y pasándolo a la lista de trabajos.</li><li><strong>Salida Típica (ejemplo):</strong></li></ol>
+<pre><code>^Z
+[2]+ Stopped nano prueba.txt</code></pre>
+<ul><li>[2] es el <strong>número de trabajo</strong> del editor nano.</li><li>El signo + indica que es el trabajo que se usará por defecto si no especificas un número (el trabajo "actual").</li><li><strong>Trabajo 2: nano prueba.txt (Stopped / Detenido)</strong></li></ul>
+<h3>[ Para suspender, teclear ^T^Z ]</h3>
+<p>En la notación de terminal y en muchos editores de texto basados en consola (como nano), el símbolo <strong>^</strong> (circunflejo) siempre significa la tecla <strong>Ctrl</strong> (Control).</p>
+<p>Por lo tanto, la combinación de teclas que nos está pidiendo es:</p>
+<ol><li><strong>Mantener presionada la tecla Ctrl</strong>.</li><li><strong>Presionar la tecla T</strong>.</li><li><strong>Presionar la tecla Z</strong>.</li></ol>
+<h4>¿Qué hace esta combinación?</h4>
+<p>Esta combinación de tres teclas (Ctrl+T seguido de Z) es una característica avanzada de nano que te permite <strong>suspender</strong> el proceso de nano (enviarlo al <em>background</em> como un trabajo detenido) <em>después</em> de haber activado un modo especial de atajo de teclado dentro de nano.</p>
+<p><strong>Normalmente, para suspender nano y enviarlo al <em>background</em>, solo necesitas presionar Ctrl + Z directamente.</strong></p>
+<p>Pero que en la versión o configuración que estamos usando, han introducido un paso extra de seguridad o un atajo de teclado para evitar suspenderlo accidentalmente, pidiendo primero Ctrl+T y luego el atajo de suspensión normal (Ctrl+Z).</p>
+<h3>Intenta la combinación completa:</h3>
+<ol><li><strong>Ctrl + T</strong></li><li><strong>Z</strong> (justo después de Ctrl+T)</li></ol>
+<p>Esto debería suspender el proceso de nano y devolvernos a la línea de comandos de nuestra shell, permitiéndonos usar el comando jobs para verlo como un trabajo detenido.</p>
+<h3>3. Listar los Trabajos</h3>
+<p>Usa el comando jobs para ver el estado de todos los procesos que has iniciado y que están siendo gestionados por tu shell.</p>
+<ol><li><strong>Comando:</strong></li></ol>
+<pre><code>jobs</code></pre>
+<ol><li><strong>Salida Típica (ejemplo):</strong></li><li><code>[1]- Running sleep 3600 &amp;</code></li><li><code>[2]+ Stopped nano prueba.txt</code><ul><li>Observarás que el trabajo <strong>[1]</strong> está <strong>Running</strong> (ejecutándose en segundo plano).</li><li>Observarás que el trabajo <strong>[2]</strong> está <strong>Stopped</strong> (detenido).</li></ul></li></ol>
+<h3>Comandos Adicionales Útiles (Gestión de Trabajos)</h3>
+<ul><li><code>fg %N</code>: Pone un trabajo detenido o en segundo plano de nuevo en <strong>primer plano (foreground)</strong>. Reemplaza N con el número de trabajo (e.g., fg %2 para reanudar y trabajar en nano prueba.txt).</li><li><code>bg %N</code>: Continúa un trabajo <strong>detenido</strong> en <strong>segundo plano (background)</strong>. Reemplaza N con el número de trabajo (e.g., bg %2 para que nano se ejecute en background, aunque como es interactivo, generalmente no es útil).</li><li><code>kill %N</code>: Termina un trabajo de forma forzosa. Reemplaza N con el número de trabajo (e.g., kill %1 para detener sleep 3600).</li></ul>
+<h3>fg: Traer un Trabajo a Primer Plano</h3>
+<p>El comando fg (<strong>f</strong>ore<strong>g</strong>round) trae un trabajo que está detenido o en segundo plano de vuelta al primer plano, permitiéndote interactuar con él.</p>
+<h3>Ejemplo Práctico: Reanudar nano</h3>
+<pre><code>jobs
+[1]- Running sleep 60 &amp;
+[2]+ Stopped nano ejemplo.txt
+fg %2
+# El %2 se refiere al ID del trabajo [2]</code></pre>
+<p><em>(Se abre el editor nano para que <strong>jose</strong> continúe editando el archivo.)</em></p>
+<h3>bg: Poner un Trabajo en Segundo Plano</h3>
+<p>El comando bg (<strong>b</strong>ack<strong>g</strong>round) reanuda un trabajo detenido y lo mueve para que se ejecute en segundo plano.</p>
+<pre><code>nano prueba.txt</code></pre>
+<h3>Ejemplo Práctico: Enviar nano a segundo plano</h3>
+<p>Si nano está detenido (como en el ejemplo de jobs):</p>
+<pre><code>jobs
+[1]- Running sleep 60 &amp;
+[2]+ Stopped nano ejemplo.txt
+bg %2
+[2]+ nano ejemplo.txt &amp;
+jobs
+[1]- Running sleep 60 &amp;
+[2]+ Stopped nano ejemplo.txt &amp;</code></pre>
+<p>La razón por la que nano sigue apareciendo como <strong>Detenido</strong> después de ejecutar bg %2 es que <strong>nano es un editor de texto interactivo en modo consola</strong>.</p>
+<p>Cuando envías un trabajo <strong>detenido</strong> (Stopped) a segundo plano (bg), el shell <strong>intenta reanudarlo</strong> para que pase a estado <strong>ejecutándose</strong> (Running). Sin embargo, en el caso de programas interactivos como nano, el núcleo (kernel) lo <strong>vuelve a detener inmediatamente</strong>.</p>
+<p>Cuando un proceso está <strong>detenido</strong> (Stopped), el comando bg %N lo envía a <strong>segundo plano</strong> (background) para que continúe su ejecución.</p>
+<ol><li><strong>Procesos sin Interacción (como sleep):</strong><ul><li>Comandos como sleep 3600 pueden ejecutarse completamente en segundo plano, ya que no necesitan interactuar con el usuario o el terminal. Por eso el trabajo [1] aparece como <strong>Ejecutando</strong> (Running).</li></ul></li><li><strong>Procesos Interactivos (como nano):</strong><ul><li>nano está diseñado para leer la entrada del teclado y escribir en la pantalla del terminal (interactuar con el <strong>TTY</strong>).</li><li>Un proceso que intenta leer datos de la terminal o escribir directamente en ella mientras está en segundo plano es <strong>automáticamente detenido por el sistema operativo</strong> (kernel de Linux) para evitar que "cuelgue" la terminal o mezcle su salida con la línea de comandos.</li></ul></li></ol>
+<h3>Lo que sucedió:</h3>
+<ol><li>Ejecutamos bg %2 para reanudar nano en segundo plano.</li><li>El shell intenta iniciar la ejecución de nano.</li><li>nano intenta dibujar su interfaz en la terminal.</li><li>El kernel detecta que un trabajo en segundo plano (nano) está intentando acceder a la terminal.</li><li>El kernel <strong>detiene inmediatamente</strong> el proceso (nano) y le envía la señal SIGTTIN o SIGTTOU (señales de Entrada/Salida de Terminal).</li><li>Por eso, cuando vuelves a ejecutar jobs, el estado de [2] vuelve a ser <strong>Detenido</strong> (Stopped), a pesar del intento de reanudarlo.</li></ol>
+<p>Para interactuar con nano o cualquier otro programa interactivo que hayas detenido, <strong>siempre debes traerlo de vuelta al primer plano</strong> (foreground).</p>
+<ul><li>Utiliza el comando:</li></ul>
+<pre><code>fg %2</code></pre>
+<p>Esto devolverá el control de la terminal al proceso de nano para que puedas continuar editando el archivo prueba.txt.</p>
+<p><strong>Nota:</strong> nano no es ideal para el segundo plano ya que espera entrada de usuario, pero el ejemplo ilustra la función del comando.</p>
+<h3>3. Comandos de Señalización de Procesos</h3>
+<p>Estos comandos se utilizan para enviar señales a los procesos. La señal más común es SIGTERM (terminación "elegante") y SIGKILL (terminación forzada).</p>
+<h3>kill: Enviar Señales a un Proceso por PID</h3>
+<p>El comando kill envía una señal a un proceso identificado por su <strong>PID</strong> (Process ID).</p>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Señal</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td><strong>(ninguna)</strong></td><td>SIGTERM (15)</td><td>Pide al proceso que termine "elegantemente" (el proceso puede limpiar antes de salir).</td></tr><tr><td>-9</td><td>SIGKILL (9)</td><td>Termina el proceso inmediatamente sin permitirle guardar o limpiar.</td></tr></tbody></table></div>
+<h3>Ejemplo Práctico: Terminar un proceso elegantemente</h3>
+<ol><li>Usa sleep 1000 para generar un proceso con un PID conocido (ej. 12345).</li><li>Usa kill para terminarlo.</li></ol>
+<pre><code>sleep 1000 &amp;</code></pre>
+<p><code>[1] 12345 # Este es el PID</code> (Process ID)</p>
+<pre><code>kill 12345 # Se envía SIGTERM
+[1]+ Terminated sleep 1000</code></pre>
+<h3>Ejemplo Práctico: Terminación forzada (SIGKILL)</h3>
+<p>Si el proceso 12346 no responde a SIGTERM, usa -9:</p>
+<pre><code>sleep 1000 &amp;
+[1] 12346
+kill -9 12346
+[1]+ Killed sleep 1000</code></pre>
+<h3>killall: Enviar Señales a Procesos por Nombre</h3>
+<p>El comando killall es útil para terminar todos los procesos que coinciden con un nombre de comando específico.</p>
+<h3>Ejemplo Práctico: Cerrar todas las instancias de un programa</h3>
+<p>Si tienes varias ventanas de gedit abiertas:</p>
+<pre><code>killall gedit</code></pre>
+<p><em>(Esto envía SIGTERM a todos los procesos llamados gedit.)</em></p>
+<p>Puedes probar el efecto del comando killall gedit de la siguiente manera:</p>
+<h3>Pasos para Probar killall gedit</h3>
+<pre><code>sudo apt install gedit</code></pre>
+<ol><li>Abre Múltiples Ventanas de gedit</li></ol>
+<p>Abre varias instancias del editor de texto gedit desde tu terminal o interfaz gráfica. Puedes hacer esto desde la terminal con el comando:</p>
+<pre><code>gedit archivo1.txt &amp;
+
+gedit archivo2.txt &amp;
+
+gedit archivo3.txt &amp;</code></pre>
+<p>(El &amp; al final envía cada instancia a segundo plano para que puedas seguir usando la terminal).</p>
+<ol><li>Verifica que los Procesos se están Ejecutando</li></ol>
+<p>Usa el comando pgrep para listar los IDs de proceso (PID) que se llaman gedit.</p>
+<pre><code>pgrep gedit</code></pre>
+<p>Deberías ver una lista de números (los PID de tus ventanas de gedit).</p>
+<ol><li>Ejecuta killall gedit</li></ol>
+<p>Este comando enviará la señal SIGTERM (señal de terminación) a todos los procesos que se llaman gedit.</p>
+<pre><code>killall gedit</code></pre>
+<ol><li>Observa el Resultado<ul><li><strong>En la interfaz gráfica:</strong> Todas las ventanas de gedit deberían cerrarse casi instantáneamente. Si tenías cambios sin guardar, gedit podría mostrar una advertencia o intentar guardar automáticamente, dependiendo de su configuración, pero el proceso en sí habrá recibido la señal para terminar.</li><li><strong>En la terminal:</strong> Si ejecutaste las ventanas en segundo plano, la terminal podría mostrar mensajes como "Terminated" o "Exited" para cada trabajo.</li></ul></li><li>Verifica la Terminación de los Procesos</li></ol>
+<p>Vuelve a usar pgrep para confirmar que ya no quedan procesos llamados gedit.</p>
+<pre><code>pgrep gedit</code></pre>
+<p>Esta vez, el comando <strong>no debería devolver ninguna salida</strong>, confirmando que todos los procesos fueron terminados con éxito.</p>
+<pre><code>killall gedit</code></pre>
+<p>Este comando envió la señal <strong>SIGTERM</strong> (terminación suave) a todos los procesos llamados gedit. Estos procesos inmediatamente comenzaron a cerrarse.</p>
+<h3>Ejecución de pgrep gedit y la respuesta del Shell:</h3>
+<pre><code>pgrep gedit
+[2]+ Terminado gedit archivo1.txt</code></pre>
+<ul><li><strong>Salida de pgrep gedit:</strong> Como no aparece ningún número (PID) encima del mensaje del shell, significa que <strong>pgrep no encontró ningún proceso gedit ejecutándose</strong>. Esto demuestra que el killall fue exitoso y todos los procesos terminaron.</li><li><strong>Mensaje del Shell:</strong> El mensaje [2]+ Terminado gedit archivo1.txt <strong>no es la salida de pgrep</strong>, sino una notificación que te da el shell (Bash) <em>justo en ese momento</em>. Cuando ejecutamos pgrep, el shell detectó que el trabajo número <strong>[2]</strong> (gedit archivo1.txt) ya había finalizado su ejecución (fue <strong>Terminado</strong> por el killall).</li></ul>
+<h3>Ejemplo Práctico: Terminación forzada por nombre</h3>
+<pre><code>killall -9 firefox</code></pre>
+<p><em>(Termina forzadamente todas las instancias de firefox.)</em></p>
+<h3>4. Comandos de Prioridad de Procesos</h3>
+<p>Estos comandos permiten modificar la prioridad con la que el kernel de Linux asigna tiempo de CPU a un proceso. La prioridad se mide con el valor <strong>niceness</strong> (rango de -20 a 19).</p>
+<ul><li><strong>-20:</strong> Máxima prioridad (menos "nice").</li><li><strong>19:</strong> Mínima prioridad (más "nice").</li><li><strong>0:</strong> Prioridad por defecto.</li></ul>
+<h3>nice: Ejecutar un Comando con Prioridad Modificada</h3>
+<p>El comando nice se usa para iniciar un nuevo proceso con una prioridad diferente a la predeterminada.</p>
+<div class="tabla"><table><thead><tr><th>Opción</th><th>Descripción</th></tr></thead><tbody><tr><td>-n NICE_VALOR</td><td>Especifica el valor de niceness (ej. 10).</td></tr></tbody></table></div>
+<h3>Ejemplo Práctico: Ejecutar un backup con baja prioridad</h3>
+<p>Quieres ejecutar un proceso de copia de seguridad (tar) para que no interfiera con su trabajo normal:</p>
+<pre><code>nice -n 15 tar -czf /tmp/backup_jose.tar.gz /home/jose/Documentos</code></pre>
+<p><em>(El valor 15 asegura que el proceso tar solo usará la CPU cuando otros procesos lo permitan.)</em></p>
+<h3>renice: Cambiar la Prioridad de un Proceso en Ejecución</h3>
+<p>El comando renice se usa para cambiar el valor de <strong>niceness</strong> de un proceso que ya está en marcha.</p>
+<h3>Ejemplo Práctico: Bajar la prioridad de un proceso</h3>
+<ol><li>Ejecuta una simulación (ej. sleep 3600) y obtiene su PID (ej. 12347).</li><li>Baja su prioridad.</li></ol>
+<pre><code>sleep 3600 &amp;
+[1] 12347
+renice 10 -p 12347
+12347 (process ID) old priority 0, new priority 10</code></pre>
+<h3>5. Comando de Utilidad de Entrada</h3>
+<h3>xargs: Construir y Ejecutar Líneas de Comandos</h3>
+<p>El comando xargs toma la entrada estándar (STDOUT), generalmente el resultado de otro comando (vía <em>pipe</em> |), y la utiliza para construir y ejecutar líneas de comando. Es esencial para trabajar con grandes listas de archivos.</p>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td><code>-I {}</code></td><td>Define un marcador de posición ({}) para insertar cada línea de entrada.</td></tr><tr><td>-p</td><td>Pide confirmación antes de ejecutar cada comando.</td></tr><tr><td>-0</td><td>Usar con find -print0 para manejar nombres de archivo con espacios o caracteres especiales.</td></tr></tbody></table></div>
+<h3>Ejemplo Práctico: Borrar muchos archivos encontrados</h3>
+<p>Quieres borrar todos los archivos con extensión .bak en su carpeta:</p>
+<h3>1. Crear Archivos .bak</h3>
+<ol><li><strong>Crear un archivo vacío con touch:</strong></li></ol>
+<pre><code>touch /home/jose/config.bak</code></pre>
+<ol><li><strong>Crear otro archivo con contenido (usando echo y redirección &gt;):</strong></li></ol>
+<pre><code>echo "Contenido de backup" &gt; /home/jose/doc_viejo.bak</code></pre>
+<h3>2. Verificar la Creación</h3>
+<pre><code>ls /home/jose/*.bak</code></pre>
+<h3>Salida esperada:</h3>
+<pre><code>/home/jose/config.bak /home/jose/doc_viejo.bak</code></pre>
+<h3>3. Ejecutar el Comando para Buscar y Eliminar</h3>
+<pre><code>find /home/jose -name "*.bak" | xargs rm</code></pre>
+<h3>Explicación del comando:</h3>
+<ul><li><code>find /home/jose</code>: Busca archivos empezando desde el directorio <code>/home/jose</code>.</li><li><code>-name "*.bak"</code>: Filtra la búsqueda solo para archivos cuyo nombre termina en .bak.</li><li>|: Es una <strong>tubería</strong> (pipe) que envía la salida del comando find como entrada al siguiente comando.</li><li><code>xargs rm</code>: Toma la lista de nombres de archivo que recibe de find y ejecuta el comando rm (eliminar) con cada uno de ellos como argumento. En esencia, elimina todos los archivos encontrados.</li></ul>
+<pre><code>find /home/jose -name "*.bak" | xargs rm</code></pre>
+<p><em>(find envía la lista de archivos a xargs, y xargs ejecuta rm con esa lista como argumentos.)</em></p>
+<h3>Ejemplo Práctico: Copiar archivos de forma segura e interactiva</h3>
+<p>Quieres copiar solo los archivos .png al directorio <code>/tmp/imagenes_jose</code>, pidiendo confirmación:</p>
+<pre><code>find . -name "*.png" -print0 | xargs -0 -I {} -p cp {} /tmp/imagenes_jose
+cp ./foto1.png /tmp/imagenes_jose? ...y/n/..</code></pre>
+<p><em>(El uso de -print0 y -0 asegura que los nombres de archivo con espacios se manejen correctamente.)</em></p>
+<h3>Ejercicios repaso:</h3>
+<h3>Índice de comandos a cubrir:</h3>
+<ul><li><code>ps</code></li><li><code>top</code></li><li><code>htop</code></li><li><code>kill</code></li><li><code>nice</code></li><li><code>renice</code></li><li><code>jobs</code></li><li><code>fg</code></li><li><code>bg</code></li><li><code>killall</code></li><li><code>xargs</code></li></ul>
+<h3>1. ps – Ver procesos en ejecución</h3>
+<h3>Uso común:</h3>
+<pre><code>ps [opciones]</code></pre>
+<h3>Ejemplos prácticos:</h3>
+<h3>Ver tus procesos activos:</h3>
+<pre><code>ps</code></pre>
+<h3>Ver todos los procesos con información completa (estilo BSD):</h3>
+<pre><code>ps aux</code></pre>
+<h3>Filtrar por nombre de usuario:</h3>
+<pre><code>ps -u jose</code></pre>
+<h3>Buscar un proceso específico (por ejemplo, “python”):</h3>
+<pre><code>ps aux | grep python</code></pre>
+<h3>Mostrar en formato árbol:</h3>
+<pre><code>ps -ejH</code></pre>
+<h3>2. top – Monitorizar procesos en tiempo real</h3>
+<h3>Uso:</h3>
+<pre><code>top</code></pre>
+<h3>Controles interactivos útiles dentro de top:</h3>
+<ul><li>q: salir</li><li>P: ordenar por uso de CPU</li><li>M: ordenar por uso de memoria</li><li>k: matar proceso</li><li>r: cambiar prioridad (renice)</li></ul>
+<h3>Ejecutar top directamente:</h3>
+<pre><code>top</code></pre>
+<h3>Filtrar por usuario:</h3>
+<pre><code>top -u jose</code></pre>
+<h3>3. htop – Versión interactiva mejorada de top</h3>
+<p>Requiere instalación:</p>
+<pre><code>sudo apt install htop</code></pre>
+<h3>Uso:</h3>
+<pre><code>htop</code></pre>
+<h3>Ventajas sobre top:</h3>
+<ul><li>Interfaz colorida</li><li>Navegación con teclado</li><li>Facilidad para matar procesos (con F9)</li><li>Muestra CPU por núcleo</li></ul>
+<h3>4. kill – Terminar procesos por PID</h3>
+<h3>Uso:</h3>
+<pre><code>kill [señal] PID</code></pre>
+<h3>Ejemplos prácticos:</h3>
+<h3>Matar proceso con PID 1234:</h3>
+<pre><code>kill 1234</code></pre>
+<h3>Enviar una señal específica (ej: SIGKILL):</h3>
+<pre><code>kill -9 1234</code></pre>
+<h3>Enviar señal de parada (SIGTERM):</h3>
+<pre><code>kill -15 1234</code></pre>
+<p>La principal diferencia entre usar kill -9 y kill -15 radica en la <strong>capacidad del proceso para realizar una limpieza</strong> antes de terminar, lo cual afecta la seguridad y estabilidad del sistema.</p>
+<div class="tabla"><table><thead><tr><th><strong>Característica</strong></th><th><strong>kill -15 (SIGTERM)</strong></th><th><strong>kill -9 (SIGKILL)</strong></th></tr></thead><tbody><tr><td><strong>Señal Enviada</strong></td><td><strong>SIGTERM</strong> (Terminación, valor 15)</td><td><strong>SIGKILL</strong> (Muerte, valor 9)</td></tr><tr><td><strong>Comportamiento</strong></td><td><strong>Gracioso (Cortés)</strong></td><td><strong>Forzado (Brutal)</strong></td></tr><tr><td><strong>Manejo por el Proceso</strong></td><td>El proceso puede <strong>capturar</strong> e ignorar la señal, o, lo que es más común, ejecutar rutinas de <strong>limpieza</strong> (guardar archivos, liberar memoria, cerrar conexiones).</td><td>El proceso <strong>no puede capturar, ignorar ni bloquear</strong> la señal. El kernel termina el proceso <strong>inmediatamente</strong>.</td></tr><tr><td><strong>Limpieza de Datos</strong></td><td><strong>Sí</strong>, el proceso tiene tiempo de cerrar archivos y liberar recursos de forma ordenada.</td><td><strong>No</strong>, el proceso se detiene de golpe, lo que puede dejar archivos abiertos o datos corruptos.</td></tr><tr><td><strong>Uso Recomendado</strong></td><td><strong>Siempre intenta usar -15 primero.</strong> Es la forma estándar y segura de terminar un programa.</td><td><strong>Solo como último recurso</strong> cuando -15 no funciona (e.g., el proceso está colgado o es un proceso zombie).</td></tr></tbody></table></div>
+<h4>1. kill -15 (SIGTERM) - La Terminación &quot;Graciosa&quot;</h4>
+<p>SIGTERM significa "Signal Termination" (Señal de Terminación). Es la señal por defecto que envía el comando kill si no especificas un número.</p>
+<ul><li>Es una <strong>solicitud</strong> para que el proceso termine.</li><li>Permite al programa <strong>"limpiar"</strong>: guardar el trabajo, cerrar conexiones de red, liberar recursos y cerrar archivos de forma segura.</li><li>Es el método preferido porque <strong>minimiza el riesgo de corrupción de datos</strong> o de dejar archivos temporales abiertos.</li></ul>
+<h4>2. kill -9 (SIGKILL) - La Terminación &quot;Forzada&quot;</h4>
+<p>SIGKILL significa "Signal Kill" (Señal de Muerte).</p>
+<ul><li>Es un <strong>comando incondicional</strong> del núcleo (kernel) para eliminar el proceso.</li><li>El proceso <strong>muere inmediatamente</strong> sin posibilidad de guardar, limpiar o reaccionar de ninguna manera. Es como desconectar la alimentación de un ordenador.</li><li>Se utiliza <strong>solo</strong> cuando SIGTERM no funciona (es decir, el proceso está colgado o ignorando la señal de terminación). El riesgo es que puede dejar datos inconsistentes o archivos incompletos.</li></ul>
+<h3>5. nice – Ejecutar proceso con prioridad modificada</h3>
+<p>Los valores van de -20 (más prioritario) a 19 (menos prioritario).</p>
+<h3>Uso:</h3>
+<pre><code>nice -n [valor] comando</code></pre>
+<h3>Ejemplos prácticos:</h3>
+<h3>Ejecutar script con baja prioridad:</h3>
+<pre><code>nice -n 10 python3 /home/jose/script_lento.py</code></pre>
+<p><strong>Sin sudo solo puedes aumentar el valor (bajar prioridad).</strong></p>
+<h3>6. renice – Cambiar la prioridad de un proceso ya en ejecución</h3>
+<h3>Uso:</h3>
+<pre><code>renice -n [nuevo_nice] -p [PID]</code></pre>
+<h3>Ejemplo:</h3>
+<h3>Cambiar el nice de un proceso con PID 1234 a 5:</h3>
+<pre><code>sudo renice -n 5 -p 1234</code></pre>
+<h3>7. jobs – Ver trabajos en segundo plano (solo en la terminal actual)</h3>
+<h3>Uso:</h3>
+<pre><code>jobs</code></pre>
+<h3>Ejemplo:</h3>
+<h3>Correr un proceso en segundo plano:</h3>
+<pre><code>sleep 60 &amp;</code></pre>
+<h3>Ver trabajos actuales:</h3>
+<pre><code>jobs</code></pre>
+<h3>8. fg – Traer un trabajo del fondo al frente</h3>
+<h3>Uso:</h3>
+<pre><code>fg %[número]</code></pre>
+<h3>Ejemplo:</h3>
+<h3>Traer el trabajo 1 al frente:</h3>
+<pre><code>fg %1</code></pre>
+<h3>9. bg – Reanudar un trabajo detenido en segundo plano</h3>
+<h3>Uso:</h3>
+<pre><code>bg %[número]</code></pre>
+<h3>Ejemplo:</h3>
+<h3>Ejecutar en segundo plano un proceso suspendido con Ctrl+Z:</h3>
+<pre><code>sleep 300
+# Presiona Ctrl+Z
+bg %1</code></pre>
+<h3>10. killall – Matar procesos por nombre</h3>
+<h3>Uso:</h3>
+<pre><code>killall [nombre_proceso]</code></pre>
+<h3>Ejemplos prácticos:</h3>
+<h3>Matar todos los procesos firefox:</h3>
+<pre><code>killall firefox</code></pre>
+<h3>Usar una señal específica:</h3>
+<pre><code>killall -9 firefox</code></pre>
+<h3>11. xargs – Ejecutar comandos con salida de otro (muy útil en scripts)</h3>
+<h3>Uso:</h3>
+<p>comando | xargs otro_comando</p>
+<h3>Ejemplos prácticos:</h3>
+<h3>Eliminar archivos listados por find:</h3>
+<pre><code>find /home/jose/temp -name "*.log" | xargs rm</code></pre>
+<h3>Contar líneas de muchos archivos .txt:</h3>
+<pre><code>find /home/jose/ -name "*.txt" | xargs wc -l</code></pre>
+<h3>Abrir múltiples archivos con xdg-open:</h3>
+<pre><code>locate "*.pdf" | head -n 3 | xargs xdg-open</code></pre>
+<h3>Ejercicio práctico final:</h3>
+<p>Supón que quieres buscar procesos de Python y matarlos si están usando mucha CPU. Haría lo siguiente:</p>
+<pre><code>ps aux | grep python
+# Encuentra el PID
+kill -9 12345
+# Matar el proceso por PID
+nice -n 15 python3 largo.py &amp;
+# Ejecutarlo con prioridad baja
+jobs
+# Ver si quedó en segundo plano
+fg %1
+# Traerlo al frente si es necesario</code></pre>

@@ -1,0 +1,106 @@
+<h2>Personalizar tu entrada al sistema</h2>
+<p>En Linux podemos personalizar los siguientes mensajes:</p>
+<ul><li>Mensaje de inicio de Sesión al realizar un Login exitoso en el sistema (ya sea desde una terminal ó accediendo via SSH.</li><li>Mensaje previo al Login (cuando accedemos por terminal directa al equipo)</li></ul>
+<h3>1. Mensaje Previo al Login</h3>
+<p>Este mensaje se presenta al solicitar los datos de autenticación cuando intentamos acceder directamente desde una terminal al sistema.</p>
+<p>Para incluir un mensaje o banner personalizado editamos el archivo:</p>
+<pre><code>sudo nano /etc/issue</code></pre>
+<p>El archivo <code>/etc/issue</code> puede contener ciertos códigos de escape para mostrar el nombre del sistema, la fecha y la hora, etc. Todos los códigos de escape consisten en una barra diagonal inversa (\) seguida inmediatamente de una de las letras que se explican a continuación.</p>
+<p>\b Muestra la velocidad en baudios de la línea actual</p>
+<p>\d Muestra la fecha actual.</p>
+<p>\s Muestra el nombre del sistema, el nombre del sistema operativo.</p>
+<p>\l Muestra el nombre de la línea tty actual.</p>
+<p>\m Muestra el identificador de arquitectura de la máquina, por ejemplo, i486</p>
+<p>\n Muestra el nombre de nodo del equipo, también conocido como nombre de host.</p>
+<p>\o Muestra el nombre de dominio del equipo.</p>
+<p>\r Muestra el número de versión del sistema operativo, por ejemplo. 1.1.9.</p>
+<p>\t Muestra la hora actual.</p>
+<p>\u Muestra el número de usuarios actuales que han iniciado sesión.</p>
+<p>\U Muestra la cadena "1 usuario" o "usuarios" donde es el número de usuarios actuales que han iniciado sesión.</p>
+<p>\v Muestra la versión del sistema operativo, por ejemplo, la fecha de compilación, etc.</p>
+<p>\4 Visualiza la dirección IP de la máquina</p>
+<p>\4{eth0} Solo visualiza la dirección IP de la tarjeta eth0 si hay varias en el sistema.</p>
+<p>Puedes ver las diferentes opciones y parámetros admitidos en tu sistema puedes hacerlo con:</p>
+<pre><code>man getty</code></pre>
+<h3>2. Archivo /etc/issue.net (Acceso Remoto SSH)</h3>
+<p>El archivo cumple una función similar a <strong><code>/etc/issue</code></strong>, pero se muestra cuando un usuario intenta conectarse al servidor de forma <strong>remota a través de SSH (Secure Shell) o Telnet.</strong></p>
+<ul><li><strong>Cuándo se muestra:</strong> Antes de la solicitud de nombre de usuario <strong>del servicio (como sshd)</strong>.</li><li><strong>Códigos de Escape:</strong> Soporta los mismos códigos de escape de que usamos antes (como , $\text{\r}$, $\text{\m}$, $\text{\4}$).</li><li><strong>Uso Recomendado:</strong> Se utiliza a menudo para mostrar advertencias de seguridad o el logo del sistema.</li></ul>
+<h3>Ejemplo de implementación:</h3>
+<pre><code># Contenido de /etc/issue.net
+sudo nano /etc/issue.net
+
+FEVAL SERVER
+------------------------------------
+ACCESO RESTRINGIDO - SERVIDOR PRIVADO
+USER: feval
+PASS: dingdong
+=================================================
+\S
+Kernel \r en \m
+IP: \4
+Hostname: \n
+Tiempo de actividad: \t
+Fecha: \d
+Hora: \t
+Usuarios Logueados: \u</code></pre>
+<h3>2. Archivo /etc/motd (Message of the Day)</h3>
+<p>El archivo es probablemente el más útil para la personalización y la información del sistema. Es lo que se muestra al usuario <strong>después de que inicia sesión correctamente</strong> (tanto en la consola como por SSH).</p>
+<p>A diferencia de los archivos que son estáticos, utiliza de forma dinámica a través de la carpeta <code>/etc/update-motd.d/.</code></p>
+<h3>Personalización Estática</h3>
+<p>Puedes añadir contenido directamente al archivo base <code>/etc/motd</code>. Este contenido se mostrará antes o después de cualquier script dinámico.</p>
+<h3>Personalización Dinámica (Recomendada)</h3>
+<p>La mejor manera es crear <strong>scripts ejecutables</strong> en la carpeta <code>/etc/update-motd.d/.</code> Estos scripts generan contenido dinámico (uso de CPU, actualizaciones pendientes, etc.) cada vez que alguien inicia sesión.</p>
+<h3>Pasos para un script personalizado:</h3>
+<ol><li>Crea un nuevo script en la carpeta:</li></ol>
+<pre><code>sudo nano /etc/update-motd.d/90-custom-message</code></pre>
+<ol><li>Añade tu mensaje y usa comandos para obtener información en tiempo real:</li></ol>
+<pre><code>#!/bin/bash
+echo "============================================================"
+echo "¡BIENVENIDO AL SERVIDOR DE FEVAL, ${USER}!"
+echo "El uso actual del disco en / es: $(df -h / | awk 'NR==2 {print $5}')"
+echo "Último inicio de sesión: $(last -1 | grep -v 'wtmp' | awk '{print $4, $5, $6}')"
+echo "============================================================"</code></pre>
+<ol><li>Dale permisos de ejecución al script:</li></ol>
+<pre><code>sudo chmod +x /etc/update-motd.d/90-custom-message</code></pre>
+<p><strong>Resultado:</strong> Cada vez que el usuario inicie sesión, verá tu mensaje personalizado con información en tiempo real, lo que le da un toque mucho más dinámico que el archivo <code>/etc/issue</code>.</p>
+<p>La forma más fácil de generar texto en arte ASCII es usando un programa llamado <strong>figlet</strong> y, opcionalmente, <strong>lolcat</strong> para darle color.</p>
+<h3>Pasos:</h3>
+<ol><li><strong>Instalar herramientas:</strong></li></ol>
+<pre><code>sudo apt install figlet lolcat</code></pre>
+<ol><li><strong>Probar figlet:</strong> Escribe un texto y canalízalo a figlet.</li></ol>
+<pre><code>echo "FEVAL SERVER" | figlet</code></pre>
+<p>o en dos líneas:</p>
+<pre><code>echo -e "FEVAL\nSERVER" | figlet</code></pre>
+<ol><li><strong>Probar lolcat (con color):</strong></li></ol>
+<pre><code>printf "FEVAL\nSERVER\n" | figlet -f slant | lolcat</code></pre>
+<p>figlet -f slant usa una fuente diferente. Puedes ver más fuentes en <code>/usr/share/figlet/.</code></p>
+<p>Puedes añadir la salida del comando printf "FEVAL\nSERVER\n" | figlet -f slant | lolcat al <strong>inicio</strong> del fichero <code>/etc/issue</code></p>
+<h4>1. Generar la Salida de figlet y Guardarla en un Archivo Temporal</h4>
+<p>La clave es guardar la salida del comando en un archivo nuevo y temporal. Dado que <code>/etc/issue</code> no soporta códigos de color (solo se ve al conectarse por SSH), solo necesitas la salida de figlet.</p>
+<p># 1. Ejecuta el comando y guarda la salida en un archivo temporal.</p>
+<pre><code># Usamos 'printf' y 'figlet' (sin 'lolcat', ya que /etc/issue no soporta color).
+printf "FEVAL\nSERVER\n" | figlet -f slant &gt; /tmp/temp_header.txt</code></pre>
+<h4>2. Concatenar y Reemplazar el Archivo Original</h4>
+<p>Ahora, concatenamos el contenido nuevo (<code>/tmp/temp_header.txt</code>) y el contenido antiguo (<code>/etc/issue</code>) en un nuevo archivo, y luego reemplazas el original.</p>
+<pre><code># 2. Concatena el archivo temporal (nuevo) y el archivo original (/etc/issue)</code></pre>
+<p># y redirige la salida al archivo temporal para la fusión.</p>
+<pre><code>cat /tmp/temp_header.txt /etc/issue &gt; /tmp/temp_issue_merged.txt
+# 3. Mueve (renombra) el archivo fusionado de vuelta a la ubicación original.
+# Esto requiere permisos de root (sudo).
+sudo mv /tmp/temp_issue_merged.txt /etc/issue</code></pre>
+<h4>3. Limpiar el Archivo Temporal</h4>
+<pre><code># 4. Elimina el archivo temporal.
+rm /tmp/temp_header.txt</code></pre>
+<h3>Recomendación para mantenerlo actualizado</h3>
+<p>Para que el archivo muestre datos actualizados (como IP o interfaz), puedes usar un script en <code>/etc/rc.local</code> o un servicio systemd que lo regenere en cada arranque:</p>
+<pre><code>#!/bin/bash
+echo "======================================" &gt; /etc/issue
+echo " SERVER - ACCESO RESTRINGIDO" &gt;&gt; /etc/issue
+echo " IP: $(hostname -I | awk '{print $1}')" &gt;&gt; /etc/issue
+echo " Interfaz de red: $(hostname)" &gt;&gt; /etc/issue
+echo "======================================" &gt;&gt; /etc/issue
+uname -a &gt;&gt; /etc/issue</code></pre>
+<h3>Configurar el Firewall (UFW)</h3>
+<p>Si el firewall de Ubuntu (UFW) está activo, bloqueará el puerto 23 por defecto. Debes abrirlo explícitamente para permitir la conexión.</p>
+<pre><code>sudo ufw allow 23/tcp
+sudo ufw status</code></pre>

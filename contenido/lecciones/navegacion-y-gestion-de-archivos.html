@@ -1,0 +1,304 @@
+<h3>1. Comando touch: Creación y Modificación de Marcas de Tiempo de Archivos</h3>
+<p>El comando touch se usa principalmente para dos propósitos: <strong>crear un archivo vacío</strong> o <strong>actualizar las marcas de tiempo</strong> (acceso, modificación y cambio) de un archivo existente.</p>
+<h3>Uso Básico: Crear un Archivo</h3>
+<ul><li><strong>Comando:</strong> <code>touch archivo.txt</code></li><li><strong>Finalidad:</strong> Crea un archivo vacío llamado archivo.txt en el directorio actual.</li><li><strong>Ejemplo Práctico:</strong></li></ul>
+<pre><code>touch informe_ventas.doc
+ls -l informe_ventas.doc
+-rw-rw-r-- 1 jose jose 0 Oct 9 07:00 informe_ventas.doc</code></pre>
+<h3>Opciones Comunes:</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-a</td><td>Solo cambia la hora de <strong>acceso</strong> (access time).</td></tr><tr><td>-m</td><td>Solo cambia la hora de <strong>modificación</strong> (modification time).</td></tr><tr><td>-t [[CC]YY]MMDDhhmm[.ss]</td><td>Usa el argumento <em>fecha_hora</em> especificado en lugar de la hora actual.</td></tr></tbody></table></div>
+<h3>Ejemplo Práctico: Modificar Solo la Hora de Acceso</h3>
+<ol><li>Creamos un archivo.</li><li>Esperamos unos segundos.</li><li>touch con -a y luego comparamos las marcas de tiempo con stat.</li></ol>
+<pre><code>touch datos_antiguos.txt
+# (Esperar 10 segundos...)
+stat datos_antiguos.txt | grep "Acceso\|Modificación"
+Acceso: (0664/-rw-rw-r--) Uid: ( 1000/ jose) Gid: ( 1000/ jose)
+Acceso: 2025-10-11 08:59:24.256741984 +0200
+Modificación: 2025-10-11 08:58:39.417333542 +0200
+touch -a datos_antiguos.txt
+stat datos_antiguos.txt | grep "Acceso\|Modificación"
+Access: 2025-10-09 07:01:10.000000000 +0200 &lt;-- ¡Esta se actualizó!
+Modify: 2025-10-09 07:01:00.000000000 +0200 &lt;-- Esta no</code></pre>
+<p>El comando <strong>stat</strong> es una herramienta fundamental en el <strong>pentesting</strong> que se utiliza principalmente en la fase de <strong>post-explotación</strong> o durante la <strong>escalada de privilegios</strong> en sistemas basados en Linux/Unix.</p>
+<p>Aunque es un comando simple, la información detallada que proporciona sobre los metadatos de los archivos es crítica para un atacante o <em>pentester</em>.</p>
+<h3>Usos Clave de stat en Pentesting</h3>
+<p>El comando stat muestra información detallada sobre el archivo (o <em>inode</em>), incluyendo: permisos, propietario, tamaño, y, lo más importante, las marcas de tiempo (timestamps) de acceso, modificación y cambio de atributos.</p>
+<h4>1. Detección de Archivos Modificados (Modify/Change Time)</h4>
+<p>El principal uso es la <strong>detección de archivos sospechosos</strong>. Un atacante puede usar stat para identificar programas o archivos de configuración que han sido alterados recientemente.</p>
+<ul><li><strong>Búsqueda de Backdoors o Troyanos:</strong> Si un atacante compromete el sistema y deja un <em>backdoor</em>, este archivo tendrá una marca de tiempo de <strong>Modificación (Modify)</strong> reciente, que no coincide con la fecha de instalación del sistema o la última actualización legítima.</li><li><strong>Archivos de Configuración:</strong> Verificar cuándo se modificó por última vez un archivo crítico como <code>/etc/passwd</code> o <code>/etc/sudoers</code>. Si la hora de Modificación es muy reciente, podría indicar una alteración maliciosa.</li></ul>
+<pre><code>stat /etc/passwd</code></pre>
+<h4>2. Detección de Acceso a Archivos (Access Time)</h4>
+<p>Esta es crucial para saber si el sistema ha sido revisado, o si un atacante ha leído archivos sensibles.</p>
+<ul><li><strong>Identificación de Vigilancia:</strong> Un administrador de sistemas o <em>pentester</em> puede usar las marcas de tiempo de <strong>Acceso (Access)</strong> para saber qué archivos o directorios leyó recientemente un usuario o proceso sospechoso.</li><li><strong>Investigación Forense:</strong> Después de ganar acceso (o para ver qué leyó un atacante), revisar la hora de Acceso de archivos importantes como <em>logs</em>, claves (id_rsa), o documentos confidenciales para determinar qué información fue potencialmente comprometida.</li></ul>
+<pre><code>stat ~/.ssh/id_rsa</code></pre>
+<p>El archivo <strong><code>~/.ssh/id_rsa</code></strong> es la <strong>clave privada SSH</strong> que se usa para conectarse a otros servidores de forma segura.</p>
+<p><strong>No se crea automáticamente:</strong> Este archivo no se crea por defecto cuando instalas un sistema operativo Linux (ni siquiera en una Máquina Virtual).</p>
+<p><strong>Se genera bajo demanda:</strong> Solo se crea cuando el usuario lo genera explícitamente usando el comando ssh-keygen.</p>
+<p>En el ámbito del pentesting, buscar <code>~/.ssh/id_rsa</code> es un movimiento estándar porque es una de las primeras cosas que un atacante busca al obtener acceso a una máquina.</p>
+<ul><li>Si existiera, el atacante podría usar esa clave privada para <strong>moverse lateralmente</strong> (es decir, acceder a otros servidores o máquinas a las que la víctima tiene permiso, sin necesidad de contraseña).</li></ul>
+<h4>3. Escalada de Privilegios</h4>
+<p>La información de stat sobre permisos y propiedades del archivo ayuda a identificar potenciales debilidades:</p>
+<ul><li><strong>Permisos y Propietario:</strong> Permite verificar rápidamente los permisos (%a) y el propietario (%U y %G) de un archivo. Si un archivo crítico o un binario del sistema tiene permisos laxos (por ejemplo, escritura para "otros"), podría ser explotado.</li></ul>
+<pre><code>stat -c "%n %a %U %G" /usr/bin/comando_sospechoso</code></pre>
+<ul><li><strong>Archivos SUID/SGID:</strong> Aunque el comando find es más eficiente para esto, stat puede confirmar los permisos especiales de ejecución (s) en archivos que pueden llevar a una escalada de privilegios si se ejecutan como root.</li></ul>
+<p>El comando stat es una de las herramientas de <strong>GNU Core Utilities</strong> que, si bien no es una herramienta de <em>pentesting</em> por sí misma (como Nmap o Metasploit), es indispensable en el <strong>análisis forense y el reconocimiento interno</strong> de un sistema comprometido.</p>
+<h3>2. Comando file: Determinar el Tipo de Archivo</h3>
+<p>El comando file examina el contenido de un archivo (no solo su extensión) para determinar su tipo.</p>
+<h3>Uso Básico: Identificar un Archivo</h3>
+<ul><li><strong>Comando:</strong> <code>file nombre_archivo</code></li><li><strong>Finalidad:</strong> Muestra una descripción del tipo de datos que contiene el archivo.</li></ul>
+<h3>Ejemplo Práctico:</h3>
+<pre><code>touch archivo_vacio.txt
+echo "Hola, esto es un script" &gt; mi_script.sh
+file archivo_vacio.txt
+archivo_vacio.txt: empty
+file mi_script.sh
+mi_script.sh: ASCII text
+file /bin/bash</code></pre>
+<p><code>/bin/bash</code>: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, ...</p>
+<h3>Opción Común:</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-s</td><td>Trabaja con archivos especiales de bloque o carácter (útil para ver el tipo de un sistema de archivos en una partición).</td></tr></tbody></table></div>
+<h3>3. Comando stat: Mostrar el Estado Detallado del Archivo</h3>
+<p>El comando stat muestra información muy detallada sobre el archivo o sistema de archivos, incluyendo los números de i-nodo y las tres marcas de tiempo.</p>
+<h3>Uso Básico: Ver Metadatos</h3>
+<ul><li><strong>Comando:</strong> <code>stat nombre_archivo</code></li><li><strong>Finalidad:</strong> Muestra el tamaño, permisos, propietario, i-nodo, y las marcas de tiempo Acess, Modify y Change.</li><li><strong>Ejemplo Práctico:</strong></li></ul>
+<pre><code>touch informe_semanal.pdf
+stat informe_semanal.pdf
+File: informe_semanal.pdf</code></pre>
+<p>Size: 0 Blocks: 0 IO Block: 4096 regular empty file</p>
+<pre><code>Device: 801h/2049d Inode: 2000001 Links: 1
+Access: (0664/-rw-rw-r--) Uid: ( 1000/ jose) Gid: ( 1000/ jose)
+Access: 2025-10-09 07:05:00.000000000 +0200
+Modify: 2025-10-09 07:05:00.000000000 +0200
+Change: 2025-10-09 07:05:00.000000000 +0200
+Birth: 2025-10-09 07:05:00.000000000 +0200</code></pre>
+<h3>Opción Común:</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-f</td><td>Muestra el estado del sistema de archivos donde reside el archivo.</td></tr></tbody></table></div>
+<h3>4. Comando find: Búsqueda Potente de Archivos</h3>
+<p>El comando find busca archivos en una <strong>jerarquía de directorios</strong> que cumplen con una condición dada. Es extremadamente potente y se usa para búsquedas en tiempo real.</p>
+<h3>Uso Básico: Buscar por Nombre</h3>
+<ul><li><strong>Comando:</strong> <code>find ruta -name "patron"</code></li><li><strong>Finalidad:</strong> Busca un archivo por nombre (distingue mayúsculas/minúsculas) a partir de la ruta.</li><li><strong>Ejemplo Práctico:</strong> Buscar el archivo interfaces en el directorio <code>/etc</code>.</li></ul>
+<pre><code>find /etc -name "interfaces"
+/etc/cups/interfaces</code></pre>
+<h3>Opciones Comunes:</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-iname</td><td>Busca por nombre ignorando mayúsculas/minúsculas.</td></tr><tr><td>-type d</td><td>Busca solo directorios. Use f para archivos, l para enlaces simbólicos.</td></tr><tr><td>-user nombre</td><td>Busca archivos propiedad del usuario especificado.</td></tr><tr><td>-mtime +N/-N</td><td>Busca archivos modificados hace <strong>más de N días</strong> (+N) o <strong>menos de N días</strong> (-N).</td></tr></tbody></table></div>
+<pre><code>sudo find -user jose
+sudo find -type d</code></pre>
+<p><strong>Ejemplo Práctico: Buscar archivos de configuración que no sean propiedad de jose y que hayan sido modificados en el último día</strong></p>
+<p># Creamos un archivo de prueba con sudo para que sea de root</p>
+<pre><code>sudo touch /etc/mi_nuevo_config.conf</code></pre>
+<p># Buscamos en <code>/etc</code> archivos regulares (-type f) que NO sean de 'jose' (-not -user jose) y que hayan sido modificados en el último día (-mtime -1).</p>
+<pre><code>find /etc/mi_nuevo_config.conf -type f -not -user jose -mtime -1</code></pre>
+<h3>5. Comando locate: Búsqueda Rápida de Archivos</h3>
+<p>El comando locate busca archivos utilizando una <strong>base de datos pre-indexada</strong> (mlocat.db). Es mucho más rápido que find, pero solo encuentra archivos que existían en el momento de la última actualización de la base de datos.</p>
+<h3>Uso Básico: Búsqueda Rápida</h3>
+<ul><li><strong>Comando:</strong> <code>locate nombre_archivo</code></li><li><strong>Finalidad:</strong> Busca rápidamente cualquier archivo cuyo nombre contenga la cadena especificada en la base de datos.</li><li><strong>Ejemplo Práctico:</strong></li></ul>
+<pre><code>sudo apt install plocate
+locate bashrc | head -3
+/etc/bash.bashrc
+/etc/skel/.bashrc
+/home/jose/.bashrc</code></pre>
+<h3>Opción Común:</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-i</td><td>Ignora mayúsculas/minúsculas.</td></tr><tr><td>-c</td><td>Solo cuenta el número de resultados.</td></tr></tbody></table></div>
+<h3>Ejemplo Práctico: Contar archivos que contienen &quot;mysql&quot; (ignorando mayúsculas)</h3>
+<pre><code>locate -i -c mysql
+152</code></pre>
+<p><strong>Nota importante:</strong> Si un archivo acaba de ser creado, locate no lo encontrará hasta que se actualice la base de datos con el comando sudo updatedb.</p>
+<h3>6. Comando which: Localizar Comandos Ejecutables</h3>
+<p>El comando which busca binarios ejecutables (programas) en los directorios listados en la variable de entorno $PATH.</p>
+<h3>Uso Básico: ¿Dónde está el programa?</h3>
+<ul><li><strong>Comando:</strong> <code>which nombre_comando</code></li><li><strong>Finalidad:</strong> Muestra la ruta completa al binario ejecutable.</li><li><strong>Ejemplo Práctico:</strong></li></ul>
+<pre><code>which ls
+/usr/bin/ls
+which python3
+/usr/bin/python3</code></pre>
+<h3>Opción Común:</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-a</td><td>Imprime <em>todas</em> las coincidencias en el $PATH, no solo la primera.</td></tr></tbody></table></div>
+<p>El comando <strong>which</strong> se utiliza en pentesting principalmente en las fases de <strong>post-explotación</strong> y <strong>reconocimiento interno</strong> para determinar la <strong>ubicación absoluta</strong> de los binarios ejecutables del sistema.</p>
+<p>Su objetivo es la <strong>fiabilidad</strong> y la <strong>evasión</strong>.</p>
+<h4>1. Garantizar la Ejecución Confiable</h4>
+<p>En un sistema comprometido, el entorno del <em>shell</em> que obtiene el atacante (o <em>pentester</em>) suele ser mínimo y puede no tener la variable de entorno $PATH correctamente configurada.</p>
+<ul><li><strong>Rutas Absolutas:</strong> Al obtener la ruta completa de un comando (ej. <code>/bin/bash</code> en lugar de solo bash), se asegura que el script o el <em>exploit</em> se ejecutará correctamente sin depender de la configuración del $PATH.</li></ul>
+<p>Se usa para obtener la ruta del intérprete en una reverse Shell</p>
+<pre><code>which python
+# Resultado: /usr/bin/python</code></pre>
+<h4>2. Detección de Modificaciones y Evasión</h4>
+<p>El comando which ayuda al atacante a evadir posibles trampas o a identificar si los binarios comunes han sido reemplazados.</p>
+<ul><li><strong>Binarios "Troyanizados":</strong> Un administrador de sistemas puede haber reemplazado binarios comunes (como ls, netcat, o incluso which mismo) con versiones modificadas para registrar la actividad del atacante. Al usar which, el atacante ve dónde está el binario que el sistema realmente está ejecutando.</li><li><strong>Identificación de Herramientas Útiles:</strong> Permite comprobar rápidamente si hay herramientas útiles instaladas y disponibles para la escalada de privilegios o movimiento lateral.<ul><li>Saber si existe un compilador (which gcc).</li><li>Saber si está instalado el intérprete de un lenguaje de <em>scripting</em> avanzado (which perl, which ruby).</li><li>Saber si están instalados comandos de red avanzados (which nc o which ncat).</li></ul></li></ul>
+<p>En resumen, which es la forma más rápida de obtener <strong>conciencia situacional</strong> y asegurar que el atacante está llamando a las herramientas que cree que está llamando, en su ubicación exacta.</p>
+<h3>7. Comando type: Describir un Comando</h3>
+<p>El comando type describe cómo se interpretará un nombre de comando, indicando si es un <strong>alias</strong>, una <strong>función</strong>, un <strong>comando incorporado (builtin)</strong> o un <strong>ejecutable</strong> externo.</p>
+<h3>Uso Básico: Analizar el Tipo</h3>
+<ul><li><strong>Comando:</strong> <code>type nombre_comando</code></li><li><strong>Finalidad:</strong> Muestra el tipo de comando.</li><li><strong>Ejemplo Práctico:</strong></li></ul>
+<pre><code>type ls
+ls is aliased to `ls --color=auto' &lt;-- ¡Es un alias!
+type cd</code></pre>
+<p>cd is a shell builtin &lt;-- ¡Es un comando incorporado del shell!</p>
+<pre><code>type find
+find is /usr/bin/find &lt;-- ¡Es un ejecutable externo!</code></pre>
+<h3>Opción Común:</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td>-a</td><td>Muestra todas las formas en las que se podría interpretar el nombre.</td></tr></tbody></table></div>
+<h3>8. Comando basename: Extraer el Nombre del Archivo</h3>
+<p>El comando basename elimina cualquier prefijo de directorio de una ruta dada, dejando solo el nombre del archivo o directorio.</p>
+<h3>Uso Básico: Extraer el Nombre Final</h3>
+<ul><li><strong>Comando:</strong> <code>basename /ruta/al/archivo</code></li><li><strong>Finalidad:</strong> Muestra el último componente de la ruta.</li></ul>
+<h3>Ejemplo Práctico:</h3>
+<pre><code>basename /home/jose/documentos/completo.txt
+completo.txt
+basename /etc/apt/
+apt</code></pre>
+<h3>Opción Común:</h3>
+<div class="tabla"><table><thead><tr><th><strong>Opción</strong></th><th><strong>Descripción</strong></th></tr></thead><tbody><tr><td><code>[SUFIXO]</code></td><td>Elimina un sufijo especificado del nombre del archivo (útil para extensiones).</td></tr></tbody></table></div>
+<h3>Ejemplo Práctico: Quitar la extensión</h3>
+<pre><code>basename /home/jose/completo.txt txt
+completo</code></pre>
+<h3>9. Comando dirname: Extraer el Nombre del Directorio</h3>
+<p>El comando dirname complementa a basename al eliminar el último componente de la ruta, dejando solo la parte del directorio.</p>
+<h3>Uso Básico: Extraer la Ruta del Directorio</h3>
+<ul><li><strong>Comando:</strong> <code>dirname /ruta/al/archivo</code></li><li><strong>Finalidad:</strong> Muestra todos los componentes de la ruta excepto el último.</li><li><strong>Ejemplo Práctico:</strong></li></ul>
+<pre><code>dirname /home/jose/completo.txt
+/home/jose/
+dirname completo.txt
+.
+dirname /usr/local/bin/
+/usr/local</code></pre>
+<p><strong>Nota:</strong> Cuando se aplica a un archivo en el directorio actual (como completo.txt), devuelve un punto (.), que representa el directorio actual.</p>
+<h3>Ejercicios de repaso:</h3>
+<h3>1. touch – Crear archivos vacíos o modificar fechas</h3>
+<h3>Uso común:</h3>
+<pre><code>touch archivo.txt</code></pre>
+<h3>Ejemplos prácticos:</h3>
+<h3>Crear un archivo vacío:</h3>
+<pre><code>touch /home/jose/ejemplo.txt</code></pre>
+<h3>Crear varios archivos:</h3>
+<pre><code>touch /home/jose/archivo1.txt /home/jose/archivo2.txt</code></pre>
+<h3>Actualizar la fecha de modificación de un archivo existente:</h3>
+<pre><code>touch /home/jose/ejemplo.txt</code></pre>
+<h3>Establecer una fecha y hora específica (formato [[CC]YY]MMDDhhmm[.ss]):</h3>
+<pre><code>touch -t 202510091200.00 /home/jose/ejemplo.txt</code></pre>
+<h3>2. file – Identificar el tipo de archivo</h3>
+<h3>Uso común:</h3>
+<pre><code>file nombre_archivo</code></pre>
+<h3>Ejemplos prácticos:</h3>
+<h3>Ver el tipo de archivo:</h3>
+<pre><code>file /home/jose/ejemplo.txt</code></pre>
+<h3>Archivo binario:</h3>
+<pre><code>file /bin/ls</code></pre>
+<h3>Archivo comprimido:</h3>
+<pre><code>file /home/jose/archivo.zip</code></pre>
+<h3>3. stat – Mostrar información detallada de archivos</h3>
+<h3>Uso común:</h3>
+<pre><code>stat archivo</code></pre>
+<h3>Ejemplos prácticos:</h3>
+<h3>Información completa del archivo:</h3>
+<pre><code>stat /home/jose/ejemplo.txt</code></pre>
+<p>Salida típica:</p>
+<pre><code>File: ejemplo.txt</code></pre>
+<p>Size: 0 Blocks: 0 IO Block: 4096 regular empty file</p>
+<pre><code>Device: 802h/2050d Inode: 1310721 Links: 1
+Access: 2025-10-09 12:00:00.000000000 +0000
+Modify: 2025-10-09 12:00:00.000000000 +0000
+Change: 2025-10-09 12:00:00.000000000 +0000
+Birth: -</code></pre>
+<h3>4. find – Buscar archivos y directorios</h3>
+<h3>Uso común:</h3>
+<pre><code>find ruta [opciones]</code></pre>
+<h3>Ejemplos prácticos:</h3>
+<h3>Buscar todos los archivos .txt en tu carpeta personal:</h3>
+<pre><code>find /home/jose -type f -name "*.txt"</code></pre>
+<h3>Buscar archivos modificados en las últimas 24 horas:</h3>
+<pre><code>find /home/jose -type f -mtime -1</code></pre>
+<h3>Buscar archivos mayores a 10MB:</h3>
+<pre><code>find /home/jose -type f -size +10M</code></pre>
+<h3>Buscar y ejecutar un comando (por ejemplo, listar detalles):</h3>
+<pre><code>find /home/jose -type f -name "*.log" -exec ls -lh {} \;</code></pre>
+<h3>5. locate – Buscar archivos rápidamente usando base de datos</h3>
+<h3>Requiere actualización de base de datos:</h3>
+<pre><code>sudo updatedb</code></pre>
+<h3>Uso común:</h3>
+<pre><code>locate nombre_archivo</code></pre>
+<h3>Ejemplos prácticos:</h3>
+<h3>Buscar archivos que contengan “bashrc”:</h3>
+<pre><code>locate bashrc</code></pre>
+<h3>Buscar todos los archivos .pdf:</h3>
+<pre><code>locate "*.pdf"</code></pre>
+<h3>6. which – Mostrar la ruta del ejecutable de un comando</h3>
+<h3>Uso común:</h3>
+<pre><code>which comando</code></pre>
+<h3>Ejemplos prácticos:</h3>
+<h3>Ruta del comando ls:</h3>
+<pre><code>which man
+which nano
+which df</code></pre>
+<p>Muestra la ubicación del comando <strong>df</strong>, que informa sobre el uso del espacio en disco (Disk Free).</p>
+<pre><code>which passwd</code></pre>
+<p>Muestra la ubicación del binario <strong>passwd</strong>, utilizado para cambiar la contraseña del usuario. (Es crucial en seguridad saber dónde reside un binario tan sensible).</p>
+<h3>7. type – Saber qué tipo de comando es (alias, built-in, función, etc.)</h3>
+<h3>Uso común:</h3>
+<pre><code>type comando</code></pre>
+<h3>Ejemplos prácticos:</h3>
+<pre><code>type nano</code></pre>
+<p>Salida:</p>
+<pre><code>nano is /usr/bin/nano
+
+type find</code></pre>
+<p>Salida:</p>
+<pre><code>find está asociado (/usr/bin/find)
+type grep</code></pre>
+<p>Salida:</p>
+<pre><code>grep es un alias de `grep --color=auto'</code></pre>
+<h3>8. basename – Obtener el nombre base de una ruta</h3>
+<h3>Uso común:</h3>
+<pre><code>basename ruta/completa/archivo.txt</code></pre>
+<h3>Ejemplos prácticos:</h3>
+<h3>Solo el nombre del archivo:</h3>
+<pre><code>basename /home/jose/documentos/ejemplo.txt</code></pre>
+<p>Salida:</p>
+<p>ejemplo.txt</p>
+<h3>Eliminar extensión con un sufijo:</h3>
+<pre><code>basename /home/jose/script.sh .sh</code></pre>
+<p>Salida:</p>
+<p>script</p>
+<h3>9. dirname – Obtener la ruta del directorio contenedor</h3>
+<h3>Uso común:</h3>
+<pre><code>dirname ruta/completa/archivo.txt</code></pre>
+<h3>Ejemplos prácticos:</h3>
+<h3>Ruta del directorio:</h3>
+<pre><code>dirname /home/jose/documentos/ejemplo.txt</code></pre>
+<p>Salida:</p>
+<p><code>/home/jose/documentos</code></p>
+<h3>Ejercicio final práctico</h3>
+<p>Supón que tienes este archivo:</p>
+<pre><code>/home/jose/proyectos/python/app.py
+touch app.py</code></pre>
+<p>Vamos a aplicar varios comandos:</p>
+<pre><code>basename /home/jose/proyectos/python/app.py
+# Resultado: app.py
+dirname /home/jose/proyectos/python/app.py
+# Resultado: /home/jose/proyectos/python
+file /home/jose/proyectos/python/app.py
+/home/jose/proyectos/python/app.py: empty
+stat /home/jose/proyectos/python/app.py
+# Muestra tamaño, fecha, permisos, etc.
+find /home/jose/proyectos -name "*.py"
+# Encuentra archivos Python
+locate app.py
+# Encuentra ubicaciones conocidas de "app.py" en el sistema</code></pre>
+<p>Seguramente no veremos nuestra app.py.</p>
+<p>El problema es que la base de datos de <strong>locate</strong> aún no se ha actualizado para incluir el archivo que acabas de crear.</p>
+<h5>1. find (Búsqueda en Tiempo Real)</h5>
+<ul><li><strong>¿Cómo funciona?</strong> find busca archivos <strong>directamente en el sistema de archivos</strong>, explorando los directorios en tiempo real.</li><li><strong>Velocidad:</strong> Es más lento, especialmente en directorios grandes.</li><li><strong>Precisión:</strong> Es <strong>siempre preciso</strong>, ya que ve los archivos en el momento exacto en que se ejecuta.</li></ul>
+<p>Cuando ejecutas find, encontró inmediatamente <code>/home/jose/proyectos/python/app.py</code> porque lo buscó físicamente en la carpeta.</p>
+<h5>2. locate (Búsqueda en Base de Datos)</h5>
+<ul><li><strong>¿Cómo funciona?</strong> locate no busca en el disco duro. En su lugar, consulta una <strong>base de datos precompilada</strong> de todos los archivos del sistema, llamada <strong>mlocate.db</strong>.</li><li><strong>Velocidad:</strong> Es extremadamente rápido.</li><li><strong>Precisión:</strong> Solo es preciso si la base de datos está actualizada.</li><li>La base de datos se actualiza automáticamente (normalmente una vez al día o cada pocas horas) o manualmente. Como creamos app.py hace poco, el archivo aún no estaba en la base de datos, por eso no lo listó.</li></ul>
+<h4>Solución</h4>
+<p>Para que locate muestre tu archivo, debes forzar la actualización manual de la base de datos ejecutando el comando <strong>updatedb</strong> con permisos de superusuario:</p>
+<pre><code>sudo updatedb</code></pre>
+<p>Una vez que este comando termine de ejecutarse (tarda unos segundos), si vuelves a ejecutar locate, ahora sí verás tu archivo:</p>
+<pre><code>jose@jose-VirtualBox:~/proyectos/python$ sudo updatedb
+jose@jose-VirtualBox:~/proyectos/python$ locate app.py</code></pre>
+<p>... (otras rutas de snap y python) ...</p>
+<pre><code>/home/jose/proyectos/python/app.py &lt;-- ¡Ahora sí aparece!
+which python3
+# Te muestra dónde está instalado el ejecutable de Python
+type cd</code></pre>
+<p># Te dice que es un comando interno del shell</p>

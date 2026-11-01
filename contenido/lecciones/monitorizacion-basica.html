@@ -1,0 +1,441 @@
+<h3>1) Conceptos rápidos (qué mirar y por qué)</h3>
+<ul><li><strong>CPU</strong>: % de uso por proceso, carga (load average).</li><li><strong>Memoria</strong>: RAM usada, buffers, cache, uso de swap.</li><li><strong>I/O disco</strong>: procesos que leen/escriben mucho → impacto en latencia.</li><li><strong>Disco/espacio</strong>: tamaño usado, inodos, discos llenos.</li><li><strong>Red</strong>: conexiones abiertas, puertos escuchando, tráfico.</li><li><strong>Procesos</strong>: procesos "pesados", usuarios que consumen recursos.</li></ul>
+<p>Regla para la <strong>load average</strong>: son promedios (1m, 5m, 15m). Interpretación rápida: comparar con número de núcleos. Por ejemplo, carga 4.0 en CPU de 4 cores ≈ saturación.</p>
+<h3>Conceptos rápidos de monitorización</h3>
+<h3>CPU</h3>
+<ul><li><strong>Qué mirar</strong>:<ul><li>% de uso por proceso → quién está consumiendo CPU.</li><li>load average → nivel de carga global del sistema.</li></ul></li><li><strong>Por qué</strong>:<ul><li>El % de CPU te dice si un proceso está acaparando recursos.</li><li>El <em>load average</em> mide cuántos procesos están esperando CPU o I/O.</li></ul></li><li><strong>Ejemplo</strong>:</li></ul>
+<pre><code>top</code></pre>
+<p>Supongamos que ves:</p>
+<pre><code>%CPU COMMAND
+95.0 gzip</code></pre>
+<p>→ El proceso gzip está usando casi un núcleo completo.</p>
+<p>Y en la cabecera:</p>
+<pre><code>load average: 4.00, 3.80, 2.50</code></pre>
+<h3>Salida al iniciar la máquina:</h3>
+<pre><code>top - 09:55:53 up 9 min, 1 user, load average: 8,28, 5,36, 2,83</code></pre>
+<p>El <strong>Load Average (Carga Promedio)</strong> mide el número de procesos que están esperando activamente para ser ejecutados. Se compara típicamente con el número de núcleos de la CPU.</p>
+<div class="tabla"><table><thead><tr><th><strong>Métrica</strong></th><th><strong>Valor</strong></th></tr></thead><tbody><tr><td><strong>Carga de 1 minuto</strong></td><td>8,28</td></tr><tr><td><strong>Núcleos de CPU (asumido)</strong></td><td>4</td></tr></tbody></table></div>
+<ul><li>Una carga promedio de <strong>4.00</strong> en un sistema de 4 núcleos significaría que todos los núcleos están completamente ocupados.</li><li>Una carga promedio de <strong>8.28</strong> significa que, en promedio durante el último minuto, había <strong>más del doble de procesos (8.28 / 4 $\approx$ 2.07)</strong> esperando la CPU de las que podían ejecutar simultáneamente.</li></ul>
+<h4>Conclusión</h4>
+<p>Si la carga promedio en un sistema de <strong>4 cores</strong> es de <strong>8.28</strong>, significa que su sistema está <strong>severamente sobrecargado</strong> ($207\%$ de capacidad de la CPU), lo que concuerda con que el sistema solo lleva <strong>9 minutos</strong> encendido y ya está experimentando un alto uso de CPU (39,9% us + 12,9% sy = $\approx 53\%$ de tiempo activo de CPU total).</p>
+<p>Es <strong>muy probable</strong> que el consumo inicial alto de CPU, especialmente si involucra el comando gzip, se deba a un <strong>script</strong> que se ejecuta al inicio o de forma programada y que comprime archivos grandes.</p>
+<p>La alta carga que vio en el top (Load Average: 8,28) podría haber sido el pico de actividad de este script de compresión. Una vez que el script termina o el proceso de compresión finaliza, el consumo de CPU y la carga promedio disminuyen drásticamente.</p>
+<h3>Cómo Confirmar si es un Script</h3>
+<p>Justo después de que el sistema se inicie y antes de que la carga baje (o al notar un nuevo pico de carga), puede usar ps para ver la línea de comandos completa del proceso.</p>
+<ul><li><strong>Para ver la lista completa de procesos y la ruta del comando (incluyendo los argumentos y, a menudo, el script que lo lanzó):</strong></li></ul>
+<pre><code>ps aux | grep gzip</code></pre>
+<p>Si el comando gzip fue iniciado por un script (por ejemplo, <code>/usr/local/bin/backup_diario.sh</code>), lo verá en la salida de ps.</p>
+<h3>Salida de ps y grep:</h3>
+<pre><code>ps aux | grep gzip
+root 1334 0.0 0.0 2800 1688 ? S 09:47 0:00 /bin/sh -c gzip
+root 1335 65.1 0.0 3424 1600 ? R 09:47 8:56 gzip
+jose 7280 0.0 0.0 6648 2360 pts/0 S+ 10:00 0:00 grep --color=auto gzip</code></pre>
+<h3>Análisis de la Salida de ps</h3>
+<div class="tabla"><table><thead><tr><th><strong>Línea</strong></th><th><strong>Usuario</strong></th><th><strong>PID</strong></th><th><strong>%CPU</strong></th><th><strong>Estado</strong></th><th><strong>Hora Inicio</strong></th><th><strong>Tiempo CPU</strong></th><th><strong>Comando</strong></th></tr></thead><tbody><tr><td><strong>1.</strong></td><td>root</td><td>1334</td><td>0.0</td><td>S (Dormido)</td><td>09:47</td><td>0:00</td><td><code>/bin/sh -c gzip</code></td></tr><tr><td><strong>2.</strong></td><td>root</td><td><strong>1335</strong></td><td><strong>65.1</strong></td><td><strong>R (Ejecutando)</strong></td><td>09:47</td><td><strong>8:56</strong></td><td><strong>gzip</strong></td></tr><tr><td><strong>3.</strong></td><td>jose</td><td>7280</td><td>0.0</td><td>S+</td><td>10:00</td><td>0:00</td><td><code>grep --color=auto gzip</code></td></tr></tbody></table></div>
+<h4>Conclusiones Clave</h4>
+<ol><li><strong>El Culpable Directo:</strong> El proceso con <strong>PID 1335</strong> es el que está consumiendo una gran cantidad de CPU (65.1%). Este es el comando <strong>gzip</strong> en sí, y está en estado <strong>R (Running)</strong>, lo que significa que está ejecutando una compresión activamente.</li><li><strong>El Proceso Padre:</strong> La línea superior (PID 1334) es el <strong>shell (<code>/bin/sh</code>)</strong> que inició el proceso gzip. El hecho de que este shell se esté ejecutando como <strong>root</strong> y use la opción -c (que a menudo indica que está ejecutando una cadena de comandos) sugiere fuertemente que fue lanzado por un <strong>script automatizado</strong> o un <strong>trabajo de sistema</strong>.</li><li><strong>Duración:</strong> El proceso de compresión (gzip) lleva activo desde las <strong>09:47</strong> y ya ha acumulado <strong>8 minutos y 56 segundos</strong> de tiempo de CPU. Esto se alinea perfectamente con que la carga es alta al inicio (que fue a las 09:47 en el informe inicial de top).</li></ol>
+<h3>Siguientes Pasos: Encontrar el Script</h3>
+<p>Dado que el proceso fue iniciado por <strong>root</strong> y se inició automáticamente poco después del arranque del sistema (o a una hora programada), el siguiente paso es averiguar qué script o servicio ejecutó el shell (<code>/bin/sh</code>) con ese comando.</p>
+<h4>Obtener Más Detalles del Proceso Padre</h4>
+<p>Podemos usar el comando ps para ver qué proceso es el padre del PID 1334 (el shell) y obtener la línea de comando completa de ese padre:</p>
+<pre><code>ps -fp 1334</code></pre>
+<p>Esta salida es crítica. Podría mostrar algo como:</p>
+<ul><li><code>/usr/sbin/cron</code> (si fue una tarea programada)</li><li><code>/usr/bin/logrotate</code> (si es la rotación de logs)</li><li>Un script de inicio específico en <code>/etc/init.d/</code> o <code>/etc/systemd/</code></li></ul>
+<h3>Salida de ps -fp:</h3>
+<pre><code>ps -fp 1334
+UID PID PPID C STIME TTY TIME CMD
+root 1334 1329 0 09:47 ? 00:00:00 /bin/sh -c gzip</code></pre>
+<p>El comando <strong>ps -fp 1334</strong> nos ha revelado la última pieza del rompecabezas: el <strong>proceso padre (PPID)</strong> es el <strong>1329</strong>.</p>
+<div class="tabla"><table><thead><tr><th><strong>Campo</strong></th><th><strong>Valor</strong></th><th><strong>Significado</strong></th></tr></thead><tbody><tr><td><strong>PID (Proceso Shell)</strong></td><td>1334</td><td>El shell (<code>/bin/sh</code>) que lanzó el proceso gzip.</td></tr><tr><td><strong>PPID (Proceso Padre)</strong></td><td><strong>1329</strong></td><td>El proceso que lanzó el shell (1334).</td></tr></tbody></table></div>
+<p>Ahora solo necesitamos identificar el proceso con <strong>PID 1329</strong>. Este proceso es el <strong>origen real</strong> de la alta carga de CPU.</p>
+<h3>Identificando la Fuente Real del Problema</h3>
+<p>Ejecutemos el comando ps -fp 1329 para ver el proceso padre:</p>
+<pre><code>ps -fp 1329
+salida:
+UID PID PPID C STIME TTY TIME CMD</code></pre>
+<p>La ejecución del comando ps -fp 1329 no ha proporcionado la información que esperábamos para ese <strong>PID</strong> (Proceso Padre).</p>
+<p>La salida incompleta:</p>
+<pre><code>UID PID PPID C STIME TTY TIME CMD</code></pre>
+<p>...sin una línea de proceso debajo, significa que el proceso con <strong>PID 1329</strong> <strong>ya terminó</strong> antes de que pudiera consultarlo con ps.</p>
+<p>Esto es habitual cuando los trabajos finalizan rápidamente después de lanzar su tarea. El proceso padre (1329) lanzó el shell (1334), el shell lanzó el gzip (1335), y luego el proceso padre (1329) se cerró inmediatamente. Sin embargo, el proceso hijo (gzip, PID <strong>1335</strong>) <strong>sigue ejecutándose</strong> porque está comprimiendo un archivo grande.</p>
+<h3>load average</h3>
+<p>En un servidor con 4 cores, un load de 4.0 ≈ todos los núcleos ocupados.</p>
+<p>Si tuvieras 2 cores, un load de 4.0 = sobrecarga (cola de procesos esperando).</p>
+<figure><img src="../media/monitorizacion-basica/imagen1.webp" width="870" height="203" alt="Captura 1 de la lección «Monitorización básica»" loading="lazy" decoding="async"></figure>
+<pre><code>top - 15:15:59 up 1:16, 1 user, load average: 0,36, 0,44, 0,25</code></pre>
+<h4>Interpretación línea por línea</h4>
+<ul><li><strong>Hora actual</strong>: 15:15:59 → la hora del sistema.</li><li><strong>Tiempo encendido</strong>: up 1:16 → el servidor lleva 1 hora y 16 minutos funcionando.</li><li><strong>Usuarios conectados</strong>: 1 user → solo hay un usuario logueado.</li><li><strong>Load average</strong>: 0,36 0,44 0,25 → carga media en los últimos 1, 5 y 15 minutos.</li></ul>
+<h4>Cómo interpretar la load average</h4>
+<ul><li>Son <strong>promedios de procesos en cola</strong> (esperando CPU o I/O).</li><li>Se comparan con el número de <strong>núcleos de CPU</strong> que tiene tu máquina.</li></ul>
+<p>Ejemplo práctico:</p>
+<ul><li>Si tu VM tiene <strong>2 cores</strong>:<ul><li>Load 0.36 → menos de medio núcleo ocupado → sistema muy tranquilo.</li><li>Load 0.44 (5 min) y 0.25 (15 min) → también muy bajos.</li><li>Conclusión: la máquina está <strong>sobrada de recursos</strong>.</li></ul></li><li>Si tuvieras <strong>4 cores</strong>, todavía más claro: 0.36 sobre 4 = apenas un 9% de carga global.</li></ul>
+<h4>Regla rápida</h4>
+<ul><li><strong>Load ≈ núm. de cores</strong> → sistema al 100% de uso, pero no saturado.</li><li><strong>Load &gt; núm. de cores</strong> → hay procesos esperando → posible cuello de botella.</li><li><strong>Load &lt; núm. de cores</strong> → sistema relajado.</li></ul>
+<p>En nuestro caso:</p>
+<p>Con 0,36 0,44 0,25, tu servidor está muy desahogado. No hay saturación ni procesos en cola.</p>
+<h3>Regla de oro para la Load Average</h3>
+<ul><li>Son <strong>promedios de procesos en cola</strong> en 1, 5 y 15 minutos.</li><li>Se interpretan <strong>comparando con el número de núcleos</strong>:<ul><li>4 cores, load 2.0 → el sistema va sobrado.</li><li>4 cores, load 4.0 → todos los núcleos ocupados (saturación).</li><li>4 cores, load 8.0 → el doble de procesos esperando → cuello de botella.</li></ul></li></ul>
+<h3>2) Herramientas rápidas: instalación (Debian/Ubuntu y RHEL/CentOS)</h3>
+<pre><code># Debian/Ubuntu
+sudo apt update
+sudo apt install -y htop iotop net-tools procps sysstat
+# RHEL/CentOS (con dnf/yum)
+sudo dnf install -y htop iotop net-tools procps-ng sysstat
+# o
+sudo yum install -y htop iotop net-tools procps-ng sysstat</code></pre>
+<p>netstat viene en net-tools. En sistemas modernos ss (parte de iproute2) es la alternativa preferida.</p>
+<h3>3) top — monitorización básica (instalado por defecto)</h3>
+<h3>Uso básico</h3>
+<pre><code>top</code></pre>
+<p>Dentro de top (modo interactivo):</p>
+<ul><li>P ordenar por CPU.</li><li>M ordenar por memoria.</li><li>1 mostrar cada CPU por separado.</li><li>u filtrar por usuario.</li><li>k matar PID.</li></ul>
+<h3>Comando no interactivo (snapshot):</h3>
+<pre><code>top -b -n1 | head -n 20</code></pre>
+<h3>Ejemplo:</h3>
+<p>muestra top, presiona M y observa la columna %MEM, RES, VIRT, COMMAND.</p>
+<h3>4) htop — versión mejorada e interactiva</h3>
+<h3>Arrancar</h3>
+<pre><code>htop</code></pre>
+<figure><img src="../media/monitorizacion-basica/imagen2.webp" width="1080" height="123" alt="Captura 2 de la lección «Monitorización básica»" loading="lazy" decoding="async"></figure>
+<h4>1. Barras de CPU</h4>
+<ul><li>Cada núcleo aparece con su propia barra (CPU0, CPU1, etc.).</li><li>Los colores indican el tipo de carga:<ul><li><strong>Verde</strong> → procesos de usuario.</li><li><strong>Rojo</strong> → procesos del kernel.</li><li><strong>Azul</strong> → procesos con baja prioridad (nice).</li><li><strong>Naranja/amarillo</strong> → tiempo de espera de I/O (esperando disco).</li></ul></li><li>Ejemplo: si ves mucho rojo → el kernel está trabajando duro (drivers, interrupciones).</li></ul>
+<p>En nuestra captura: tenemos <strong>2 cores</strong> y ambos están con carga ligera, nada saturado.</p>
+<h4>2. Memoria (Mem)</h4>
+<ul><li>Barra horizontal que muestra la RAM usada frente al total.</li><li>Ejemplo: 1940M/3.82G → estás usando ~1,9 GB de 3,8 GB disponibles.</li><li>Colores:<ul><li><strong>Verde</strong> → memoria usada por procesos.</li><li><strong>Azul</strong> → buffers.</li><li><strong>Amarillo</strong> → caché.</li></ul></li><li>Importante: Linux usa RAM libre como caché, así que no te asustes si parece “llena”.</li></ul>
+<h4>3. Swap</h4>
+<ul><li>Muestra el uso de la memoria de intercambio en disco.</li><li>Ejemplo: 0K/3.82G → no estás usando nada de swap (perfecto).</li><li>Si empieza a crecer mucho → la RAM se queda corta y el sistema puede volverse lento.</li></ul>
+<h4>4. Información del sistema (cabecera)</h4>
+<ul><li><strong>Tasks</strong>: número de procesos y threads activos.<ul><li>Ejemplo: 118 total, 381 threads, 86 kernel threads, 1 running.</li><li>→ Tienes 118 procesos, de los cuales solo 1 está ejecutándose en ese instante; el resto está en espera.</li></ul></li><li><strong>Load average</strong>: 0.12, 0.49, 0.18 → carga en 1, 5 y 15 minutos.<ul><li>Con 2 cores, un load de 0.12 es bajísimo → sistema relajado.</li></ul></li><li><strong>Uptime</strong>: 01:26:43 → el sistema lleva 1h 26m encendido.</li></ul>
+<h3>En este caso:</h3>
+<figure><img src="../media/monitorizacion-basica/imagen3.webp" width="1133" height="110" alt="Captura 3 de la lección «Monitorización básica»" loading="lazy" decoding="async"></figure>
+<h3>Resumen del Sistema (2 Cores)</h3>
+<div class="tabla"><table><thead><tr><th><strong>Campo</strong></th><th><strong>Valor</strong></th><th><strong>Significado</strong></th></tr></thead><tbody><tr><td><strong>Uptime</strong></td><td>00:53:30</td><td>El sistema ha estado funcionando durante <strong>53 minutos y 30 segundos</strong>.</td></tr><tr><td><strong>Tasks</strong></td><td>135, 532 thr, 88 kthr, 2 running</td><td>Hay <strong>135 procesos</strong> totales, gestionando 532 hilos, con solo <strong>2 procesos/hilos</strong> activos o listos para ejecutarse (running).</td></tr></tbody></table></div>
+<h3>Uso de CPU (2 Cores)</h3>
+<p>Los valores de la CPU (Q y L) confirman que se trata de un sistema de 2 núcleos (Core 0 y Core 1).</p>
+<div class="tabla"><table><thead><tr><th><strong>Core</strong></th><th><strong>Valor</strong></th><th><strong>Significado</strong></th></tr></thead><tbody><tr><td><strong>Core 0</strong></td><td>27.7%</td><td>El primer núcleo está al <strong>27.7%</strong> de uso.</td></tr><tr><td><strong>Core 1</strong></td><td>21.4%</td><td>El segundo núcleo está al <strong>21.4%</strong> de uso.</td></tr><tr><td><strong>Total Estimado</strong></td><td>$\approx 49.1\%$</td><td>El consumo total de CPU es <strong>bajo</strong> a <strong>moderado</strong>.</td></tr></tbody></table></div>
+<h3>Carga Promedio (Load Average)</h3>
+<div class="tabla"><table><thead><tr><th><strong>Período</strong></th><th><strong>Valor</strong></th><th><strong>Interpretación (para 2 Cores)</strong></th></tr></thead><tbody><tr><td><strong>1 minuto</strong></td><td><strong>0.15</strong></td><td><strong>Muy baja</strong> (casi inactiva). Solo 0.15 procesos esperan la CPU.</td></tr><tr><td><strong>5 minutos</strong></td><td><strong>0.55</strong></td><td><strong>Baja</strong>.</td></tr><tr><td><strong>15 minutos</strong></td><td><strong>1.57</strong></td><td><strong>Baja</strong> a <strong>Moderada</strong>.</td></tr></tbody></table></div>
+<ul><li><strong>Punto de Referencia:</strong> En un sistema de 2 núcleos, cualquier carga <strong>por debajo de 2.00</strong> indica que hay suficiente capacidad de procesamiento para manejar la demanda sin cuellos de botella.</li><li><strong>Conclusión:</strong> El sistema está actualmente <strong>muy tranquilo</strong> y tiene mucha capacidad sobrante.</li></ul>
+<h3>Uso de Memoria (RAM y Swap)</h3>
+<div class="tabla"><table><thead><tr><th><strong>Recurso</strong></th><th><strong>Total</strong></th><th><strong>Usado (aproximado)</strong></th><th><strong>Porcentaje de Uso</strong></th></tr></thead><tbody><tr><td><strong>RAM (Mem)</strong></td><td>3.82G</td><td>1.09G</td><td>$\approx 28.5\%$</td></tr><tr><td><strong>Swap</strong></td><td>3.82G</td><td>192K</td><td><strong>Mínimo</strong> (casi cero)</td></tr></tbody></table></div>
+<ul><li><strong>RAM:</strong> Solo se está utilizando $\approx **1.09 GB**$ de los $3.82 GB$ disponibles, lo que es un uso <strong>muy bajo</strong>.</li><li><strong>Swap:</strong> El uso de <strong>Swap</strong> es <strong>prácticamente nulo</strong> ($192 KB$), lo que confirma que el sistema tiene suficiente RAM y no necesita usar el disco como memoria virtual.</li></ul>
+<h3>Resumen General del Estado</h3>
+<p>El sistema se encuentra en un estado <strong>excelente</strong> y <strong>saludable</strong>:</p>
+<ul><li><strong>Baja Carga:</strong> La carga promedio es muy baja, lo que indica que el sistema no está estresado.</li><li><strong>CPU Disponible:</strong> Ambos núcleos tienen mucha capacidad libre (alrededor del $70\%$-$78\%$ libre).</li><li><strong>Buena Memoria:</strong> El sistema tiene mucha memoria RAM libre y casi no está usando el espacio de intercambio (Swap).</li></ul>
+<p>En contraste con el informe anterior donde la carga era $8.28$, este sistema está actualmente <strong>subutilizado</strong> y funcionando de manera óptima.</p>
+<h4>5. Lista de procesos (parte inferior)</h4>
+<ul><li>Cada fila es un proceso.</li><li>Columnas típicas:<ul><li><strong>PID</strong> → identificador del proceso.</li><li><strong>USER</strong> → usuario dueño del proceso.</li><li><strong>PRI/NI</strong> → prioridad y “nice” (ajuste de prioridad).</li><li><strong>VIRT/RES/SHR</strong> → memoria virtual, residente y compartida.</li><li><strong>S</strong> → estado (R = running, S = sleeping, Z = zombie).</li><li><strong>%CPU / %MEM</strong> → consumo de CPU y RAM.</li><li><strong>TIME+</strong> → tiempo total de CPU usado.</li><li><strong>COMMAND</strong> → nombre del proceso.</li></ul></li></ul>
+<p>Aquí es donde cazas a los “glotones” de CPU o RAM.</p>
+<h3>Resumen visual</h3>
+<ul><li><strong>Arriba</strong> → estado global (CPU, RAM, Swap, carga, uptime).</li><li><strong>Abajo</strong> → detalle por proceso (quién consume qué).</li></ul>
+<p>Atajos útiles:</p>
+<ul><li>F6 ordenar (cpu, mem, time).</li><li>F3 buscar proceso.</li><li>F9 matar proceso (seleccionar señal).</li><li>F2 configurar columnas.</li></ul>
+<h3>Ejercicio</h3>
+<ol><li><code>sudo apt install htop</code> (si no está)</li></ol>
+<p><code>htop -u root</code> (ver procesos de root)</p>
+<ol><li>Usa F5 para mostrar árbol y observa que los procesos hijos heredan recursos.</li></ol>
+<h3>5) iotop — quién está haciendo I/O a disco</h3>
+<h3>Instalación</h3>
+<pre><code>sudo apt install iotop
+# Debian/Ubuntu
+sudo dnf install iotop
+# RHEL/CentOS</code></pre>
+<h3>Uso</h3>
+<pre><code>sudo iotop
+# interactivo
+sudo iotop -o -P
+# -o muestra solo procesos con I/O activo, -P muestra PIDs
+sudo iotop -b -n5</code></pre>
+<p>#El comando sudo iotop -b -n5 generará una salida <strong>no interactiva (batch mode)</strong> que muestra las estadísticas de uso de <strong>Entrada/Salida de Disco (I/O)</strong> por proceso, y se actualizará <strong>5 veces</strong> antes de terminar.</p>
+<div class="tabla"><table><thead><tr><th><strong>Componente</strong></th><th><strong>Significado</strong></th><th><strong>Explicación</strong></th></tr></thead><tbody><tr><td><strong>sudo</strong></td><td><strong>Superuser Do</strong></td><td>Se requiere para ejecutar iotop ya que necesita privilegios de <em>root</em> para acceder a la información de I/O del <em>kernel</em>.</td></tr><tr><td><strong>iotop</strong></td><td><strong>I/O Top</strong></td><td>La utilidad que rastrea el uso de disco (I/O) por cada proceso o hilo en el sistema.</td></tr><tr><td><strong>-b</strong></td><td><strong>Batch Mode</strong></td><td>Le dice a iotop que se ejecute en modo <em>batch</em> (por lotes) en lugar de en modo interactivo. Esto significa que <strong>no se refrescará en la pantalla continuamente</strong> como lo hace top o htop, sino que imprimirá la información una vez por iteración y luego saldrá, lo cual es ideal para <em>scripts</em> o para recopilar datos de forma limpia.</td></tr><tr><td><strong>-n5</strong></td><td><strong>Iterations</strong></td><td>Le dice a iotop que tome <strong>5 muestras</strong> (o iteraciones) antes de salir. Por defecto, cada muestra suele tener un segundo de retraso, por lo que el comando tardará unos 5 segundos en completarse.</td></tr></tbody></table></div>
+<h3>Salida Generada por iotop -b -n5</h3>
+<p>La salida será una tabla que se imprime 5 veces consecutivas (una tabla por iteración), cada una mostrando el consumo de I/O durante el intervalo de tiempo anterior. La tabla tendrá un formato similar a este:</p>
+<pre><code>Total DISK READ: [Valor_Total_Lectura] KB/s | Total DISK WRITE: [Valor_Total_Escritura] KB/s
+Actual DISK READ: [Valor_Actual_Lectura] KB/s | Actual DISK WRITE: [Valor_Actual_Escritura] KB/s
+TID PRIO USER DISK READ DISK WRITE SWAPIN IO&gt; COMM
+1 be/4 root 0.00 K/s 0.00 K/s 0.00 % 0.00 % init
+1234 be/4 root 123.45 K/s 200.00 K/s 0.00 % 45.00 % gzip archivo_grande.log
+5678 be/4 jose 0.00 K/s 0.00 K/s 0.00 % 0.00 % chrome --type=renderer
+...</code></pre>
+<ol><li><strong>Totales Globales:</strong><ul><li><strong>Total DISK READ/WRITE</strong>: El ancho de banda total del disco leído y escrito por <strong>todos</strong> los procesos en el sistema.</li><li><strong>Actual DISK READ/WRITE</strong>: El ancho de banda actual que se está utilizando, excluyendo las escrituras que son gestionadas por la caché (lo que refleja un uso más real del disco físico).</li></ul></li><li><strong>Estadísticas por Proceso/Hilo:</strong> La tabla principal desglosa el uso por proceso (o hilo).<ul><li><strong>TID</strong>: ID del Hilo (Thread ID) o del Proceso (si está en modo de procesos, -P).</li><li><strong>USER</strong>: El usuario que posee el proceso.</li><li><strong>DISK READ / DISK WRITE</strong>: La <strong>velocidad</strong> de lectura y escritura del disco del proceso, generalmente en KB/s o MB/s. <strong>Esto es lo más importante</strong> para identificar a los "culpables".</li><li><strong>IO&gt;</strong>: El <strong>porcentaje de tiempo</strong> que el proceso está esperando I/O (bloqueado en llamadas al disco). Un valor alto aquí (&gt;50%) indica que el proceso está <strong>limitado por la velocidad del disco</strong>.</li></ul></li></ol>
+<h4></h4>
+<h4>Aplicación:</h4>
+<p>Este comando es ideal para capturar exactamente el proceso <strong>gzip</strong> que identificamos previamente. Si lo ejecuta durante un pico de alta carga de disco:</p>
+<ol><li>Verá en las 5 iteraciones cómo <strong>gzip</strong> domina las columnas <strong>DISK READ</strong> y/o <strong>DISK WRITE</strong>.</li><li>Le dará valores cuantificables (KB/s o MB/s) para saber exactamente qué tan rápido está comprimiendo ese archivo.</li></ol>
+<p><strong>Demostración práctica:</strong> genera I/O de prueba y observa:</p>
+<pre><code># prueba (en otra terminal)
+dd if=/dev/zero of=/tmp/testfile bs=1M count=500 oflag=direct</code></pre>
+<p>o para tener más tiempo:</p>
+<pre><code>dd if=/dev/zero of=/tmp/testfile_grande bs=1M count=5000 oflag=direct
+# observa en iotop qué PID escribe</code></pre>
+<p><strong>Nota</strong>: iotop necesita contabilidad I/O activada en el kernel; si no funciona en una distro, usa iotop con permisos o usa pidstat -d.</p>
+<h3>Ejercicio</h3>
+<ol><li>Ejecuta sudo iotop -o y, en otra consola, lanza el dd anterior.</li><li>Identifica el PID que genera la escritura.<br> (Respuesta esperada: el PID del proceso dd aparece con alto WRITES.)</li></ol>
+<figure><img src="../media/monitorizacion-basica/imagen4.webp" width="1217" height="116" alt="Captura 4 de la lección «Monitorización básica»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/monitorizacion-basica/imagen5.webp" width="1265" height="156" alt="Captura 5 de la lección «Monitorización básica»" loading="lazy" decoding="async"></figure>
+<div class="tabla"><table><thead><tr><th><strong>Campo</strong></th><th><strong>Valor</strong></th><th><strong>Interpretación</strong></th></tr></thead><tbody><tr><td><strong>Total DISK WRITE</strong></td><td><strong>$209.19\text{ M/s}$</strong></td><td>Es la velocidad total de escritura que el sistema está experimentando. Este es un valor <strong>muy alto</strong>, típico de una máquina virtual usando un SSD o una configuración optimizada.</td></tr><tr><td><strong>Current DISK WRITE</strong></td><td><strong>$209.19\text{ M/s}$</strong></td><td>Muestra que toda la actividad de escritura actual está yendo directamente al disco físico, sin depender de la caché.</td></tr><tr><td><strong>TID</strong></td><td><strong>$8121$</strong></td><td>El ID del Hilo/Proceso (dd) que está causando la actividad.</td></tr><tr><td><strong>DISK WRITE</strong></td><td><strong>$209.19\text{ M/s}$</strong></td><td><strong>El proceso dd es el único responsable</strong> de toda la escritura del disco, usando $209.19\text{ M/s}$.</td></tr><tr><td><strong>COMMAND</strong></td><td><code>dd if=/dev/zero of=/tmp/testfile_grande bs=1M count=5000 oflag=direct</code></td><td>Esta es la línea de comando que está generando la escritura.</td></tr></tbody></table></div>
+<ol><li><strong>Proceso Identificado:</strong> El proceso con <strong>TID $8121$</strong> (dd) es el que está generando la actividad de I/O de disco.</li><li><strong>Actividad Comprobada:</strong> Se confirma que el comando <strong>dd</strong> está escribiendo a una velocidad de <strong>más de $200\text{ MB/s}$</strong> en el disco.</li><li><strong>Objetivo Cumplido:</strong> La salida demuestra cómo la herramienta iotop permite identificar, de manera precisa y cuantitativa, qué proceso (PID/TID) es el causante de una alta carga de I/O de disco (wa o io&gt; alto).</li></ol>
+<p>Esto valida la técnica que usaríamos para identificar al culpable del anterior pico de carga, que era el proceso <strong>gzip</strong>.</p>
+<h3>6) du y df — uso de disco</h3>
+<h3>df — resumen de sistemas de ficheros</h3>
+<pre><code>df -hT
+# -h human readable, -T mostrar tipo de FS
+df -h /var
+# espacio usado en /var
+df -i
+# uso de inodos
+du — cuánto ocupa cada directorio
+sudo du -sh /var/log
+# tamaño de /var/log
+sudo du -ah /var | sort -rh | head -n 20
+# 20 archivos/directorios más grandes (human)
+sudo du --max-depth=1 -h /home
+# resumen por subdirectorios (nivel 1)</code></pre>
+<p><strong>Herramienta interactiva</strong>:</p>
+<p>ncdu (muy útil) — instala ncdu y ejecuta ncdu <code>/.</code></p>
+<pre><code>sudo apt install ncdu
+sudo ncdu /</code></pre>
+<p><strong>ncdu</strong> (NCurses Disk Usage) es una herramienta excelente e interactiva para navegar y analizar el uso del disco de forma rápida, lo cual es perfecto para un escenario de liberar espacio.</p>
+<p>Para escanear <strong>todo el sistema de archivos</strong> (iniciando desde la raíz /), debes usar sudo porque necesita permisos para acceder a todos los directorios (incluidos <code>/root</code>, <code>/var/log</code>, etc.):</p>
+<pre><code>sudo ncdu /</code></pre>
+<h4>Consejos de Uso de ncdu</h4>
+<ol><li><strong>Escaneo Inicial:</strong> La primera vez que lo ejecutes en /, tardará unos segundos (o minutos, dependiendo del tamaño de su disco) en escanear todo y calcular los tamaños.</li><li><strong>Navegación:</strong><ul><li>Usa las <strong>flechas de dirección (arriba/abajo)</strong> para moverte entre directorios y archivos.</li><li>Presiona <strong>Enter</strong> para entrar en un directorio.</li><li>Presiona <strong>Punto y coma</strong> (.. o la flecha izquierda) para retroceder.</li></ul></li><li><strong>Identificación de Archivos Grandes:</strong><ul><li>Los directorios y archivos se <strong>ordenan automáticamente por tamaño</strong> (los más grandes arriba).</li><li>Busca cualquier directorio gigante que consuma la mayor parte del espacio.</li></ul></li><li><strong>Eliminar Archivos:</strong><ul><li>Selecciona un archivo que quieras borrar (¡ten cuidado!).</li><li>Presions la tecla <strong>d</strong> (de <em>delete</em>). ncdu te pedirá confirmación. <strong>Solo borra archivos que sepas que son seguros de eliminar.</strong></li></ul></li><li><strong>Ayuda:</strong><ul><li>Presiona <strong>?</strong> para ver la lista completa de comandos y atajos de teclado.</li></ul></li></ol>
+<p>ncdu te permite visualizar gráficamente (con la barra de porcentaje a la izquierda) dónde se está yendo su espacio libre de $6.0\text{ GB}$.</p>
+<h3>Ejercicio</h3>
+<ol><li>Encuentra las 10 rutas que más ocupan bajo <code>/var</code>:</li></ol>
+<pre><code>sudo du -ah /var | sort -rh | head -n 10</code></pre>
+<ol><li>Anota el mayor culpable</li></ol>
+<figure><img src="../media/monitorizacion-basica/imagen6.webp" width="732" height="582" alt="Captura 6 de la lección «Monitorización básica»" loading="lazy" decoding="async"></figure>
+<h3>7) netstat y ss — conexiones y puertos</h3>
+<h3>Instalación (si hace falta)</h3>
+<pre><code>sudo apt install net-tools
+# para netstat
+netstat ejemplos
+# conexiones TCP activas
+sudo netstat -antp</code></pre>
+<figure><img src="../media/monitorizacion-basica/imagen7.webp" width="1026" height="158" alt="Captura 7 de la lección «Monitorización básica»" loading="lazy" decoding="async"></figure>
+<pre><code># puertos escuchando y el proceso
+sudo netstat -tulnp</code></pre>
+<figure><img src="../media/monitorizacion-basica/imagen8.webp" width="1072" height="317" alt="Captura 8 de la lección «Monitorización básica»" loading="lazy" decoding="async"></figure>
+<pre><code># estadísticas de protocolo
+netstat -s
+ss (más moderno, recomendado)
+# listar puertos TCP/UDP escuchando con programa
+sudo ss -tulpen</code></pre>
+<figure><img src="../media/monitorizacion-basica/imagen9.webp" width="1228" height="533" alt="Captura 9 de la lección «Monitorización básica»" loading="lazy" decoding="async"></figure>
+<pre><code># conexiones establecidas (tcp)
+ss -s
+# resumen
+ss -tn state established</code></pre>
+<figure><img src="../media/monitorizacion-basica/imagen10.webp" width="561" height="239" alt="Captura 10 de la lección «Monitorización básica»" loading="lazy" decoding="async"></figure>
+<p><strong>Diferencia entre <em>LISTEN</em> y <em>ESTABLISHED</em> y cómo identificar procesos que exponen puertos (PID/Programa).</strong></p>
+<h3>Estados de red en TCP</h3>
+<h4>LISTEN</h4>
+<ul><li>Significa que un proceso está <strong>esperando conexiones entrantes</strong> en un puerto.</li><li>Ejemplo típico:<ul><li>sshd en el puerto 22 → está en estado <strong>LISTEN</strong> esperando que alguien intente conectarse por SSH.</li></ul></li><li>Es como un teléfono sonando en espera de que alguien descuelgue.</li></ul>
+<h4>ESTABLISHED</h4>
+<ul><li>Indica que ya existe una <strong>conexión activa</strong> entre cliente y servidor.</li><li>Ejemplo:<ul><li>Si te conectas por SSH a tu servidor, verás una entrada en <strong>ESTABLISHED</strong> entre tu IP y el puerto 22 del servidor.</li></ul></li><li>Es como cuando ya contestaste la llamada y estás hablando.</li></ul>
+<p>Resumen rápido:</p>
+<ul><li><strong>LISTEN</strong> = esperando conexiones.</li><li><strong>ESTABLISHED</strong> = conexión activa en curso.</li></ul>
+<h3>Cómo identificar procesos que exponen puertos</h3>
+<h4>1. Con ss (reemplazo moderno de netstat)</h4>
+<pre><code>sudo ss -ltnp</code></pre>
+<ul><li><code>-l</code> → solo sockets en escucha (LISTEN).</li><li>-t → TCP.</li><li>-n → mostrar números (no resolver nombres).</li><li>-p → mostrar PID y programa.</li></ul>
+<p>Ejemplo de salida:</p>
+<pre><code>LISTEN 0 128 *:22 *:* users:(("sshd",pid=1234,fd=3))</code></pre>
+<p>→ El proceso sshd (PID 1234) está escuchando en el puerto 22.</p>
+<h4>Con lsof</h4>
+<pre><code>sudo lsof -i -P -n | grep LISTEN</code></pre>
+<p>Ejemplo:</p>
+<p>sshd 1234 root 3u IPv4 12345 0t0 TCP *:22 (LISTEN)</p>
+<p>→ Igual: sshd está en LISTEN en el puerto 22.</p>
+<h4>Con netstat (si lo tienes instalado)</h4>
+<pre><code>sudo netstat -tulnp</code></pre>
+<p>Ejemplo:</p>
+<pre><code>tcp 0 0 0.0.0.0:80 0.0.0.0:* LISTEN 5678/nginx</code></pre>
+<p>→ El proceso nginx (PID 5678) escucha en el puerto 80.</p>
+<h3>Ejemplo</h3>
+<ol><li><strong>LISTEN</strong>:</li></ol>
+<pre><code>tcp 0 0 0.0.0.0:22 0.0.0.0:* LISTEN 1234/sshd</code></pre>
+<p>→ sshd está esperando conexiones SSH.</p>
+<ol><li><strong>ESTABLISHED</strong>:</li></ol>
+<pre><code>tcp 0 0 192.168.1.10:22 192.168.1.50:54321 ESTABLISHED 1234/sshd</code></pre>
+<p>→ Un cliente en 192.168.1.50 ya está conectado por SSH.</p>
+<p>Con esto puedes:</p>
+<ul><li>Ver <strong>qué servicios están expuestos</strong> (LISTEN).</li><li>Ver <strong>qué conexiones están activas</strong> (ESTABLISHED).</li><li>Identificar <strong>qué proceso/PID</strong> está detrás de cada puerto.</li></ul>
+<h3>Ejercicio</h3>
+<pre><code>sudo ss -tulpen | less</code></pre>
+<p>identifica el proceso que escucha en el puerto 80/443 y su usuario.</p>
+<p>identifica el proceso que escucha en el puerto 8125 y su usuario.</p>
+<div class="tabla"><table><thead><tr><th><strong>Puerto</strong></th><th><strong>Protocolo</strong></th><th><strong>Dirección</strong></th><th><strong>Proceso</strong></th><th><strong>UID (Usuario)</strong></th></tr></thead><tbody><tr><td><strong>8125</strong></td><td>UDP y TCP</td><td>127.0.0.1</td><td><strong>netdata</strong></td><td>uid:122</td></tr><tr><td><strong>53</strong></td><td>UDP y TCP</td><td>127.0.0.54 o 127.0.0.53%lo</td><td><strong>systemd-resolve</strong></td><td>uid:991</td></tr><tr><td><strong>41136</strong> / <strong>5353</strong></td><td>UDP</td><td>0.0.0.0 / [::]</td><td><strong>avahi-daemon</strong></td><td>uid:108</td></tr><tr><td><strong>19999</strong></td><td>TCP</td><td>0.0.0.0</td><td><strong>netdata</strong></td><td>(el mismo que 8125)</td></tr><tr><td><strong>631</strong></td><td>TCP</td><td>127.0.0.1</td><td><strong>cupsd</strong></td><td>(sin UID, pero es el proceso del servicio cups.service)</td></tr></tbody></table></div>
+<ul><li><strong>Puertos 8125 y 19999:</strong> Utilizados por <strong>netdata</strong> (un sistema de monitorización de rendimiento en tiempo real).</li><li><strong>Puerto 53:</strong> Es el puerto estándar para <strong>DNS</strong> (Sistema de Nombres de Dominio), utilizado aquí por systemd-resolve (el resolvedor de nombres local). Las direcciones son de <em>loopback</em> (127.0.0.x), por lo que solo son accesibles localmente.</li><li><strong>Puertos 41136 y 5353:</strong> Utilizados por <strong>avahi-daemon</strong> para el descubrimiento de servicios de red locales (mDNS/DNS-SD).</li><li><strong>Puerto 631:</strong> Utilizado por <strong>cupsd</strong> (Common Unix Printing System), el servicio de impresión.</li></ul>
+<h3>8) Integrando herramientas — ejemplos</h3>
+<h3>Caso: El servicio va lento</h3>
+<ol><li><code>top</code> → ¿cpu alta?</li><li><code>iotop</code> → ¿I/O alto?</li><li><code>df -h / du</code> → ¿disco lleno?</li><li><code>ss -tn</code> → ¿conexiones establecidas muy altas?</li><li><code>htop → identificar proceso culpable, strace si necesario (avanzado).</code></li></ol>
+<h3>9) Instalar y configurar Netdata — monitorización en tiempo real (UI web)</h3>
+<p>Netdata es un monitor ligero con UI web en tiempo real (gráficas por segundo) — muy útil para demos.</p>
+<h3>Instalación recomendada (un-liner oficial)</h3>
+<p><em>Nota:</em> este es el método más sencillo para entornos de demostración. En producción, sigue la guía oficial de tu distro.</p>
+<pre><code># Método rápido (script de instalación oficial)
+bash &lt;(curl -Ss https://get.netdata.cloud/kickstart.sh -o kickstart.sh)</code></pre>
+<h3>Opcional: instalar desde paquetes si tu repo lo provee:</h3>
+<pre><code>sudo apt install curl -y</code></pre>
+<h4>Descarga el script primero y ejecútalo</h4>
+<p>En lugar de usar &lt;(curl …), hazlo en dos pasos para evitar problemas:</p>
+<pre><code>curl -sSL https://get.netdata.cloud/kickstart.sh -o kickstart.sh
+sudo bash kickstart.sh</code></pre>
+<h3>Iniciar / habilitar</h3>
+<pre><code>sudo systemctl enable --now netdata
+# comprobar estado
+sudo systemctl status netdata</code></pre>
+<h3>Acceso</h3>
+<ul><li>Abre en el navegador: <code>http://localhost:19999</code></li><li>Por defecto Netdata sirve en el puerto <strong>19999</strong>.</li></ul>
+<h3>Configuración básica</h3>
+<pre><code>sudo nano /etc/netdata/netdata.conf
+
+# busca la sección [web] y ajusta bind/puerto si necesitas limitar acceso
+# tras cambios:
+sudo systemctl restart netdata</code></pre>
+<h3>Seguridad / buenas prácticas</h3>
+<ul><li>Para exposiciones públicas: usa un proxy inverso (nginx) con HTTPS y autenticación, o limita acceso por firewall / VPN.</li><li>Para demo: puedes tunelar con ssh -L 19999:localhost:19999 user@server y abrir <code>http://localhost:19999</code>.</li></ul>
+<h3>Ejercicio Netdata</h3>
+<ol><li>Instala Netdata en una VM.</li><li>Genera carga CPU (stress o dd) y observa la gráfica de CPU en Netdata.</li><li>Explica lo que muestra (picos, CPU user vs system).</li></ol>
+<figure><img src="../media/monitorizacion-basica/imagen11.webp" width="757" height="580" alt="Captura 11 de la lección «Monitorización básica»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/monitorizacion-basica/imagen12.webp" width="1251" height="510" alt="Captura 12 de la lección «Monitorización básica»" loading="lazy" decoding="async"></figure>
+<p>Al cargar <code>http://localhost:19999/</code> (que es la interfaz web por defecto de <strong>Netdata</strong>), deberías centrarte en los paneles que proporcionan una visión general inmediata de la salud y el rendimiento del sistema.</p>
+<h3>System Overview (Vista General del Sistema)</h3>
+<p>Este es el primer panel que aparece y ofrece un resumen vital:</p>
+<ul><li><strong>CPU:</strong> Observa la gráfica de uso general, especialmente la distinción entre el uso del sistema (system), del usuario (user) y el tiempo de espera de I/O (<strong>iowait</strong>). Un <strong>iowait</strong> alto indica que la CPU está esperando datos del disco (problema de disco o I/O).</li><li><strong>Memoria:</strong> Revisa el uso de RAM. Es crucial vigilar la memoria <strong>libre</strong> y, más importante, la memoria <strong>usada</strong> y el <strong>swap</strong> (intercambio). Si el uso de <strong>swap</strong> aumenta constantemente, tu sistema se está quedando sin RAM física.</li><li><strong>Carga del Sistema (Load Average):</strong> Comprueba los valores de 1, 5 y 15 minutos. Si son consistentemente más altos que el número de núcleos de tu CPU, el sistema está sobrecargado.</li><li><strong>Espacio en Disco (Disks):</strong> Asegúrate de que no haya particiones (especialmente la raíz /) cerca de su capacidad máxima.</li></ul>
+<h3>Networking (Red)</h3>
+<p>Si tu servidor maneja tráfico de red, revisa:</p>
+<ul><li><strong>Ancho de Banda (Bandwidth):</strong> Mira las tasas de tráfico de red de entrada (in) y salida (out) para ver si hay picos inesperados.</li><li><strong>Errores y Descartes de Red (Errors/Drops):</strong> Una alta cantidad de paquetes descartados (drops) o errores puede indicar problemas con la tarjeta de red, el cableado o la configuración.</li></ul>
+<h3>Disks (Discos)</h3>
+<p>Esta sección es fundamental para el rendimiento de I/O:</p>
+<ul><li><strong>Latencia de I/O (I/O Time, o r/s y w/s):</strong> Observa la cantidad de lecturas y escrituras por segundo. Es más importante revisar el <strong>tiempo de I/O</strong> (cuánto tiempo está ocupado el disco). Valores altos (&gt;50ms) pueden causar cuellos de botella.</li><li><strong>Utilización (Utilization):</strong> Indica el porcentaje de tiempo que el disco ha estado ocupado sirviendo solicitudes. Un 100% de utilización significa que el disco está trabajando al máximo de su capacidad.</li></ul>
+<h3>Processes (Procesos)</h3>
+<p>Netdata agrupa métricas por procesos. Esto es lo que debes buscar:</p>
+<ul><li><strong>Top CPU Users:</strong> Identifica qué procesos están consumiendo la mayor parte de la CPU. Si un proceso inesperado (como un php-fpm o un apache2 con uso anómalamente alto) aparece aquí, es una señal de problema.</li><li><strong>Top Memory Users:</strong> Identifica qué procesos están usando más memoria. Esto es útil para detectar pérdidas de memoria (memory leaks).</li></ul>
+<h3>Applications (Aplicaciones)</h3>
+<p>Si tienes instaladas y configuradas las integraciones (como Apache, Nginx, MySQL/PostgreSQL, etc.), mira:</p>
+<ul><li><strong>Servidor Web (Apache/Nginx):</strong><ul><li><strong>Peticiones por Segundo (Requests/s):</strong> Para medir la carga de trabajo.</li><li><strong>Workers Activos/Inactivos:</strong> Para asegurar que tu servidor web tiene suficientes <em>threads</em> para manejar el tráfico.</li><li><strong>Códigos de Estado (Status Codes):</strong> Revisa las peticiones con código <strong>4xx</strong> (errores del cliente) y <strong>5xx</strong> (errores del servidor). Un aumento en los errores <strong>5xx</strong> indica un problema grave en el servidor o la aplicación.</li></ul></li><li><strong>Bases de Datos (MySQL/PostgreSQL):</strong><ul><li><strong>Conexiones:</strong> Asegúrate de que no estás llegando al límite de conexiones permitidas.</li><li><strong>Consultas Lentas (Slow Queries):</strong> Identifica si la base de datos está atascada procesando consultas ineficientes.</li></ul></li></ul>
+<h3>En resumen:</h3>
+<p>La clave de Netdata es la <strong>monitorización en tiempo real</strong>. Busca anomalías o desviaciones en los patrones normales: picos en el uso de CPU/Memoria/Iowait, aumento de errores de red o errores 5xx en el servidor web.</p>
+<h3>¿Qué es stress?</h3>
+<p>Es un programa que lanza procesos artificiales que consumen CPU, memoria, disco o I/O, para poner el sistema bajo carga.</p>
+<p>Se usa en pruebas de rendimiento, detección de cuellos de botella o para comprobar la estabilidad de un servidor.</p>
+<h3>Opciones principales</h3>
+<ul><li><strong>-c, --cpu N</strong> → genera <strong>N procesos que consumen CPU</strong> (haciendo cálculos matemáticos).<br> Ejemplo:</li></ul>
+<pre><code>stress --cpu 2 --timeout 30s
+→ 2 procesos saturando CPU durante 30 segundos.</code></pre>
+<ul><li><strong>-i, --io N</strong> → genera <strong>N procesos de I/O</strong> (operaciones de entrada/salida).<br> Ejemplo:</li></ul>
+<pre><code>stress --io 4 --timeout 20s</code></pre>
+<p>→ 4 procesos haciendo operaciones de disco/memoria.</p>
+<ul><li><strong>-m, --vm N</strong> → genera <strong>N procesos que reservan memoria</strong> (malloc/free).<ul><li>Con --vm-bytes B defines cuánto ocupa cada uno.<br> Ejemplo:</li></ul></li></ul>
+<pre><code>stress --vm 2 --vm-bytes 512M --timeout 15s</code></pre>
+<p>→ 2 procesos, cada uno reservando 512 MB de RAM durante 15 segundos.</p>
+<ul><li><strong>-d, --hdd N</strong> → genera <strong>N procesos que escriben y borran archivos</strong> (simula carga de disco).<ul><li>Con --hdd-bytes B defines el tamaño de cada archivo.<br> Ejemplo:</li></ul></li></ul>
+<pre><code>stress --hdd 1 --hdd-bytes 2G --timeout 10s</code></pre>
+<p>→ 1 proceso escribiendo/borrando archivos de 2 GB durante 10 segundos.</p>
+<ul><li><strong>-t, --timeout N</strong> → duración de la prueba (ej. 10s, 2m, 1h).</li></ul>
+<h3>Ejemplo completo</h3>
+<p>Consola 1:</p>
+<pre><code>stress --cpu 4 --io 2 --vm 2 --vm-bytes 256M --timeout 30s</code></pre>
+<p>Consola 2:</p>
+<pre><code>htop</code></pre>
+<ul><li>4 procesos de CPU.</li><li>2 procesos de I/O.</li><li>2 procesos de memoria (256 MB cada uno).</li><li>Todo durante 30 segundos.</li></ul>
+<p>Esto simula un escenario de carga mixta (CPU + I/O + RAM).</p>
+<h3>Precauciones</h3>
+<ul><li>stress <strong>no es un benchmark</strong>, solo genera carga.</li><li>Puede ralentizar mucho tu VM o incluso colgarla si pides más recursos de los que tiene.</li><li>Úsalo en entornos de prueba, no en producción.</li></ul>
+<h3>Resumen rápido:</h3>
+<ul><li><strong>CPU</strong> → --cpu N</li><li><strong>I/O</strong> → --io N</li><li><strong>Memoria</strong> → --vm N --vm-bytes X</li><li><strong>Disco</strong> → --hdd N --hdd-bytes X</li><li><strong>Tiempo</strong> → --timeout N</li></ul>
+<h3>10) Instalar y configurar Glances — monitor más compacto, CLI + web</h3>
+<p><strong>Qué es</strong>:</p>
+<p>Glances es un monitor en consola con modo web (glances -w) útil para demos rápidas.</p>
+<h3>Instalación</h3>
+<div class="tabla"><table><thead><tr><th><strong>Problema</strong></th><th><strong>Comando</strong></th><th><strong>Solución</strong></th></tr></thead><tbody><tr><td><strong>Error de Sintaxis</strong></td><td><code>glances -w 0.0.0.0</code></td><td>Se corrigió el comando para usar la opción de <em>Bind</em> correcta: <strong>glances -w -B 0.0.0.0</strong>.</td></tr><tr><td><strong>Bloqueo de Red</strong></td><td><code>sudo ufw allow 61208/tcp</code></td><td><strong>Se abrió el puerto 61208</strong> en el firewall (UFW) para permitir el acceso externo.</td></tr><tr><td><strong>Glances No Accesible</strong></td><td>`sudo ss -tuln</td><td><code>grep 61208`</code></td></tr></tbody></table></div>
+<figure><img src="../media/monitorizacion-basica/imagen13.webp" width="1302" height="447" alt="Captura 13 de la lección «Monitorización básica»" loading="lazy" decoding="async"></figure>
+<h3>Resolución de Dependencias Faltantes (Página en Blanco)</h3>
+<p>La página en blanco fue causada por la falta del archivo glances.js, debido a una instalación incompleta. Para corregirlo, se pasó de apt a una instalación moderna y aislada con pipx.</p>
+<div class="tabla"><table><thead><tr><th><strong>Problema</strong></th><th><strong>Comando de Instalación</strong></th><th><strong>Dependencia Faltante</strong></th></tr></thead><tbody><tr><td><strong>Preparación</strong></td><td><code>sudo apt install python3-pip pipx</code></td><td>Se instaló pip y el gestor de entornos aislados pipx.</td></tr><tr><td><strong>Instalación Aislada</strong></td><td><code>pipx install glances</code></td><td>Se instaló Glances en un entorno virtual dedicado.</td></tr><tr><td><strong>Error de PATH</strong></td><td><code>pipx ensurepath + source ~/.bashrc + hash -r</code></td><td>Se arregló la ruta de comandos para que el sistema pudiera encontrar el nuevo binario de glances.</td></tr><tr><td><strong>Error FastAPI</strong></td><td><code>pipx inject glances fastapi</code></td><td>Se instaló el <em>framework</em> web principal.</td></tr><tr><td><strong>Error Jinja2</strong></td><td><code>pipx inject glances jinja2</code></td><td><strong>Se instaló la última dependencia</strong> necesaria para el renderizado de la página.</td></tr></tbody></table></div>
+<h3>Comando de Ejecución Final</h3>
+<p>Una vez que todos los pasos fueron completados, Glances se pudo iniciar correctamente:</p>
+<pre><code>glances -w -B 0.0.0.0</code></pre>
+<h3>Acceso Web</h3>
+<p>La interfaz web de monitoreo está disponible en:</p>
+<p><code>http://192.168.1.44:61208/</code></p>
+<h3>Acceso desde fuera de la VM</h3>
+<p>Por defecto, glances -w escucha en 127.0.0.1:61208.</p>
+<ul><li>Si lo abres desde <strong>la misma VM</strong> → <code>http://127.0.0.1:61208</code> funciona.</li><li>Si lo intentas desde tu <strong>host</strong> en VirtualBox, no responde porque solo escucha en localhost. Solución:</li></ul>
+<pre><code>glances -w --bind 0.0.0.0</code></pre>
+<p>Y luego accedes desde tu host con la IP de la VM:</p>
+<p><code>http://192.168.1.44:61208/</code></p>
+<figure><img src="../media/monitorizacion-basica/imagen14.webp" width="1300" height="595" alt="Captura 14 de la lección «Monitorización básica»" loading="lazy" decoding="async"></figure>
+<h3>Firewall o red de VirtualBox</h3>
+<ul><li>Si usas NAT, el puerto 61208 no se expone al host.</li><li>Para verlo desde fuera, necesitas <strong>Bridge</strong> o <strong>Adaptador solo‑anfitrión</strong>, o configurar un <strong>port forwarding</strong> en NAT.</li></ul>
+<h3>Modo terminal</h3>
+<pre><code>glances
+# teclas: h (help), q (quit), o (show/hide columns)</code></pre>
+<figure><img src="../media/monitorizacion-basica/imagen15.webp" width="1295" height="536" alt="Captura 15 de la lección «Monitorización básica»" loading="lazy" decoding="async"></figure>
+<h3>Modo web</h3>
+<pre><code># inicia el servidor web (puerto por defecto 61208)
+glances -w
+# abre en el navegador: http://&lt;ip&gt;:61208</code></pre>
+<p>Poner como servicio systemd (ejemplo básico)</p>
+<p>Crea <code>/etc/systemd/system/glances.service</code> con contenido (ejemplo sencillo). Luego:</p>
+<pre><code>sudo systemctl daemon-reload
+sudo systemctl enable --now glances</code></pre>
+<p>(Para entornos de producción, configura usuario, opciones y seguridad.)</p>
+<p><strong>Seguridad</strong>: por defecto el modo web no está asegurado. Usa <strong>ssh tunnel</strong>:</p>
+<pre><code>ssh -L 61208:localhost:61208 usuario@server
+# luego abrir http://localhost:61208</code></pre>
+<p>O protege con nginx/HTTPS.</p>
+<p>Cuando accedes a <strong>Glances</strong> a través de su interfaz web <code>http://127.0.0.1:61208/</code>, debes buscar la misma información clave que en la consola, ya que está diseñada para ser un panel de control rápido y completo.</p>
+<p>Glances utiliza colores para indicar el estado de salud (verde: OK, azul: Cuidado, magenta: Alerta, rojo: Crítico), lo cual es lo primero que debes buscar.</p>
+<h3>1. CPU (Central Processing Unit)</h3>
+<ul><li><strong>Uso General:</strong> Comprueba el porcentaje de uso total.</li><li><strong>Distribución:</strong> Observa qué porcentaje se destina a <strong>System</strong> (procesos del kernel), <strong>User</strong> (aplicaciones) e <strong>I/O Wait</strong>. Un <strong>I/O Wait</strong> alto es una señal de que la CPU está inactiva esperando que el disco termine una operación, indicando un cuello de botella de I/O.</li><li><strong>Frecuencia (Freq):</strong> Muestra la velocidad actual de los núcleos de la CPU.</li></ul>
+<h3>2. MEM (Memoria) y SWAP</h3>
+<ul><li><strong>Uso de RAM:</strong> Mira el porcentaje de memoria <strong>Used</strong> (usada) y <strong>Free</strong> (libre).</li><li><strong>Caché/Búfer:</strong> Esta memoria se usa activamente, pero se puede liberar rápidamente, por lo que no es tan crítica como la memoria <strong>Used</strong> pura.</li><li><strong>SWAP:</strong> Si el uso de <strong>Swap</strong> aumenta, significa que el sistema está moviendo datos de la RAM al disco duro (paginación), lo cual degrada seriamente el rendimiento. <strong>Un uso constante de Swap es una señal de falta de RAM.</strong></li></ul>
+<h3>3. Load (Carga del Sistema)</h3>
+<ul><li><strong>Valores (1m, 5m, 15m):</strong> Estos números representan el promedio de procesos esperando por la CPU en los últimos 1, 5 y 15 minutos.</li><li><strong>Análisis:</strong> Compara estos valores con el número de núcleos de tu CPU. Si los números son consistentemente <strong>mayores que el número de núcleos</strong> disponibles, tu sistema está <strong>sobrecargado</strong>.</li></ul>
+<h3>4. Network I/O (Entrada/Salida de Red)</h3>
+<ul><li><strong>Tráfico:</strong> Revisa las tasas de transferencia de red (Rx para recibir, Tx para transmitir) en KB/s o MB/s.</li><li><strong>Anomalías:</strong> Busca picos inesperados que puedan indicar actividad maliciosa o una aplicación que consume demasiado ancho de banda.</li><li><strong>Errores/Descartes:</strong> Si ves que los contadores de errores o paquetes descartados aumentan, hay un problema en la capa física o en la configuración de red.</li></ul>
+<h3>5. DISK I/O (Entrada/Salida de Disco)</h3>
+<ul><li><strong>Lectura/Escritura (R/W):</strong> Muestra la velocidad de lectura (R) y escritura (W) en disco (KB/s o MB/s).</li><li><strong>Utilización:</strong> La clave es ver si el disco está alcanzando su límite de rendimiento (p. ej., si el disco está al 100% de utilización, pero solo transfiere 1 MB/s, la latencia será alta).</li></ul>
+<h3>6. PROCESOS (Process List)</h3>
+<p>Esta es la sección más detallada, donde puedes identificar la causa raíz de un problema:</p>
+<ul><li><strong>Ordenación:</strong> Por defecto, Glances ordena por consumo de <strong>CPU</strong> o <strong>MEM</strong>.</li><li><strong>Identificación:</strong> Busca el <strong>nombre del proceso (Command)</strong>, su <strong>PID</strong>, el <strong>usuario</strong> que lo ejecuta y el porcentaje de <strong>CPU</strong> y <strong>MEM</strong> que consume.</li><li><strong>Problemas Comunes:</strong><ul><li>Un proceso que consume cerca del 100% de la CPU de un solo núcleo.</li><li>Un proceso que consume una cantidad excesiva de memoria, indicando un posible <em>memory leak</em>.</li></ul></li></ul>
+<h3>En resumen:</h3>
+<p>Debes buscar rápidamente cualquier métrica que esté marcada en <strong>magenta</strong> (alerta) o <strong>rojo</strong> (crítico) para identificar cuellos de botella en la <strong>CPU</strong> (si hay I/O Wait alto), <strong>Memoria</strong> (si hay SWAP activo), o <strong>Carga</strong> (si es mayor que el número de núcleos).</p>
+<h3>Ejercicio Glances</h3>
+<ol><li><code>glances -w en una VM.</code></li><li>Accede a la interfaz web vía SSH tunnel.</li><li>Observa métricas y describe CPU, memoria y procesos top.</li></ol>
+<h3>11) Prácticas sugeridas</h3>
+<ol><li><strong>Diagnóstico de saturación CPU</strong><ul><li>Ejecuta top y htop. Identifica proceso top CPU. Confirma con ps.</li><li>Acciones: renice o investigar tu cmd.</li></ul></li><li><strong>Detectar problema de I/O</strong><ul><li>Usa iotop y du para localizar proceso/archivo. Simula con dd.</li></ul></li><li><strong>Limpieza de disco</strong><ul><li>Encuentra archivos &gt;100MB:</li></ul></li></ol>
+<pre><code>sudo find / -type f -size +100M -exec ls -lh {} \; 2&gt;/dev/null</code></pre>
+<ul><li>Propón política: rotación de logs (logrotate), compresión, mover a otro disco.</li></ul>
+<ol><li><strong>Red y puertos</strong></li></ol>
+<pre><code>ss -tulpen
+detectar servicios expuestos. Inicia
+python3 -m http.server 8080
+y verifica.</code></pre>
+<ol><li><strong>Monitorización en tiempo real con Netdata/Glances</strong><ul><li>Instala Netdata o Glances, genera carga y documenta las métricas.</li></ul></li></ol>
+<h3>12) Cheatsheet rápido (comandos útiles)</h3>
+<pre><code># procesos / CPU
+top
+htop
+ps aux | sort -nrk 3,3 | head -n 10 # top 10 por CPU
+ps aux | sort -nrk 4,4 | head -n 10 # top 10 por MEM
+# disco
+df -hT
+du -sh /path/*
+du -ah /path | sort -rh | head -n 20
+ncdu /path
+# I/O
+sudo iotop -o -P
+iostat -xz 1 # requiere sysstat
+# red / sockets
+sudo ss -tulpen
+sudo netstat -tulnp
+# netdata / glances
+sudo systemctl enable --now netdata
+glances -w</code></pre>
+<h3>13) Consejos</h3>
+<ul><li><strong>Cuidado en máquinas compartidas</strong>: no matar procesos críticos en ejercicios. Usa VMs o contenedores.</li><li><strong>Seguridad</strong>: siempre proteger netdata/glances si se exponen a la red.</li></ul>

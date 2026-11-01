@@ -1,0 +1,105 @@
+<h2>1) Conceptos clave</h2>
+<ul><li><strong>IP fija (estática)</strong> → una dirección manual para un equipo (ej. servidor).</li><li><strong>DHCP</strong> → asigna IPs dinámicamente a clientes.</li><li><strong>DNS</strong> → traduce nombres de dominio a IPs.</li><li><strong>dnsmasq</strong> → servicio ligero que combina DHCP + DNS local.</li><li><code>nmap / tcpdump</code> → herramientas para analizar y diagnosticar la red.</li></ul>
+<h2>2) Asignar IP fija</h2>
+<h2>En distribuciones modernas (con Netplan – Ubuntu/Debian 18+)</h2>
+<pre><code>Archivo: /etc/netplan/01-netcfg.yaml</code></pre>
+<p>Ejemplo de configuración estática:</p>
+<pre><code>network:
+version: 2
+ethernets:
+ens33:
+dhcp4: no
+addresses:
+- 192.168.1.50/24
+gateway4: 192.168.1.1
+nameservers:
+addresses: [8.8.8.8, 1.1.1.1]</code></pre>
+<p>Aplicar cambios:</p>
+<pre><code>sudo netplan apply</code></pre>
+<h2>En distribuciones con ifconfig/interfaces (clásico Debian/Ubuntu &lt; 18)</h2>
+<pre><code>Archivo: /etc/network/interfaces
+auto eth0
+iface eth0 inet static
+address 192.168.1.50
+netmask 255.255.255.0
+gateway 192.168.1.1
+dns-nameservers 8.8.8.8 1.1.1.1</code></pre>
+<p>Reiniciar red:</p>
+<pre><code>sudo systemctl restart networking</code></pre>
+<h2>Ejercicio 1</h2>
+<ol><li>Configura tu tarjeta en 192.168.56.20/24 (en una red virtual).</li><li>Haz ping 192.168.56.1 (la puerta de enlace de VirtualBox/VMware).</li><li>Comprueba con ip a que la IP se aplicó.</li></ol>
+<h2>3) Montar un servidor DHCP/DNS local con dnsmasq</h2>
+<h2>Instalación</h2>
+<pre><code>sudo apt install dnsmasq # Debian/Ubuntu
+sudo dnf install dnsmasq # RHEL/CentOS</code></pre>
+<h2>Configuración básica de DHCP</h2>
+<p>Editar <code>/etc/dnsmasq.conf</code>:</p>
+<pre><code># interfaz de red a usar
+interface=eth0
+# rango de IPs a entregar (pool DHCP)
+dhcp-range=192.168.1.100,192.168.1.150,12h</code></pre>
+<p>Reiniciar servicio:</p>
+<pre><code>sudo systemctl restart dnsmasq
+sudo systemctl enable dnsmasq</code></pre>
+<h2>Configuración básica de DNS local</h2>
+<p>En <code>/etc/dnsmasq.conf</code> agrega:</p>
+<pre><code># asignar IP fija por hostname
+address=/intranet.local/192.168.1.50</code></pre>
+<p>Esto hace que ping intranet.local resuelva a 192.168.1.50.</p>
+<h2>Ejercicio 2</h2>
+<ol><li>Configura un rango DHCP 192.168.56.100 – 192.168.56.120.</li><li>En otra VM cliente, pon la red en modo DHCP y comprueba con ip a qué IP recibió.</li><li>Añade un DNS local:</li><li><code>address=/curso.local/192.168.56.20</code></li></ol>
+<p>Luego desde el cliente, prueba ping curso.local.</p>
+<h2>4) Análisis de red con nmap</h2>
+<h2>Instalación</h2>
+<pre><code>sudo apt install nmap</code></pre>
+<h2>Escaneos básicos</h2>
+<pre><code>nmap 192.168.1.1 # detecta puertos abiertos en 1 host
+nmap 192.168.1.0/24 # escanea toda la subred
+nmap -sV 192.168.1.10 # detecta versiones de servicios
+nmap -O 192.168.1.10 # intenta identificar el SO</code></pre>
+<h2>Ejercicio 3</h2>
+<ol><li>Escanea tu propia red nmap 192.168.56.0/24.</li><li>Identifica al menos un host con un puerto abierto (ej. 22 o 80).</li><li>Explica qué servicio corresponde a ese puerto.</li></ol>
+<h2>5) Análisis de red con tcpdump</h2>
+<h2>Instalación</h2>
+<pre><code>sudo apt install tcpdump</code></pre>
+<h2>Capturas básicas</h2>
+<pre><code>sudo tcpdump -i eth0 # captura tráfico en la interfaz eth0
+sudo tcpdump -i eth0 port 80 # solo tráfico HTTP
+sudo tcpdump -i eth0 host 192.168.1.50 # tráfico hacia/desde un host
+sudo tcpdump -w captura.pcap # guarda captura en archivo para Wireshark</code></pre>
+<h2>Ejemplo en clase</h2>
+<p>En una terminal:</p>
+<pre><code>ping 8.8.8.8</code></pre>
+<p>En otra:</p>
+<pre><code>sudo tcpdump -i eth0 icmp</code></pre>
+<p>→ Verás los paquetes ICMP echo request/reply.</p>
+<h2>Ejercicio 4</h2>
+<ol><li>Lanza un ping google.com.</li><li>Usa tcpdump -i eth0 icmp para capturar.</li><li>Explica la diferencia entre echo request y echo reply.</li></ol>
+<h2>6) Ejercicio integrador</h2>
+<p><strong>Escenario:</strong> Debes configurar un pequeño laboratorio de red.</p>
+<ul><li>El servidor (VM1) tendrá IP fija 192.168.56.10.</li><li>El servidor correrá dnsmasq entregando IPs entre 192.168.56.100-120.</li><li>Un cliente (VM2) debe obtener IP automáticamente y resolver el nombre servidor.local al 192.168.56.10.</li><li>Luego, analiza desde VM2 con nmap qué puertos están abiertos en 192.168.56.10.</li></ul>
+<h2>Resultado esperado:</h2>
+<ul><li>Cliente recibe IP en rango.</li><li><code>ping servidor.local funciona.</code></li><li>nmap 192.168.56.10 muestra puertos abiertos (ej. 22 para SSH).</li></ul>
+<h2>7) Cheatsheet rápido</h2>
+<pre><code># redes
+ip a
+ping 8.8.8.8
+ip route show
+# configurar IP temporal
+sudo ip addr add 192.168.1.50/24 dev eth0
+sudo ip route add default via 192.168.1.1
+# netplan (Ubuntu moderno)
+sudo nano /etc/netplan/*.yaml
+
+sudo netplan apply
+# dnsmasq
+sudo apt install dnsmasq
+sudo nano /etc/dnsmasq.conf
+
+sudo systemctl restart dnsmasq
+# nmap
+nmap -sV 192.168.1.10
+nmap 192.168.1.0/24
+# tcpdump
+sudo tcpdump -i eth0 port 80
+sudo tcpdump -w salida.pcap</code></pre>

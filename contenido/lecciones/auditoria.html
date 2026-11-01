@@ -1,0 +1,169 @@
+<h2>Objetivo</h2>
+<ul><li>Revisar la <strong>configuración de usuarios y permisos</strong>.</li><li>Analizar <strong>logs y servicios activos</strong>.</li><li>Verificar <strong>seguridad básica</strong> y cumplimiento de buenas prácticas.</li></ul>
+<h2>1. Auditoría de usuarios y permisos</h2>
+<h2>Comandos útiles:</h2>
+<pre><code># Listar todos los usuarios
+cat /etc/passwd
+# Listar grupos
+cat /etc/group
+# Usuarios con privilegios sudo
+getent group sudo</code></pre>
+<h2>Revisión de permisos de archivos críticos:</h2>
+<pre><code># Ver permisos de archivos importantes
+ls -l /etc/passwd /etc/shadow /etc/sudoers
+# Buscar archivos con permisos peligrosos
+find / -perm -4000 -type f 2&gt;/dev/null # archivos SUID
+find / -perm -2000 -type f 2&gt;/dev/null # archivos SGID</code></pre>
+<h2>2. Auditoría de servicios y procesos</h2>
+<h2>Listar servicios activos</h2>
+<pre><code># Con systemd
+systemctl list-units --type=service --state=running
+# Ver puertos abiertos
+ss -tuln</code></pre>
+<h2>Revisión de servicios habilitados en arranque</h2>
+<pre><code>systemctl list-unit-files --type=service | grep enabled</code></pre>
+<h2>3. Auditoría de logs</h2>
+<h2>Revisar intentos de acceso</h2>
+<pre><code># Últimos logins
+last
+# Intentos fallidos de SSH
+sudo grep "Failed password" /var/log/auth.log</code></pre>
+<h2>Analizar eventos críticos</h2>
+<pre><code># Ver errores del sistema
+sudo journalctl -p err
+# Supervisar logs en tiempo real
+sudo tail -f /var/log/syslog</code></pre>
+<h2>4. Auditoría de seguridad básica</h2>
+<h2>Firewall</h2>
+<pre><code># Ver reglas activas (UFW)
+sudo ufw status verbose
+# Ver reglas con iptables
+sudo iptables -L -v -n</code></pre>
+<h2>Usuarios con shell no estándar</h2>
+<pre><code>awk -F: '($7 !~ "/bin/bash|/sbin/nologin|/bin/false/") {print $1,$7}' /etc/passwd</code></pre>
+<h2>Revisar configuraciones SSH</h2>
+<pre><code>sudo grep -E "PermitRootLogin|PasswordAuthentication" /etc/ssh/sshd_config</code></pre>
+<h2>5. Auditoría de integridad de archivos</h2>
+<ul><li>Instalar AIDE (Advanced Intrusion Detection Environment):</li></ul>
+<pre><code>sudo apt install aide -y
+sudo aideinit
+sudo aide --check</code></pre>
+<ul><li>Permite detectar cambios inesperados en archivos del sistema.</li></ul>
+<p>El comando sudo aide --check es el paso final para realizar una <strong>auditoría de integridad</strong>, pero la efectividad de AIDE depende de cómo hayas configurado y guardado la <strong>base de datos de referencia (baseline)</strong>.</p>
+<h2>Guía de Uso de AIDE (Advanced Intrusion Detection Environment)</h2>
+<p>AIDE funciona creando una <strong>instantánea criptográfica</strong> (un <em>hash</em> o <em>checksum</em>) de todos los archivos y directorios importantes del sistema. El comando check compara el estado actual con esa instantánea inicial.</p>
+<h2>1. Instalación de AIDE</h2>
+<p>Instala el paquete AIDE:</p>
+<pre><code>sudo apt install aide -y</code></pre>
+<h2>2. Creación de la Base de Datos de Referencia (Baseline)</h2>
+<p>Este es el paso <strong>más importante</strong>. La primera vez que ejecutas el sistema, generas el archivo que AIDE utilizarás para detectar cualquier cambio futuro. <strong>Debes ejecutar este paso inmediatamente después de instalar el sistema y configurarlo a tu gusto</strong>, antes de cualquier intrusión.</p>
+<p>El comando sudo aideinit se encarga de crear el archivo de base de datos inicial:</p>
+<pre><code>sudo aideinit</code></pre>
+<h2>Lo que hace aideinit:</h2>
+<ol><li>Ejecuta aide --init, que escanea el sistema según las reglas definidas en <code>/etc/aide/aide.conf</code>.</li><li>Crea el archivo de base de datos inicial, normalmente llamado <code>/var/lib/aide/aide.db.new</code>.</li><li>Muestra un aviso pidiendo que se mueva ese archivo a la ubicación de referencia.</li></ol>
+<h2>Mover la Base de Datos de Referencia:</h2>
+<p>Para que AIDE sepa qué archivo debe usar como "estado original", debe renombrar el archivo *.new al nombre de base de datos activo.</p>
+<pre><code>sudo mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db</code></pre>
+<p><strong>Nota de Seguridad:</strong> En un entorno de producción, es crucial <strong>mover esta base de datos (aide.db) a un medio de solo lectura</strong> (como un CD/DVD, o un disco USB desconectado después de la copia) o a un servidor seguro. Si un atacante compromete el sistema, podría modificar la base de datos de AIDE para ocultar sus cambios antes de que usted ejecute la comprobación.</p>
+<h2>3. Ejecución de la Auditoría de Integridad (Check)</h2>
+<p>Una vez que la base de datos de referencia está en su lugar, ejecuta la auditoría de integridad:</p>
+<pre><code>sudo aide --check</code></pre>
+<h2>Detalles de la Salida de --check:</h2>
+<p>El resultado de aide --check categoriza los archivos en tres secciones:</p>
+<div class="tabla"><table><thead><tr><th><strong>Sección</strong></th><th><strong>Descripción</strong></th><th><strong>Causa Típica</strong></th></tr></thead><tbody><tr><td><strong>Added entries:</strong></td><td>Archivos y directorios <strong>nuevos</strong> que no estaban en la base de datos original.</td><td>Instalación de nuevos paquetes o creación manual de archivos.</td></tr><tr><td><strong>Removed entries:</strong></td><td>Archivos y directorios que <strong>existían</strong> en la base de datos original y han sido eliminados.</td><td>Desinstalación de paquetes o eliminación manual de archivos de configuración.</td></tr><tr><td><strong>Changed entries:</strong></td><td>Archivos que <strong>existen</strong>, pero han sido <strong>modificados</strong>.</td><td>Una actualización del sistema o la alteración de un binario o archivo de configuración por parte de un atacante.</td></tr></tbody></table></div>
+<h2>Atributos de los cambios (Ejemplo):</h2>
+<p>Si un archivo ha cambiado, AIDE muestra qué atributos se modificaron. Por ejemplo:</p>
+<p><code>/etc/hosts</code> : p+i+n+u+g+s+acl+selinux+xattrs</p>
+<p>Esto indica que el archivo <code>/etc/hosts</code> ha cambiado su <strong>p</strong>ermiso, <strong>i</strong>nodo, <strong>n</strong>úmero de enlaces, <strong>u</strong>suario, <strong>g</strong>rupo y <strong>s</strong>ize (tamaño).</p>
+<h2>4. Actualización de la Base de Datos (Si los Cambios son Legítimos)</h2>
+<p>Si ejecuta aide --check y los cambios detectados son <strong>legítimos</strong> (por ejemplo, después de una actualización del sistema o una instalación normal), debe actualizar la base de datos para incluir los nuevos estados.</p>
+<ol><li><strong>Generar la Nueva Base de Datos:</strong></li></ol>
+<pre><code>sudo aide --update</code></pre>
+<p><em>Esto crea un nuevo archivo de base de datos (aide.db.new) que incluye los cambios detectados.</em></p>
+<ol><li><strong>Mover el Nuevo Archivo:</strong></li></ol>
+<pre><code>sudo mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db</code></pre>
+<p><em>Este paso sobrescribe el archivo antiguo con la nueva instantánea, estableciendo un nuevo punto de referencia para futuras comprobaciones.</em></p>
+<h2>6. Auditoría de recursos y rendimiento</h2>
+<pre><code># Uso de CPU, memoria, disco
+top
+htop
+df -h
+free -m
+# Procesos que consumen más recursos
+ps aux --sort=-%cpu | head -10
+ps aux --sort=-%mem | head -10</code></pre>
+<h2>7. Buenas prácticas</h2>
+<ol><li>Mantener <strong>software actualizado</strong>:</li></ol>
+<pre><code>sudo apt update &amp;&amp; sudo apt upgrade -y</code></pre>
+<ol><li>Revisar <strong>cuentas inactivas o huérfanas</strong>.</li><li>Activar <strong>Fail2Ban</strong> o mecanismos de protección frente a fuerza bruta.</li><li>Revisar <strong>permisos de archivos críticos</strong>.</li><li>Mantener copias de seguridad periódicas.</li></ol>
+<h2>Checklist Práctica de Auditoría Básica en Linux</h2>
+<div class="tabla"><table><thead><tr><th><strong>Área</strong></th><th><strong>Comando</strong></th><th><strong>Objetivo</strong></th><th><strong>Posibles alertas / Qué buscar</strong></th></tr></thead><tbody><tr><td><strong>Usuarios y grupos</strong></td><td><code>cat /etc/passwd</code></td><td>Listar todos los usuarios del sistema</td><td>Usuarios desconocidos, UID 0 sospechosos</td></tr><tr><td></td><td><code>cat /etc/group</code></td><td>Listar grupos</td><td>Grupos sospechosos o permisos excesivos</td></tr><tr><td></td><td><code>getent group sudo</code></td><td>Ver usuarios con privilegios sudo</td><td>Usuarios no autorizados en sudo</td></tr><tr><td></td><td>`awk -F: '($7 !~ "/bin/bash</td><td><code>/sbin/nologin</code></td><td>/bin/false/") {print $1,$7}' /etc/passwd`</td></tr></tbody></table></div>
+<h2>Permisos críticos</h2>
+<pre><code>ls -l
+/etc/passwd
+/etc/shadow
+/etc/sudoers</code></pre>
+<p>Verificar permisos de archivos sensibles</p>
+<p>Permisos que permitan escritura a usuarios no root</p>
+<pre><code>find / -perm -4000 -type f 2&gt;/dev/null
+Archivos SUID
+Archivos con SUID peligrosos
+find / -perm -2000 -type f 2&gt;/dev/null</code></pre>
+<h2>Servicios y procesos</h2>
+<pre><code>systemctl list-units --type=service --state=running
+Listar servicios activos
+Servicios innecesarios o desconocidos
+systemctl list-unit-files --type=service | grep enabled</code></pre>
+<p>Ver servicios habilitados en arranque</p>
+<p>Servicios inseguros habilitados por defecto</p>
+<pre><code>ss -tuln
+Ver puertos abiertos
+Puertos no esperados abiertos</code></pre>
+<h2>SSH</h2>
+<pre><code>sudo grep -E "PermitRootLogin|PasswordAuthentication" /etc/ssh/sshd_config
+Revisar seguridad SSH</code></pre>
+<p>PermitRootLogin yes, PasswordAuthentication yes pueden ser riesgos |</p>
+<pre><code>sudo grep "Failed password" /var/log/auth.log</code></pre>
+<p>Ver intentos fallidos de login</p>
+<p>Intentos de fuerza bruta o ataques externos</p>
+<h2>Firewall y seguridad de red</h2>
+<pre><code>sudo ufw status verbose</code></pre>
+<p>Revisar reglas activas de UFW</p>
+<p>Falta de reglas o puertos abiertos innecesarios</p>
+<pre><code>sudo iptables -L -v -n
+Revisar reglas iptables</code></pre>
+<p>Políticas laxas, INPUT ACCEPT general</p>
+<h2>Logs del sistema</h2>
+<pre><code>last
+Revisar últimos logins
+Logins sospechosos o inusuales
+sudo journalctl -p err
+Revisar errores críticos</code></pre>
+<p>Mensajes de error persistentes o repetidos</p>
+<pre><code>sudo tail -f /var/log/syslog
+Monitorización en tiempo real</code></pre>
+<p>Eventos inusuales, fallos de servicios</p>
+<h2>Integridad de archivos</h2>
+<pre><code>sudo apt install aide -y y sudo aideinit &amp;&amp; sudo aide --check</code></pre>
+<p>Detectar cambios no autorizados en archivos del sistema</p>
+<p>Archivos modificados sin justificación</p>
+<h2>Rendimiento y recursos</h2>
+<pre><code>top / htop
+Monitorizar CPU y memoria</code></pre>
+<p>Procesos que consumen recursos excesivos</p>
+<pre><code>df -h
+Revisar uso de disco
+Discos casi llenos
+free -m</code></pre>
+<p>Ver memoria disponible. Memoria insuficiente o swapping constante</p>
+<pre><code>ps aux --sort=-%cpu | head -10</code></pre>
+<p>Procesos más intensivos en CPU Procesos sospechosos o no autorizados</p>
+<pre><code>ps aux --sort=-%mem | head -10</code></pre>
+<p>Procesos más intensivos en RAM</p>
+<p>Procesos sospechosos o no autorizados</p>
+<h2>Actualizaciones y parches</h2>
+<pre><code>sudo apt update &amp;&amp; sudo apt upgrade -y
+Mantener el sistema actualizado
+Paquetes obsoletos o vulnerables</code></pre>
+<h2>Consejos para uso en laboratorio</h2>
+<ol><li>Ejecutar <strong>checklist completa</strong> como práctica de auditoría.</li><li>Registrar cualquier <strong>alerta o anomalía</strong> en un archivo de reporte.</li><li>Practicar <strong>corrección de errores</strong>: eliminar usuarios innecesarios, deshabilitar servicios, ajustar permisos y firewall.</li></ol>

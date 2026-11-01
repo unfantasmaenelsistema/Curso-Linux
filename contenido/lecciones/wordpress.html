@@ -1,0 +1,130 @@
+<p>La instalación utiliza el <em>stack</em> <strong>LAMP</strong> (Linux, Apache, MySQL y PHP) en un entorno local, ideal para desarrollo y pruebas.</p>
+<h2>Paso 1: Actualizar el Sistema</h2>
+<p>Es crucial asegurar que todos los paquetes estén actualizados para garantizar la estabilidad y seguridad.</p>
+<div class="tabla"><table><thead><tr><th><strong>Comando</strong></th><th><strong>Función</strong></th></tr></thead><tbody><tr><td><code>sudo apt update</code></td><td>Actualiza la lista de paquetes disponibles</td></tr><tr><td><code>sudo apt upgrade -y</code></td><td>Instala las actualizaciones pendientes</td></tr></tbody></table></div>
+<h2>Paso 2: Instalar Apache (Servidor Web)</h2>
+<p>Apache es el servidor que se encargará de mostrar tu sitio web.</p>
+<ol><li><strong>Instalar Apache:</strong></li></ol>
+<pre><code>sudo apt install apache2 -y</code></pre>
+<ol><li><strong>Verificar la instalación:</strong></li></ol>
+<p>Accede a <code>http://localhost/</code> en tu navegador. Deberías ver la página de bienvenida de Apache</p>
+<h2>Paso 3: Instalar MySQL (Base de Datos)</h2>
+<p>MySQL se utiliza para almacenar todo el contenido de WordPress.</p>
+<ol><li><strong>Instalar MySQL:</strong></li></ol>
+<pre><code>sudo apt install mysql-server -y</code></pre>
+<ol><li><strong>Ejecutar el script de seguridad:</strong> Se recomienda ejecutar este <em>script</em> para mejorar la seguridad de MySQL y establecer opciones básicas.</li></ol>
+<pre><code>sudo mysql_secure_installation</code></pre>
+<p>Sigue las instrucciones en pantalla para establecer la <strong>contraseña del usuario root</strong> y otras opciones de seguridad.</p>
+<figure><img src="../media/wordpress/imagen1.webp" width="722" height="268" alt="Captura 1 de la lección «WordPress en un servidor Linux»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/wordpress/imagen2.webp" width="794" height="193" alt="Captura 2 de la lección «WordPress en un servidor Linux»" loading="lazy" decoding="async"></figure>
+<p>12345678</p>
+<p>Remove anonymous users? (Press y|Y for Yes, any other key for No) : <strong>y</strong></p>
+<p>Disallow root login remotely? (Press y|Y for Yes, any other key for No) : <strong>n</strong></p>
+<p>Con esa respuesta le has indicado a la configuración de SQL que <strong>no quieres deshabilitar el inicio de sesión remoto para el usuario root</strong>.</p>
+<p>Al presionar <strong>n</strong>, le indicas al sistema de gestión de bases de datos que <strong>permitirá</strong> que el usuario root se conecte a la base de datos <strong>desde cualquier dirección IP</strong> de la red, no solo desde la máquina local (localhost).</p>
+<h2>Implicaciones de Seguridad</h2>
+<p>La configuración por defecto y la <strong>recomendación de seguridad</strong> es siempre responder <strong>y (Sí)</strong> a esta pregunta.</p>
+<div class="tabla"><table><thead><tr><th><strong>Configuración</strong></th><th><strong>Implicación de Seguridad</strong></th></tr></thead><tbody><tr><td><strong>n</strong> (Permitir root remoto)</td><td><strong>Riesgo ALTO.</strong> Si alguien adivina o descifra la contraseña de root, puede acceder a toda la base de datos desde cualquier lugar de la red, sin necesidad de acceder primero al servidor.</td></tr><tr><td><strong>y</strong> (Deshabilitar root remoto)</td><td><strong>Riesgo BAJO.</strong> El usuario root solo puede conectarse desde el servidor (localhost). Para acceder como root, el atacante necesitaría primero obtener acceso al servidor mismo, lo que añade una capa de defensa.</td></tr></tbody></table></div>
+<p>Si estás en un entorno de máquina virtual aislada y necesitas acceder como root desde otra máquina virtual o desde tu máquina anfitriona, esta opción te lo permite. Sin embargo, en un entorno de producción, esta configuración es peligrosa.</p>
+<h2>Paso 4: Crear la Base de Datos y el Usuario de WordPress</h2>
+<p>Debes crear una base de datos específica y un usuario dedicado para WordPress.</p>
+<ol><li><strong>Acceder al <em>shell</em> de MySQL:</strong></li></ol>
+<pre><code>sudo mysql</code></pre>
+<ol><li><strong>Ejecutar los comandos SQL</strong> (reemplaza 12345678 con una contraseña fuerte):</li></ol>
+<pre><code>CREATE DATABASE wordpress DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+CREATE USER 'wordpressuser'@'localhost' IDENTIFIED BY '12345678';
+GRANT ALL PRIVILEGES ON wordpress.* TO 'wordpressuser'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;</code></pre>
+<p><em>Estos comandos crean la base de datos wordpress y el usuario wordpressuser, otorgándole todos los privilegios sobre esa base de datos</em>.</p>
+<h2>Paso 5: Instalar PHP y Extensiones Necesarias</h2>
+<p>PHP es el lenguaje de programación que utiliza WordPress, y requiere extensiones específicas para manejar diversas funcionalidades (como imágenes y datos XML).</p>
+<ol><li><strong>Instalar PHP y extensiones:</strong></li></ol>
+<pre><code>sudo apt install php libapache2-mod-php php-mysql php-curl php-gd php-mbstring php-xml php-xmlrpc php-soap php-intl php-zip -y</code></pre>
+<h2>Paso 6: Configurar Apache para WordPress</h2>
+<p>Necesitas configurar Apache para que sepa dónde encontrar y cómo servir el sitio de WordPress.</p>
+<ol><li><strong>Crear el archivo de configuración del sitio:</strong></li></ol>
+<pre><code>sudo nano /etc/apache2/sites-available/wordpress.conf</code></pre>
+<ol><li><strong>Añadir la configuración</strong> (copia y pega):</li></ol>
+<pre><code>&lt;VirtualHost *:80&gt;
+ServerAdmin webmaster@localhost
+DocumentRoot /var/www/wordpress
+&lt;Directory /var/www/wordpress/&gt;
+AllowOverride All
+Require all granted
+&lt;/Directory&gt;
+ErrorLog ${APACHE_LOG_DIR}/error.log
+CustomLog ${APACHE_LOG_DIR}/access.log combined
+&lt;/VirtualHost&gt;</code></pre>
+<p><em>Esta configuración establece <code>/var/www/wordpress</code> como el directorio raíz y permite el uso de archivos .htaccess (gracias a AllowOverride All) para las configuraciones de WordPress, como las URLs amigables</em>.</p>
+<ol><li><strong>Guardar y cerrar</strong> el archivo (en nano: Ctrl+O, Enter, Ctrl+X).</li><li><strong>Habilitar el sitio y el módulo rewrite</strong> (necesario para las URLs amigables):</li></ol>
+<pre><code>sudo a2ensite wordpress.conf
+sudo a2enmod rewrite</code></pre>
+<figure><img src="../media/wordpress/imagen3.webp" width="657" height="196" alt="Captura 3 de la lección «WordPress en un servidor Linux»" loading="lazy" decoding="async"></figure>
+<ol><li><strong>Recargar Apache</strong> para aplicar los cambios:</li></ol>
+<pre><code>sudo systemctl reload apache2</code></pre>
+<p>La diferencia principal entre <strong>systemctl restart apache2</strong> y <strong>systemctl reload apache2</strong> es el método que usan para aplicar los cambios en la configuración de Apache y el impacto que tienen sobre las conexiones activas:</p>
+<div class="tabla"><table><thead><tr><th><strong>Característica</strong></th><th><strong>systemctl reload apache2 (Recargar)</strong></th><th><strong>systemctl restart apache2 (Reiniciar)</strong></th></tr></thead><tbody><tr><td><strong>Mecanismo</strong></td><td>Envía una señal al proceso principal de Apache para que relea su archivo de configuración.</td><td>Detiene completamente el servicio y luego lo vuelve a iniciar.</td></tr><tr><td><strong>Tiempo de Inactividad</strong></td><td><strong>Casi nulo (0 segundos).</strong> Las conexiones activas terminan sus tareas con el proceso antiguo.</td><td><strong>Breve interrupción.</strong> Hay un momento de inactividad mientras el servicio se detiene y se inicia.</td></tr><tr><td><strong>Impacto en Conexiones</strong></td><td><strong>Mantiene las conexiones activas.</strong> Las conexiones se sirven hasta que terminan, luego se usan los nuevos <em>workers</em>.</td><td><strong>Corta todas las conexiones activas.</strong> Las peticiones en curso se pierden.</td></tr><tr><td><strong>Cuándo usarlo</strong></td><td>Para <strong>cambios menores</strong> en la configuración (ej. agregar un Virtual Host, cambiar una directiva de registro).</td><td>Para <strong>cambios mayores</strong> (ej. cambiar puertos, cambiar módulos, errores críticos) o cuando una recarga falla.</td></tr></tbody></table></div>
+<pre><code>systemctl reload apache2 (Recargar)</code></pre>
+<p>Esta es la forma <strong>preferida y más segura</strong> de aplicar cambios en la configuración en un entorno de producción, ya que minimiza el impacto en los usuarios finales.</p>
+<p>Simplemente le dice a Apache que:</p>
+<ol><li>Cargue la nueva configuración.</li><li>Inicie nuevos procesos <em>worker</em> con esa configuración.</li><li>Permita que los procesos <em>worker</em> antiguos terminen de servir sus peticiones pendientes antes de cerrarse.</li></ol>
+<pre><code>systemctl restart apache2 (Reiniciar)</code></pre>
+<p>Esto es más drástico. Es necesario cuando la configuración es tan crítica (como cambiar un módulo, un puerto principal o la configuración SSL/TLS) que <strong>Apache necesita una detención completa</strong> para aplicar los cambios de manera segura. Si una recarga falla o los cambios no se aplican, un reinicio forzado suele ser la solución.</p>
+<h2>Paso 7: Descargar y Configurar WordPress</h2>
+<p>Descarga los archivos de WordPress y configúralos para que se conecten a la base de datos.</p>
+<ol><li><strong>Descargar y extraer:</strong></li></ol>
+<pre><code>wget https://wordpress.org/latest.tar.gz
+tar -xvzf latest.tar.gz
+sudo mv wordpress /var/www/</code></pre>
+<ol><li><strong>Asignar permisos:</strong> Esto permite a Apache (www-data) acceder y modificar los archivos.</li></ol>
+<pre><code>sudo chown -R www-data:www-data /var/www/wordpress</code></pre>
+<ol><li><strong>Configurar la base de datos:</strong></li></ol>
+<pre><code>cd /var/www/wordpress
+sudo cp wp-config-sample.php wp-config.php
+sudo nano wp-config.php</code></pre>
+<ol><li><strong>Editar el archivo wp-config.php</strong> y reemplazar los valores de la base de datos con los que creaste en el Paso 4.</li></ol>
+<p>El bloque modificado completo en tu wp-config.php debe quedar <strong>exactamente</strong> así:</p>
+<pre><code>define( 'DB_NAME', 'wordpress' );
+define( 'DB_USER', 'wordpressuser' );
+define( 'DB_PASSWORD', '12345678' );
+define( 'DB_HOST', 'localhost' );
+define( 'DB_CHARSET', 'utf8' );
+define( 'DB_COLLATE', '' );</code></pre>
+<figure><img src="../media/wordpress/imagen4.webp" width="774" height="410" alt="Captura 4 de la lección «WordPress en un servidor Linux»" loading="lazy" decoding="async"></figure>
+<ol><li><strong>Guardar y cerrar</strong> el archivo.</li></ol>
+<figure><img src="../media/wordpress/imagen5.webp" width="687" height="337" alt="Captura 5 de la lección «WordPress en un servidor Linux»" loading="lazy" decoding="async"></figure>
+<p>Si recargamos localhost en el navegador seguiremos viendo la página de Apache.</p>
+<p>La razón por la que sigues viendo la página por defecto de Apache ("It works!") es que tu servidor está cargando la configuración predeterminada (000-default.conf) antes que la de WordPress, ya que ambas están escuchando en el puerto 80.</p>
+<p>Para que WordPress se muestre al acceder a <code>http://localhost/</code>, debemos <strong>deshabilitar el sitio web predeterminado</strong> de Apache.</p>
+<h2>Solución: Deshabilitar el Sitio por Defecto</h2>
+<h2>1. Deshabilitar el sitio predeterminado</h2>
+<p>Utiliza la herramienta a2dissite para deshabilitar el archivo de configuración por defecto (000-default.conf).</p>
+<pre><code>sudo a2dissite 000-default.conf</code></pre>
+<h2>2. Verificar que WordPress esté habilitado (Solo si es necesario)</h2>
+<p>Puedes confirmarlo con a2ensite:</p>
+<pre><code>sudo a2ensite wordpress.conf</code></pre>
+<p><em>(Si ya está habilitado, te dirá: "Site wordpress already enabled").</em></p>
+<h2>3. Recargar el Servicio Apache</h2>
+<p>Ahora, con el sitio predeterminado deshabilitado y el sitio de WordPress habilitado, recarga el servicio para que los cambios surtan efecto.</p>
+<pre><code>sudo systemctl reload apache2</code></pre>
+<h2>Verificación Final</h2>
+<p>Después de ejecutar estos comandos, vuelve a tu navegador y accede a la dirección:</p>
+<p><a href="https://www.google.com/search?q=http://localhost/" target="_blank" rel="noopener"><code>http://localhost/</code></a></p>
+<p><strong>Deberías ver la pantalla de bienvenida y el asistente de instalación de WordPress</strong> solicitándote que selecciones el idioma. Si es así, ¡la configuración de Apache estará completa!</p>
+<figure><img src="../media/wordpress/imagen6.webp" width="640" height="466" alt="Captura 6 de la lección «WordPress en un servidor Linux»" loading="lazy" decoding="async"></figure>
+<h2>Paso 8: Completar la Instalación a Través del Navegador</h2>
+<p>El último paso es el asistente de configuración web de WordPress.</p>
+<ol><li>Accede a <code>http://localhost/</code> en tu navegador.</li></ol>
+<h2>¿Qué sigue?</h2>
+<ul><li>Ahora que tienes WordPress instalado localmente, puedes comenzar a:</li><li>Explorar la interfaz de administración (<code>http://localhost/wp-admin/</code>).</li><li>Instalar temas y plugins para personalizar y mejorar tu sitio.</li><li>Crear contenido como páginas y entradas de blog.</li></ul>
+<ol><li>Deberías ver la pantalla de instalación de WordPress.</li><li>Sigue las instrucciones en pantalla para <strong>elegir el idioma</strong>, <strong>el nombre del sitio</strong> y <strong>establecer el nombre de usuario y contraseña del administrador</strong>.</li></ol>
+<p>¡Con esto, tu instalación local de WordPress en Ubuntu 24.04 estará completa!</p>
+<p>Título del sitio: diversionconbanderas</p>
+<p>Nombre de usuario: sheldon</p>
+<p>Contraseña: penny</p>
+<p>Tu correo electrónico: <a href="mailto:sheldon@diversionconbanderas.local">sheldon@diversionconbanderas.local</a></p>
+<figure><img src="../media/wordpress/imagen7.webp" width="756" height="557" alt="Captura 7 de la lección «WordPress en un servidor Linux»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/wordpress/imagen8.webp" width="801" height="347" alt="Captura 8 de la lección «WordPress en un servidor Linux»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/wordpress/imagen9.webp" width="378" height="283" alt="Captura 9 de la lección «WordPress en un servidor Linux»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/wordpress/imagen10.webp" width="1301" height="354" alt="Captura 10 de la lección «WordPress en un servidor Linux»" loading="lazy" decoding="async"></figure>

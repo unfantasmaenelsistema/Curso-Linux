@@ -1,0 +1,80 @@
+<h3>Requisitos:</h3>
+<ul><li>Unidad extraíble donde se pueda almacenar la copia de seguridad. Puede ser un pendrive con mucho espacio, un disco duro externo, o alguna unidad que disponga de espacio.</li><li>ISO de Clonezilla descargada y booteada en un pendrive.</li></ul>
+<h2>Realizar copia de seguridad</h2>
+<p>En primer lugar, hemos de descargar la ISO de clonezilla, herramienta que usaremos para realizar copias de seguridad de todo un disco duro. Lo podemos descargar desde <a href="http://clonezilla.org/downloads.php" target="_blank" rel="noopener">http://clonezilla.org/downloads.php</a> descargamos la versión <strong>stable</strong> para evitarnos problemas.</p>
+<figure><img src="../media/clonezilla/imagen1.webp" width="959" height="274" alt="Captura 1 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Elegimos la arquitectura que soporta nuestro PC (32 o 64 bits), elegimos que sea tipo ISO y descargamos.</p>
+<figure><img src="../media/clonezilla/imagen2.webp" width="982" height="276" alt="Captura 2 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Booteamos la ISO en la unidad extraíble disponible, con cualquiera de las herramientas siguientes:</p>
+<pre><code>https://rufus.akeo.ie/?locale=ca_ES https://unetbootin.github.io/</code></pre>
+<p>Una vez que hemos logrado arrancar desde el pendrive, entonces tendremos algo como lo siguiente y elegimos la primera opción.</p>
+<figure><img src="../media/clonezilla/imagen3.webp" width="635" height="478" alt="Captura 3 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Elegimos el idioma que mejor entendamos.</p>
+<figure><img src="../media/clonezilla/imagen4.webp" width="798" height="596" alt="Captura 4 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Seguimos los siguientes pasos por orden, y hemos de elegir las opciones que están marcadas en <strong>ROJO</strong>.</p>
+<figure><img src="../media/clonezilla/imagen5.webp" width="795" height="279" alt="Captura 5 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/clonezilla/imagen6.webp" width="797" height="587" alt="Captura 6 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Elegimos destino de la copia de seguridad. En mi caso el disco duro externo.</p>
+<p>Tengo dos particiones del SO Windows y otra unidad que es el disco externo.</p>
+<figure><img src="../media/clonezilla/imagen7.webp" width="797" height="307" alt="Captura 7 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Donde me aparecerán los ficheros que contenga, si es que el disco externo no está vacío, pero es indiferente, mientras haya espacio suficiente.</p>
+<figure><img src="../media/clonezilla/imagen8.webp" width="797" height="198" alt="Captura 8 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Ponemos el nombre con el que queremos que se guarde la copia de seguridad.</p>
+<figure><img src="../media/clonezilla/imagen9.webp" width="539" height="150" alt="Captura 9 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>En este paso es donde encontraremos el disco duro origen, en mi caso estoy usando máquinas virtuales con VirtualBox y por eso simulo que estoy usando un disco duro externo, <strong>sda</strong> referencia al primer disco y <strong>sdb</strong> al disco “externo”.</p>
+<figure><img src="../media/clonezilla/imagen10.webp" width="793" height="217" alt="Captura 10 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Comprobamos y en caso extremo reparamos la imagen.</p>
+<figure><img src="../media/clonezilla/imagen11.webp" width="799" height="230" alt="Captura 11 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Comprobamos que la imagen no esté corrupta y tengamos una copia de seguridad funcional.</p>
+<figure><img src="../media/clonezilla/imagen12.webp" width="801" height="200" alt="Captura 12 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Ponemos no cifrar imagen, porque si lo hacemos puede que se nos olvide la contraseña, eso ya queda a decisión personal.</p>
+<figure><img src="../media/clonezilla/imagen13.webp" width="798" height="266" alt="Captura 13 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Le damos a continuar y aceptamos con <strong>y</strong>.</p>
+<figure><img src="../media/clonezilla/imagen14.webp" width="686" height="154" alt="Captura 14 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Podemos elegir no hacer, nada o lo que queramos es indiferente.</p>
+<figure><img src="../media/clonezilla/imagen15.webp" width="556" height="195" alt="Captura 15 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Sólo nos queda esperar, luego empezará a crear la imagen, que en realidad es la copia de seguridad del disco.</p>
+<figure><img src="../media/clonezilla/imagen16.webp" width="512" height="364" alt="Captura 16 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Si comprobamos el disco “externo”, la copia de seguridad está hecha.</p>
+<figure><img src="../media/clonezilla/imagen17.webp" width="1357" height="581" alt="Captura 17 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<h2>Restaurar copia de seguridad</h2>
+<p>Supongamos que en cualquier caso perdemos los datos o nuestro disco duro deja de funcionar.</p>
+<p>En este caso simularé un disco nuevo y haré la restauración aquí.</p>
+<figure><img src="../media/clonezilla/imagen18.webp" width="721" height="316" alt="Captura 18 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Para restaurar la copia de seguridad desde la imagen, hemos de arrancar otra vez con Clonezilla.</p>
+<figure><img src="../media/clonezilla/imagen19.webp" width="635" height="478" alt="Captura 19 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/clonezilla/imagen20.webp" width="798" height="596" alt="Captura 20 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Seguimos los pasos como si fuesemos a realizar la copia.</p>
+<figure><img src="../media/clonezilla/imagen21.webp" width="795" height="279" alt="Captura 21 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/clonezilla/imagen22.webp" width="789" height="591" alt="Captura 22 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Hacemos la combinación de teclado <strong>CTRL + C</strong> porque es simplemente un aviso constante de lo que tenemos conectado, en este caso el disco duro local y externo.</p>
+<figure><img src="../media/clonezilla/imagen23.webp" width="535" height="148" alt="Captura 23 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Seleccionamos el disco donde tenemos la copia de seguridad. En este caso no me aparece el otro disco, porque recordemos que es <em>“uno nuevo y por tanto no tiene formato”</em>. Si intentásemos restaurar al antiguo disco duro, sería indiferente porque lo que cuenta es seleccionar la unidad que contenga la copia de seguridad.</p>
+<figure><img src="../media/clonezilla/imagen24.webp" width="797" height="276" alt="Captura 24 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Seleccionamos el mismo directorio donde dejamos la copia, en mi caso la raíz.</p>
+<figure><img src="../media/clonezilla/imagen25.webp" width="797" height="215" alt="Captura 25 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Elegimos el modo principiante.</p>
+<figure><img src="../media/clonezilla/imagen26.webp" width="628" height="203" alt="Captura 26 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>A partir de aquí le damos a restaurar disco. ---En caso de que no nos dé la opción <strong>restoredisk</strong> entonces quiere decir que hemos hecho mal la copia de seguridad a una imagen y por tanto hemos de repetir el primer paso de realizar la <strong>copia de seguridad</strong>.---</p>
+<figure><img src="../media/clonezilla/imagen27.webp" width="798" height="392" alt="Captura 27 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Nos aparecerá la imagen o imágenes que tengamos disponibles en el disco externo.</p>
+<figure><img src="../media/clonezilla/imagen28.webp" width="585" height="173" alt="Captura 28 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Y nos dará la opción del destino a restaurar. En este caso como sólo tenemos un disco duro local y un externo, sólo podremos restaurar al disco disponible.</p>
+<figure><img src="../media/clonezilla/imagen29.webp" width="801" height="233" alt="Captura 29 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Le damos a comprobar la imagen antes de restaurar, para evitar secciones corruptas del disco en la imagen.</p>
+<figure><img src="../media/clonezilla/imagen30.webp" width="796" height="212" alt="Captura 30 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Comprobamos la imagen en busca de errores.</p>
+<figure><img src="../media/clonezilla/imagen31.webp" width="508" height="365" alt="Captura 31 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<figure><img src="../media/clonezilla/imagen32.webp" width="501" height="365" alt="Captura 32 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Cuando acabe, le damos a <strong>y</strong> a las siguientes opciones.</p>
+<figure><img src="../media/clonezilla/imagen33.webp" width="799" height="437" alt="Captura 33 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Donde comenzará la restauración.</p>
+<figure><img src="../media/clonezilla/imagen34.webp" width="503" height="364" alt="Captura 34 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Antes de terminar nos saldrá algo como esto:</p>
+<figure><img src="../media/clonezilla/imagen35.webp" width="800" height="181" alt="Captura 35 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Reiniciamos el equipo y quitamos las unidades extraíbles.</p>
+<figure><img src="../media/clonezilla/imagen36.webp" width="799" height="236" alt="Captura 36 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Una vez acabada la restauración probamos a arrancar desde el disco restaurado, que si recordamos estaba vacío (si tiene SO es indiferente, simplemente lo sobreescribirá). Entonces comprobaremos que pasamos de tener un disco sin Sistema Operativo.</p>
+<figure><img src="../media/clonezilla/imagen37.webp" width="721" height="316" alt="Captura 37 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
+<p>Ya tenemos un disco restaurado desde la imagen o backup realizado con Clonezilla.</p>
+<figure><img src="../media/clonezilla/imagen38.webp" width="1360" height="645" alt="Captura 38 de la lección «Clonezilla»" loading="lazy" decoding="async"></figure>
